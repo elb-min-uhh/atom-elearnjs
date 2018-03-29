@@ -1,0 +1,387 @@
+/*
+* Styles zum video.js v0.3 by Arne Westphal
+* Ergänzend zum elearn.js v1.0.0
+* eLearning Buero MIN-Fakultaet - Universitaet Hamburg
+*/
+
+
+@font-face {
+    font-family: 'eLearn-Video';
+    font-style: normal;
+    font-weight: normal;
+    src: url('../font/eLearn-Video.woff') format('woff');
+}
+
+.video-container {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.elearnjs-video {
+    max-width:100%;
+    margin:3em 0px 3em 0px;
+    padding: 10px 15px;
+    min-height: 25px;
+    min-width: 50px;
+    background: #000;
+    color: white;
+}
+
+/* Apple player hide */
+
+.elearnjs-video *::-webkit-media-controls {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+.elearnjs-video *::-webkit-media-controls-enclosure {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+.elearnjs-video *::-webkit-media-controls-panel {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+/* Old shadow dom for play button */
+
+.elearnjs-video *::--webkit-media-controls-play-button {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+/* New shadow dom for play button */
+
+.elearnjs-video *::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+
+.elearnjs-video > :not(video) {
+    display: none;
+}
+
+.elearnjs-video video {
+    display: block;
+    margin: auto;
+}
+
+/* ------------------------- VIDEO NOTES ------------------------- */
+
+.video-container.noted_video .elearnjs-video,
+.video-container.allow_user_notes .elearnjs-video {
+    margin-bottom: 0;
+}
+
+.video_notes_wrapper {
+    display: none;
+    max-width: 100%;
+    background: #888;
+    padding: 1.8em;
+    border-radius: 0 0 5px 5px;
+    color: white;
+    margin-bottom: 3em;
+    box-sizing: border-box;
+}
+
+.video_notes_wrapper table th {
+    background: #555;
+}
+
+.video_notes_wrapper textarea,
+.video_notes_wrapper input[type="text"] {
+    border: 1px solid rgb(169, 169, 169);
+    background: #666;
+    color: white;
+}
+
+.video_notes_wrapper ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:    #b4b4b4;
+}
+.video_notes_wrapper :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   color:    #b4b4b4;
+   opacity:  1;
+}
+.video_notes_wrapper ::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color:    #b4b4b4;
+   opacity:  1;
+}
+.video_notes_wrapper :-ms-input-placeholder { /* Internet Explorer 10-11 */
+   color:    #b4b4b4;
+}
+.video_notes_wrapper ::-ms-input-placeholder { /* Microsoft Edge */
+   color:    #b4b4b4;
+}
+
+.video_notes_wrapper.tabbed-container {
+    padding: 0;
+}
+
+.video_notes_wrapper .tabs {
+    background-color: #666;
+}
+
+.video_notes_wrapper .tab-select {
+    color: #fff;
+    border-right: 1px solid #888888;
+    background: 0;
+}
+
+.video_notes_wrapper .tab-select.act {
+    background: #888;
+}
+
+.video_notes_wrapper .tabbed-box {
+    background: none;
+}
+
+.video-container.noted_video .video_notes_wrapper,
+.video-container.allow_user_notes .video_notes_wrapper {
+    display: block;
+}
+
+.video-container.noted_video .video_notes_wrapper span.video_note_timestamp,
+.video-container.allow_user_notes .video_notes_wrapper span.video_note_timestamp {
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+
+.video_notes_wrapper .video_note {
+    padding: 0.2em 0.5em;
+    margin: 4px 0;
+    background: #666;
+    border-radius: 3px;
+    word-break: break-word;
+}
+
+.video_notes_wrapper .video_note .content {
+    display: inline;
+}
+
+.video_notes_wrapper .video_note textarea,
+.video_notes_wrapper .video_note input[type="text"] {
+    background: #555;
+}
+
+.video_notes_wrapper .video_note.backup {
+    display: none;
+}
+
+.elearnjs-video .controls .video-progress-con .video-progress-note {
+    position: absolute;
+    top:8px; /* centered to .video-progress which is top:10px and height 4px */
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    height: 8px;
+    background: #F7EF00;
+    pointer-events: none;
+}
+
+.elearnjs-video .controls .video-progress-con .video-progress-note.user-progress-note {
+    background: rgba(16, 167, 255, 0.9);
+}
+
+/* PDF Style hide all show all checkboxes */
+.show_all_notes {
+    display: none !important;
+}
+
+/* USER NOTES */
+/* PDF Style hide all user notes */
+
+.user_notes,
+.user_notes * {
+    display: none !important;
+}
+
+/* ---------------------------------------------------------------------- */
+
+.loading-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: none;
+    background: rgba(0,0,0,0.2);
+}
+
+.loading-overlay .loading-con {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -20px;
+}
+
+.loading-animation {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s infinite linear;
+}
+
+.loading-animation>.background {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 3px solid #888;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.50), inset 0 0 10px rgba(0, 0, 0, 0.50);
+}
+
+.loading-animation>.inner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    clip: rect(0px, 40px, 40px, 20px);
+}
+
+.loading-animation>.inner.skip {
+    transform: rotate(180deg);
+}
+
+.loading-animation>.inner>.light {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    clip: rect(0px, 40px, 40px, 20px);
+    animation: spin 2.5s infinite linear;
+}
+
+/* ------------------------ QUIZ.js Style --------------------------- */
+.video_notes_wrapper .question, .video_note .q-ergebnis {
+    border: 2px solid #888;
+}
+
+.video_notes_wrapper .question.answered .answers textarea {
+    background: #444;
+}
+
+.video_notes_wrapper .question h4 {
+    background: #888;
+}
+
+.video_note button.quizButton {
+    border:1px solid #888;
+    background-color:#888;
+    color: white;
+}
+
+.video_notes_wrapper .question label:hover {
+    background-color: #888;
+}
+
+.video_notes_wrapper .question label.right,
+.video_notes_wrapper .question .object.right {
+    background-color: #6a756a;
+}
+
+.video_notes_wrapper .question label.right:hover,
+.video_notes_wrapper .question .object.right:hover {
+    background-color: #5e755e;
+}
+
+
+.video_notes_wrapper .question label.wrong {
+    background-color: #756a6a;
+}
+
+.video_notes_wrapper .question label.wrong:hover {
+    background-color: #755e5e;
+}
+
+.video_notes_wrapper .question .right.right_icon:after,
+.video_notes_wrapper .question .wrong.right_icon:after {
+    color: #38b738;
+}
+
+.video_notes_wrapper .question[qtype="choice"] label.right_icon:before,
+.video_notes_wrapper .question[qtype="choice"] label.wrong_icon:before,
+.video_notes_wrapper .question[qtype="matrix_choice"] label.right_icon:before,
+.video_notes_wrapper .question[qtype="matrix_choice"] label.wrong_icon:before {
+    color: #b4b4b4;
+}
+
+/* .question[qtype="choice"] label.right.right_icon:before, */
+.video_notes_wrapper .question[qtype="choice"] label.wrong.right_icon:before,
+.video_notes_wrapper .question[qtype="matrix_choice"] label.wrong.right_icon:before {
+    color: #790000;
+}
+/* .question[qtype="choice"] label.right.wrong_icon:before, */
+.video_notes_wrapper .question[qtype="choice"] label.wrong.wrong_icon:before
+.video_notes_wrapper .question[qtype="matrix_choice"] label.wrong.wrong_icon:before, {
+    color: #790000;
+}
+
+.video_notes_wrapper .question label.img_radio:hover img {
+    border: 5px solid #666;
+}
+
+.video_notes_wrapper .question label.img_radio input:checked + img {
+    border: 5px solid #5ba8bd
+}
+
+.video_notes_wrapper .question label.img_radio.right {
+    border: 5px solid #6ea277;
+}
+
+.video_notes_wrapper .question label.img_radio.wrong {
+    border: 5px solid #a26e6e;
+}
+
+.video_notes_wrapper .question[qtype="classification"] .answers .object.blocked,
+.video_notes_wrapper .question[qtype="order"] .answers .object.blocked {
+    background: #555;
+}
+
+/* ------------------------ SUPPRESS OLAT PLAYER --------------------------- */
+.mejs-video {
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+}
+.mejs-video .mejs-mediaelement {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+.mejs-video .mejs-mediaelement video {
+    pointer-events: none !important;
+}
+
+.mejs-video .mejs-layers, .mejs-video .mejs-controls {
+    display: none !important;
+}
+
+.mejs-video:not(.mejs-long-video) .video-progress-con {
+    pointer-events: none !important;
+}
+
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

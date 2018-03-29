@@ -2,8 +2,12 @@
 'context-menu':
   'atom-text-editor': [
     {
-      'label': 'Toggle elearn.js'
-      'command': 'elearnjs-plugin:toggle'
+      'label': 'elearn.js - to HTML',
+      'command': 'elearnjs-plugin:to-html'
+    },
+    {
+      'label': 'elearn.js - to PDF',
+      'command': 'elearnjs-plugin:to-pdf'
     }
   ]
 'menu': [
@@ -13,8 +17,12 @@
       'label': 'eLearn.js'
       'submenu': [
         {
-          'label': 'Toggle'
-          'command': 'elearnjs-plugin:toggle'
+          'label': 'Save as HTML',
+          'command': 'elearnjs-plugin:to-html'
+        },
+        {
+          'label': 'Save as PDF',
+          'command': 'elearnjs-plugin:to-pdf'
         }
       ]
     ]

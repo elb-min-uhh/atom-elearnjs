@@ -1,4 +1,4 @@
-﻿/*
+/*
 * CSS for eLearn.js
 * Created by Michael Heinecke
 * Improved by Arne Westphal
@@ -40,8 +40,8 @@
 body {
     font-family: Open Sans, sans-serif;
     line-height:164%;
-    background-color: rgb(214,214,214);
-    font-size:93.75%;
+    /* PDF styles no background color */
+    font-size: 12px;
     margin:0;
     margin:auto;
 }
@@ -65,163 +65,6 @@ iframe, video {
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none; /* Non-prefixed version, currently
                           supported by Chrome and Opera */
-}
-
-#wrap {
-    min-height:100%;
-    vertical-align:center;
-    max-width: 1100px;
-    margin:0em auto 0em auto;
-}
-
-#navigation {
-    position:fixed;
-    vertical-align:center;
-    width:1100px;
-    max-width: 100%;
-    margin:0em auto 0em auto;
-    text-align:left;
-    font-size:0.8em;
-    color:rgb(204,204,204);
-    z-index: 5;
-}
-
-#nav-bar {
-    z-index:5;
-    padding-top:0.6em;
-    padding-bottom:0.6em;
-    background-color:rgb(102,102,102);
-    height: auto;
-}
-
-#nav-bar .btn {
-    padding: 5px;
-    margin-top: -5px;
-}
-
-#btnBack,#btnAll,#btnExpSym,#btnMenu, #btnHelpSym {
-    color: rgb(204,204,204);
-    font-size: 180%;
-    display: inline-block;
-}
-
-#btnBackCon {
-    display: none;
-}
-
-.back-enabled #btnBackCon {
-    float: left;
-    display: inline-block;
-    overflow-y: auto;
-    margin-left: 20px;
-}
-
-.back-enabled #btnBack {
-    float: left;
-    width: 22px;
-    display:inline-block;
-}
-
-.back-enabled #btnBackText {
-    margin-left: 5px;
-    float: left;
-}
-
-#btnAllCon {
-    float: left;
-    display: inline-block;
-    overflow-y: auto;
-    margin-left: 20px;
-}
-
-.back-enabled #btnAllCon {
-    margin-left: 0;
-}
-
-#btnAll {
-    float: left;
-    width: 22px;
-    display:inline-block;
-}
-
-#btnAllText {
-    margin-left: 5px;
-    float: left;
-}
-
-#btnExp {
-    position: relative;
-    width: calc(100% - 100px - 142px - 5px);
-    overflow:hidden;
-    white-space:nowrap;
-}
-
-.back-enabled #btnExp {
-    width: calc(100% - 200px - 142px - 5px);
-}
-
-#btnExp:before {
-    content: " ";
-    height: 100%;
-    width: 10px;
-    position: absolute;
-    right: 0;
-    background: -webkit-linear-gradient(right, #666666, rgba(102, 102, 102, 0)); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(right, #666666, rgba(102, 102, 102, 0)); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(right, #666666, rgba(102, 102, 102, 0)); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to left, #666666, rgba(102, 102, 102, 0)); /* Standard syntax */
-}
-
-#btnExpSym {
-    position: absolute;
-    left: 5px;
-    width: 22px;
-    display: inline-block;
-}
-
-#nav-title {
-    margin-left: 25px;
-    float:left;
-}
-
-#btnHelp {
-    float: right;
-    display: inline-block;
-    overflow-y: auto;
-    margin-right: 20px;
-}
-
-#btnHelpSym {
-    float: left;
-    width: 22px;
-    display:inline-block;
-}
-
-#btnHelpText {
-    margin-left: 5px;
-    float: left;
-}
-
-#btnExp {
-    float: left;
-}
-
-#btnMenu {
-    margin-right:20px;
-    width: 22px;
-    float: right;
-}
-
-#btnBackCon:hover *, #btnAllCon:hover *, #btnExp:hover *, #btnMenu:hover,
-#btnHelp:hover * {
-    text-decoration: none;
-    color: #fff;
-}
-
-.page {
-    padding: 50px 17.272727% 96px 17.272727%;
-    margin:0;
-    background-color: #fff;
 }
 
 /*Absatzformate*/
@@ -1051,554 +894,64 @@ QR Overlay
 
 
 /* -------------------------- Bilder Galerie -------------------------- */
-
-div.slider-con {
-    position: relative;
-    padding: 20px 60px 20px;
-    background: #888;
-    border-radius: 5px;
-    margin: 1em 0 0;
+/* PDF styles replace original slider styles */
+/* there is no .slider-con without the elearn.js initiation */
+.slider {
+    max-height: none !important;
+    height: auto !important;
+    background: 0 !important;
 }
-
-div.preview-con {
-    position: relative;
-    padding: 10px 60px 10px;
-    background: #444;
-    border-radius: 0 0 5px 5px;
-    margin: -5px 0 1em;
-}
-
-div.slider, div.slider-nav {
-    overflow: hidden;
-    position: relative;
-    /*border: 3px solid #dcdcdc;
-    border-radius: 5px; */
-    background: #888;
-}
-
-div.slider-nav{
-    margin:0;
-    background: #444;
-}
-
 ul.img-gallery {
-    font-size: 0;
-    margin: 0;
-    padding: 0;
-    display: block;
-    transition-duration: 0.5s;
-    transition-timing-function: ease-out;
+    font-size: 10pt;
+    padding: 0 20%;
+    max-height: none !important;
+    list-style: none !important;
+    transition-duration: 0s !important;
+    margin-left: 0 !important;
+    width: auto !important;
+    transform: none !important;
 }
-
-ul.img-gallery:after {
-    content: "\0020";
-    display: block;
-    clear: both;
-    visibility: hidden;
-    line-height: 0;
-    height: 0;
-}
-
-ul.img-gallery p {
-    display:none;
-}
-
 ul.img-gallery li {
-    list-style: none;
-    width: 100%;
-    display: block;
-    float: left;
-    text-align: center;
-    white-space: nowrap;
-    margin-right: 2px;
+    max-height: none !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    margin-bottom: 15px;
+}
+ul.img-gallery li.loop_clone {
+    display: none !important;
+}
+ul.img-gallery li img {
+    margin-bottom: 0 !important;
+}
+ul.img-gallery li p {
+    display: block !important;
+    white-space: normal !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-bottom: 2em !important;
+}
+.slider-description, .preview-con {
+    display: none !important;
 }
 
-ul.img-gallery li>*{
-    position: relative;
-    margin: auto;
-    max-width: 100%;
-    width: auto;
-    vertical-align: middle;
+#navigation {
+    display:none !important;
+}
+.skip-arrows {
+    display: none !important;
+}
+h2 {
+    page-break-before:always;
+}
+code {
+    white-space:pre-wrap;
 }
 
-div.slider-nav ul.img-gallery li {
-    border-right: 5px solid #444;
-    box-sizing: border-box;
-    opacity: 0.5;
-    overflow: hidden;
-    cursor: pointer;
+.MathJax {
+    font-size: 20pt !important;
 }
 
-div.slider-nav ul.img-gallery li img {
-    max-width: none;
-}
-
-div.slider-nav ul.img-gallery li:hover{
-    opacity: 0.8;
-}
-
-div.slider-nav ul.img-gallery li.active{
-    opacity: 1;
-}
-
-div.slider-con:hover .slider-zoom{
-    right: 15px;
-    opacity: 1;
-}
-/*
-div.slider-con:hover .slider-back-area, div.preview-con:hover .slider-back-area,
-    div.slider-con:hover .slider-next-area, div.preview-con:hover .slider-next-area, */
-    div.slider-con:hover .slider-zoom-area {
-    opacity: 1;
-}
-
-.slider-back, .slider-next, .slider-zoom {
-    transition-duration: 0.25s;
-    position: absolute;
-    top: 50%;
-    margin-top: -0.8em;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.slider-back-area, .slider-next-area, .slider-zoom-area {
-    opacity: 1;
-    position:absolute;
-    top:0;
-    width: 60px;
-    height:100%;
-    transition-duration: 0.25s;
-}
-
-
-.slider-back-area:hover .slider-back, .slider-next-area:hover .slider-next,
-    .slider-zoom-area:hover .slider-zoom{
-    color: rgba(255, 255, 255, 1);
-}
-
-
-.slider-back {
-    left: 15px;
-    opacity: 1;
-}
-
-.slider-next {
-    right: 15px;
-    opacity: 1;
-}
-
-.slider-back-area {
-    left: 0;
-}
-
-.slider-next-area {
-    right: 0;
-}
-
-.slider-zoom {
-    margin-top: -0.4em;
-    right: -15px;
-    opacity: 0;
-    font-size: 180%;
-}
-
-.slider-zoom-area {
-    right: 5px;
-    width: 40px;
-    height: 40px;
-}
-
-.helper {
-    display: inline-block;
-    height: 100%;
-    vertical-align: middle;
-}
-
-.slider-description {
-    display: none;
-    position: relative;
-    color: white;
-    background: #888;
-    margin: -5px 0 0;
-    text-align: left;
-    padding: 10px 60px 10px;
-    border-radius: 0 0 5px 5px;
-    border-bottom: 15px solid #888;
-}
-
-/* BIDLER LIGHTBOX */
-
-.image-zoom-container {
-    display:none;
-}
-
-.img-lightbox {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    text-align: center;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-.img-lightbox * {
-    pointer-events: all;
-}
-
-.img-lightbox img {
-    position: relative;
-    box-sizing: border-box;
-    width: auto;
-    max-width: calc(100% - 80px);
-    max-height: calc(100% - 80px);
-    margin: 40px 40px;
-}
-
-.lb-bg {
-    position: fixed;
-    top: 0;
-    background: #000;
-    opacity: 0.5;
-    height: 200%;
-    width: 200%;
-    z-index: 9;
-}
-
-.img-lightbox .close {
-    display: inline-block;
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
-    position: relative;
-    text-align: center;
-    z-index: 1;
-    font-size: 150%;
-}
-
-.img-lightbox .close:hover {
-    color: rgba(255, 255, 255, 1);
-}
-
-
-/*Media-Querys für Responsivität*/
-
-@media screen and (max-width:1100px) {
-    .tooltip {
-        left: 0;
-    }
-    .tooltip.right {
-        right: 0;
-    }
-
-    #tooltipArrowRight,
-    #tooltipTouchRight {
-        right: calc(17.272727% - 30px - 20px - 37px);
-        /* right: page padding - #btnNext.MarginLeft - #btnNext:before.MarginLeft - own padding to fit arrow*/
-    }
-    #tooltipArrowLeft,
-    #tooltipTouchLeft {
-        left: calc(17.272727% - 30px - 20px - 37px);
-        /* left: page padding - #btnPrev.MarginRight - #btnPrev:before.MarginRight - own padding to fit arrow*/
-    }
-}
-
-@media screen and (max-width:940px) {
-    .page {
-        padding: 45px 13% 68px 13%;
-    }
-    #navigation {
-        font-size: 0.8em;
-    }
-    #btnNext, #btnPrev {
-        width: calc(13% - 45px); /* page padding - something as margin*/
-    }
-    #btnNext:before, #btnPrev:before {
-        margin: 10px;
-    }
-    #btnPrev {
-        margin: 0 20px 0 25px;
-    }
-    #btnNext {
-        margin: 0 25px 0 20px;
-    }
-
-    #tooltipArrowRight,
-    #tooltipTouchRight {
-        right: calc(13% - 20px - 10px - 37px);
-        /* right: page padding - #btnNext.MarginLeft - #btnNext:before.MarginLeft - own padding to fit arrow*/
-    }
-    #tooltipArrowLeft,
-    #tooltipTouchLeft {
-        left: calc(13% - 20px - 10px - 37px);
-        /* left: page padding - #btnPrev.MarginRight - #btnPrev:before.MarginRight - own padding to fit arrow*/
-    }
-
-    .side-menu {
-        max-width: 50%;
-    }
-}
-
-@media screen and (max-width:800px) {
-    body {
-        font-size: 87.5%;
-    }
-    #navigation {
-        font-size: 0.8em;
-    }
-    .page {
-        padding: 45px 8.5% 68px 8.5%;
-    }
-    h1 {
-        padding:2.8em 0em 1em 0em;
-        font-size: 2.6em;
-    }
-    h2 {
-        padding:1.95em 0em 1.1em 0em;
-        font-size:1.9em;
-    }
-    h3 {
-        font-size:1.4em;
-        margin: 1em 0em 0.8em 0em;
-    }
-    h4 {
-        font-size:1.2em;
-        margin: 1em 0em 0.8em 0em;
-    }
-
-    #btnNext, #btnPrev {
-        width: calc(8.5% - 15px); /* page padding - something as margin*/
-    }
-    #btnNext:before, #btnPrev:before {
-        top: 3.5em;
-        margin: 0;
-    }
-    #btnPrev {
-        font-size: 70%;
-        margin: 0 15px 0 0;
-    }
-    #btnNext {
-        font-size: 70%;
-        margin: 0 0 0 15px;
-    }
-
-    #tooltipArrowRight,
-    #tooltipArrowLeft {
-        top: 7em;
-    }
-
-    #tooltipArrowRight,
-    #tooltipTouchRight {
-        right: calc(8.5% - 15px - 0px - 33px);
-        /* right: page padding - #btnNext.MarginLeft - #btnNext:before.MarginLeft - own padding to fit arrow*/
-    }
-    #tooltipArrowLeft,
-    #tooltipTouchLeft {
-        left: calc(8.5% - 15px - 0px - 33px);
-        /* left: page padding - #btnPrev.MarginRight - #btnPrev:before.MarginRight - own padding to fit arrow*/
-    }
-
-    .side-menu {
-        max-width: 65%;
-    }
-    div.slider-con, div.preview-con {
-        padding: 20px 50px 20px;
-    }
-    div.slider-con .slider-back, div.preview-con .slider-back {
-        left: 12px;
-        opacity: 1;
-    }
-    div.slider-con .slider-next, div.preview-con .slider-next {
-        right: 12px;
-        opacity: 1;
-    }
-    .slider-back-area, .slider-next-area {
-        width: 50px;
-    }
-    .img-lightbox img {
-        margin: 40px 20px;
-        max-width: calc(100% - 40px);
-        max-height: calc(100% - 60px);
-    }
-    .section-overview-element {
-        padding: 5px 0 5px 125px;
-        width: calc(100% - 125px);
-    }
-    .section-overview-element.sub {
-        padding: 5px 0 5px 145px;
-        width: calc(100% - 145px);
-    }
-    .section-overview-element.subsub {
-        padding: 5px 0 5px 165px;
-        width: calc(100% - 165px);
-    }
-
-    .section-overview-element.active {
-        padding: 5px 0 5px 122px;
-    }
-    .section-overview-element.active.sub {
-        padding: 5px 0 5px 142px;
-    }
-    .section-overview-element.active.subsub {
-        padding: 5px 0 5px 162px;
-    }
-
-    .tabbed-box, .hideable-container .hideable {
-        padding: 1.4em;
-    }
-}
-
-@media screen and (max-width:440px) {
-    body {
-        font-size: 81.4%;
-    }
-    #navigation {
-        font-size: 1em;
-    }
-    .page {
-        padding: 45px 4% 30px 4%;
-    }
-    h1 {
-        padding:3.4em 0em 1em 0em;
-        font-size: 1.96em;
-    }
-    h2 {
-        padding:1.95em 0em 1.1em 0em;
-        font-size:1.6em;
-    }
-    h3 {
-        font-size:1.36em;
-        margin: 1em 0em 0.8em 0em;
-    }
-    h4 {
-        font-size:1.2em;
-        margin: 1em 0em 0.8em 0em;
-    }
-
-    #btnNext, #btnPrev {
-        display: none !important;
-    }
-
-    .side-menu {
-        max-width: 85%;
-    }
-    div.slider-con, div.preview-con {
-        padding: 20px 40px 20px;
-    }
-    div.slider-con .slider-back, div.preview-con .slider-back {
-        left: 10px;
-        opacity: 1;
-    }
-    div.slider-con .slider-next, div.preview-con .slider-next {
-        right: 10px;
-        opacity: 1;
-    }
-    .slider-back-area, .slider-next-area {
-        width: 40px;
-    }
-    .img-lightbox img {
-        margin: 20px 10px;
-        max-width: calc(100% - 20px);
-        max-height: calc(100% - 30px);
-    }
-    .section-overview-element {
-        padding: 5px 0 5px 82px;
-        width: calc(100% - 82px);
-    }
-    .section-overview-element.sub {
-        padding: 5px 0 5px 92px;
-        width: calc(100% - 92px);
-    }
-    .section-overview-element.subsub {
-        padding: 5px 0 5px 102px;
-        width: calc(100% - 102px);
-    }
-
-    .section-overview-element.active {
-        padding: 5px 0 5px 79px;
-    }
-    .section-overview-element.active.sub {
-        padding: 5px 0 5px 89px;
-    }
-    .section-overview-element.active.subsub {
-        padding: 5px 0 5px 99px;
-    }
-    #btnBackText, #btnAllText, #btnHelpText {
-        display:none;
-    }
-    #btnExp {
-        width: calc(100% - 142px - 5px);
-    }
-    .back-enabled #btnExp {
-        width: calc(100% - 180px - 5px);
-    }
-    #btnHelp {
-        margin-right: 0;
-    }
-
-    .tabbed-box, .hideable-container .hideable {
-        padding: 0.8em;
-    }
-}
-
-
-@media print {
-    body {
-        font-size:78%;
-    }
-    .page {
-        padding: 45px 8.5% 68px 8.5%;
-    }
-
-    #navigation {
-        display:none !important;
-    }
-    .skip-arrows {
-        display: none !important;
-    }
-    h2 {
-        page-break-before:always;
-    }
-    code {
-        white-space:pre-wrap;
-    }
-
-    .slider-con {
-        max-height: none !important;
-        padding: 0 !important;
-        border-radius: 0 !important;
-        background: 0 !important;
-    }
-    .slider-con .btn {
-        display: none;
-    }
-    .slider-con .slider {
-        max-height: none !important;
-        height: auto !important;
-        background: 0 !important;
-    }
-    .slider-con ul.img-gallery {
-        font-size: 10pt;
-        max-height: none !important;
-        list-style: none !important;
-        transition-duration: 0s !important;
-        margin-left: 0 !important;
-        width: auto !important;
-        transform: none !important;
-    }
-    .slider-con ul.img-gallery li {
-        max-height: none !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: 100% !important;
-        margin-bottom: 15px;
-    }
-    .slider-con ul.img-gallery li.loop_clone {
-        display: none !important;
-    }
-    .slider-con ul.img-gallery li p {
-        display: block !important;
-        white-space: normal !important;
-    }
-    .slider-description, .preview-con {
-        display: none !important;
-    }
+#MathJax_Message {
+    display: none !important;
 }
