@@ -62,7 +62,10 @@ this rule.
 In this example the MathJax Script is loaded and initiated.
 
 If you want to write a value over multiple lines you can surround it with `'`
-or `"` otherwise it will only get interpreted as single line value.
+or `"` otherwise it will only get interpreted as single line value. The chosen
+wrapper has to be escaped within the value. This can also be seen in the example
+above. Another example: `Title: An "Example" with quotes` is equal to
+`Title: "An \"Example\" with quotes"` and `Title: 'An "Example" with quotes'`.
 
 The `---` wrapping the block is necessary if you include this block.
 All Key-Value pairs have to be within these `---` lines.
