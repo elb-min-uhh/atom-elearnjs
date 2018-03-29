@@ -1,0 +1,20 @@
+{
+  "name": "atom-elearnjs",
+  "main": "./lib/main",
+  "version": "0.0.0",
+  "description": "Atom package for conversion of elearn.js Markdown to HTML and PDF",
+  "keywords": [],
+  "activationCommands": {
+    "atom-workspace": "elearnjs-plugin:toggle"
+  },
+  "repository": "https://github.com/elb-min-uhh/atom-elearnjs",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "ncp": "^2.0.0",
+    "path": "^0.12.7",
+    "showdown": "^1.8.6"
+  }
+}
