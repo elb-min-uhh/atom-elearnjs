@@ -1,3 +1,2 @@
 ## 0.1.0 - First Release
-* Every feature added
-* Every bug fixed
+* Basic Markdown to HTML and PDF conversion for elearn.js scripts

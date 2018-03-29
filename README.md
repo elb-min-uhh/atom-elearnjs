@@ -11,7 +11,7 @@ package.
 
 ## Usage
 
-In Atom open your Markdown file. Afterwards you can do either of the following:
+In Atom open your Markdown file. Afterwards you can do any of the following:
 
 * use the Package tab, access elearn.js and convert to either html or pdf.
 * Right-Click in the editor window and choose `elearn.js - to HTML` or
@@ -75,7 +75,7 @@ imprint information you have to add the following block to the markdown code.
       YOUR CODE HERE
     ```
 
-Within these block either markdown or html is allowed.
+Within this block either markdown or html is allowed.
 
 This block is optional but it is recommended to insert this block at the top of
 your markdown file.
@@ -104,8 +104,8 @@ your markdown file.
 
 ## License
 
-atom-elearnjs is developed by [dL.MIN](https://www.min.uni-hamburg.de/studium/elearning.html) of Universität Hamburg.
+atom-elearnjs is developed by [dl.min](https://www.min.uni-hamburg.de/studium/digitalisierung-lehre/ueber-uns.html) of Universität Hamburg.
 
 The software is using [MIT-License](http://opensource.org/licenses/mit-license.php).
 
-Copyright (c) 2018 Michael Heinecke, dL.MIN, Universität Hamburg
+cc-by Michael Heinecke, Arne Westphal, dl.min, Universität Hamburg
