@@ -52,7 +52,7 @@ to add meta information to the generated HTML-File.
     ---
 
 This will basically add `<meta>` elements to the HTML's Head.
-For example `Author: Name Author`, where `Author` might be called _Key_ and 
+For example `Author: Name Author`, where `Author` might be called _Key_ and
 `Name Author` _Value_, will be converted to
 `<meta name="author" content="Name Autor"/>`. There are only two exceptions to
 this rule.
@@ -64,7 +64,7 @@ In this example the MathJax Script is loaded and initiated.
 If you want to write a value over multiple lines you can surround it with `'`
 or `"` otherwise it will only get interpreted as single line value.
 
-The `---` wrapping the block is necessary if you include this block. 
+The `---` wrapping the block is necessary if you include this block.
 All Key-Value pairs have to be within these `---` lines.
 All fields are optional as well as the block itself.
 
@@ -87,8 +87,12 @@ your markdown file.
 
 * Add settings for:
     * _HTML and PDF_:
+        * Filechooser for output location
         * Optional MathJax integration
         * Optional CSS File for additional styles
+    * _HTML only_:
+        * Optional export of _elearn.js_ assets
+        * Optional export of linked files into _elearn.js_ assets
     * _PDF only_:
         * Page break before section (on/off)
         * Optional footer text
@@ -105,9 +109,18 @@ your markdown file.
         * Workaround: zoom factor ~0.7
     * PDF output has no footer/page numbers.
 
+## Credits
+
+* [Atom](https://atom.io) the editor you need!
+* [Showdown](http://showdownjs.com/) used for Markdown to HTML conversion.
+* [marcbachmann/node-html-pdf](https://github.com/marcbachmann/node-html-pdf)
+used for HTML to PDF conversion.
+
 ## License
 
-atom-elearnjs is developed by [dl.min](https://www.min.uni-hamburg.de/studium/digitalisierung-lehre/ueber-uns.html) of Universität Hamburg.
+atom-elearnjs is developed by
+[dl.min](https://www.min.uni-hamburg.de/studium/digitalisierung-lehre/ueber-uns.html)
+of Universität Hamburg.
 
 The software is using [MIT-License](http://opensource.org/licenses/mit-license.php).
 
