@@ -52,7 +52,8 @@ to add meta information to the generated HTML-File.
     ---
 
 This will basically add `<meta>` elements to the HTML's Head.
-For example `Author: Name Author` will be converted to
+For example `Author: Name Author`, where `Author` might be called _Key_ and 
+`Name Author` _Value_, will be converted to
 `<meta name="author" content="Name Autor"/>`. There are only two exceptions to
 this rule.
 
@@ -63,6 +64,8 @@ In this example the MathJax Script is loaded and initiated.
 If you want to write a value over multiple lines you can surround it with `'`
 or `"` otherwise it will only get interpreted as single line value.
 
+The `---` wrapping the block is necessary if you include this block. 
+All Key-Value pairs have to be within these `---` lines.
 All fields are optional as well as the block itself.
 
 
