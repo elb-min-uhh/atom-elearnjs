@@ -5,7 +5,10 @@
   "description": "Atom package for conversion of elearn.js Markdown to HTML and PDF",
   "keywords": [],
   "activationCommands": {
-    "atom-workspace": ["elearnjs-plugin:to-html", "elearnjs-plugin:to-pdf"]
+    "atom-workspace": [
+      "elearnjs-plugin:to-html",
+      "elearnjs-plugin:to-pdf"
+    ]
   },
   "repository": "https://github.com/elb-min-uhh/atom-elearnjs",
   "license": "MIT",
