@@ -1,6 +1,9 @@
 ## 0.1.2 (not released)
-* Automatic section generation at headings (with config)
-* Optional PDF page break at section beginning (default on)
+* General:
+    * Automatic section generation at headings (with config)
+* PDF:
+    * Optional PDF page break at section beginning (default on)
+    * Zoom for PDF output
 ## 0.1.1
 * Metadata and imprint blocks extended syntax
     * both can be written in HTML comment style

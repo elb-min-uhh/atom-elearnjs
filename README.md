@@ -147,7 +147,6 @@ and
         * Optional export of linked files into _elearn.js_ assets
     * _PDF only_:
         * Optional footer text
-        * Zoom Factor
 
 ## Known Issues
 
