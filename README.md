@@ -27,18 +27,27 @@ scripts to the HTML Head you can use the following syntax.
 
 ### Sections
 
-The only method to create `<section>` elements, used by the _elearn.js_ to
-create pages, is the following syntax:
+Sections are automatically created at headings. These sections are used by
+_elearn.js_ to create pages. This can be changed in the
+_settings_ of this atom package. By default headings up to `### Heading 3`
+will start a new section with the name set to the headings text.
+
+If you only want a specific heading to not start a new section, insert
+`<!--no-section-->` into the headings text like this:
+
+    ## Example Heading <!--no-section-->
+
+If you disable this option or want a new section at a specific point, you can
+insert
 
     |||SECTION_NAME///
 
 This way the html will contain a surrounding `<section name="SECTION_NAME">`.
-You should always insert the first section before everything else (besides
-not displayed elements like the _meta information_ or _imprint_ below).
+
+__Notice:__ You should always insert the first section before everything else
+(besides not displayed elements like the _meta information_ or _imprint_ below).
 Other displayed elements before the first section will otherwise always be
 visible.
-
-An option to create sections automatically at specific headings is planned.
 
 ### Meta Information
 
@@ -130,7 +139,6 @@ and
 
 * Add settings for:
     * _HTML and PDF_:
-        * Automatic sections at headings (with setting for max depth)
         * Filechooser for output location
         * Optional MathJax integration
         * Optional CSS File for additional styles
