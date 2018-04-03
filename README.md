@@ -92,14 +92,17 @@ All fields are optional as well as the block itself.
 In the HTML version's menu of an elearn.js document is an imprint. To add your
 imprint information you have to add the following block to the markdown code.
 
-    ```imprint
+    <!--imprint
       YOUR CODE HERE
-    ```
+    -->
 
 Within this block either markdown or html is allowed.
 
 This block is optional but it is recommended to insert this block at the top of
-your markdown file.
+your markdown file. This block should not be converted in other markdown
+converters due to it's html comment style. This way you are save to use
+this even when working with other converters. But of course other converters
+will not generate any output based on this block.
 
 ## Planned Features
 
