@@ -83,7 +83,18 @@ above. Another example: `Title: An "Example" with quotes` is equal to
 `Title: "An \"Example\" with quotes"` and `Title: 'An "Example" with quotes'`.
 
 The `---` wrapping the block is necessary if you include this block.
-All Key-Value pairs have to be within these `---` lines.
+All Key-Value pairs have to be within these `---` lines. If you want to be sure
+the block will not be converted to anything else by other converters you can
+also use the alternative syntax:
+
+    <!--meta
+      Title: elearn.js Template
+      Author: ...
+    -->
+
+This way you are save to use this even when working with other converters. But
+you cannot use `-->` in the block and atom will not highlight the syntax.
+
 All fields are optional as well as the block itself.
 
 
@@ -100,9 +111,20 @@ Within this block either markdown or html is allowed.
 
 This block is optional but it is recommended to insert this block at the top of
 your markdown file. This block should not be converted in other markdown
-converters due to it's html comment style. This way you are save to use
+converters due to its html comment style. This way you are save to use
 this even when working with other converters. But of course other converters
 will not generate any output based on this block.
+There are two alternatives to this syntax:
+
+    ```imprint
+      YOUR CODE HERE
+    ```
+
+and
+
+    ~~~imprint
+      YOUR CODE HERE
+    ~~~
 
 ## Planned Features
 
