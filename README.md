@@ -27,7 +27,7 @@ scripts to the HTML Head you can use the following syntax.
 
 ### Sections
 
-The only method to create `<section>` elements, used by the elearn.js to
+The only method to create `<section>` elements, used by the _elearn.js_ to
 create pages, is the following syntax:
 
     |||SECTION_NAME///
