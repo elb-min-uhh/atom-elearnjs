@@ -3,7 +3,8 @@
     * Automatic section generation at headings (with config)
 * PDF:
     * Optional PDF page break at section beginning (default on)
-    * Zoom for PDF output
+    * Optional Zoom for PDF output
+    * Optional Render delay to wait for delayed scripts
 ## 0.1.1
 * Metadata and imprint blocks extended syntax
     * both can be written in HTML comment style
