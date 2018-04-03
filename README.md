@@ -146,7 +146,6 @@ and
         * Optional export of _elearn.js_ assets
         * Optional export of linked files into _elearn.js_ assets
     * _PDF only_:
-        * Page break before section (on/off)
         * Optional footer text
         * Zoom Factor
 
