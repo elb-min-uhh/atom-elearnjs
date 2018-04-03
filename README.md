@@ -22,8 +22,23 @@ In Atom open your Markdown file. Afterwards you can do any of the following:
 
 ## Additions to Markdown Syntax
 
-To add additional meta information or scripts to the HTML Head you can use the
-following syntax.
+To use additional elearn.js features or add meta information or
+scripts to the HTML Head you can use the following syntax.
+
+### Sections
+
+The only method to create `<section>` elements, used by the elearn.js to
+create pages, is the following syntax:
+
+    |||SECTION_NAME///
+
+This way the html will contain a surrounding `<section name="SECTION_NAME">`.
+You should always insert the first section before everything else (besides
+not displayed elements like the _meta information_ or _imprint_ below).
+Other displayed elements before the first section will otherwise always be
+visible.
+
+An option to create sections automatically at specific headings is planned.
 
 ### Meta Information
 
@@ -90,6 +105,7 @@ your markdown file.
 
 * Add settings for:
     * _HTML and PDF_:
+        * Automatic sections at headings (with setting for max depth)
         * Filechooser for output location
         * Optional MathJax integration
         * Optional CSS File for additional styles
