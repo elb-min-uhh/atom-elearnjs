@@ -8,6 +8,10 @@
     {
       'label': 'elearn.js - to PDF',
       'command': 'elearnjs-plugin:to-pdf'
+    },
+    {
+        'label': 'elearn.js - Save as\u2026',
+        'command': 'elearnjs-plugin:save-as'
     }
   ]
 'menu': [
@@ -23,6 +27,10 @@
         {
           'label': 'Save as PDF',
           'command': 'elearnjs-plugin:to-pdf'
+        },
+        {
+            'label': 'Save as\u2026',
+            'command': 'elearnjs-plugin:save-as'
         }
       ]
     ]

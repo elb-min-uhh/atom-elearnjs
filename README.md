@@ -139,7 +139,6 @@ and
 
 * Add settings for:
     * _HTML and PDF_:
-        * Filechooser for output location
         * Optional MathJax integration
         * Optional CSS File for additional styles
     * _HTML only_:
