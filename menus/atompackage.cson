@@ -3,15 +3,15 @@
   'atom-text-editor': [
     {
       'label': 'elearn.js - to HTML',
-      'command': 'elearnjs-plugin:to-html'
+      'command': 'atom-elearnjs:to-html'
     },
     {
       'label': 'elearn.js - to PDF',
-      'command': 'elearnjs-plugin:to-pdf'
+      'command': 'atom-elearnjs:to-pdf'
     },
     {
         'label': 'elearn.js - Save as\u2026',
-        'command': 'elearnjs-plugin:save-as'
+        'command': 'atom-elearnjs:save-as'
     }
   ]
 'menu': [
@@ -22,15 +22,15 @@
       'submenu': [
         {
           'label': 'Save as HTML',
-          'command': 'elearnjs-plugin:to-html'
+          'command': 'atom-elearnjs:to-html'
         },
         {
           'label': 'Save as PDF',
-          'command': 'elearnjs-plugin:to-pdf'
+          'command': 'atom-elearnjs:to-pdf'
         },
         {
             'label': 'Save as\u2026',
-            'command': 'elearnjs-plugin:save-as'
+            'command': 'atom-elearnjs:save-as'
         }
       ]
     ]

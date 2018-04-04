@@ -6,9 +6,9 @@
   "keywords": [],
   "activationCommands": {
     "atom-workspace": [
-      "elearnjs-plugin:to-html",
-      "elearnjs-plugin:to-pdf",
-      "elearnjs-plugin:save-as"
+      "atom-elearnjs:to-html",
+      "atom-elearnjs:to-pdf",
+      "atom-elearnjs:save-as"
     ]
   },
   "repository": "https://github.com/elb-min-uhh/atom-elearnjs",
