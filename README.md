@@ -207,6 +207,7 @@ and
 * _HTML and PDF_:
     * Optional MathJax integration
     * Optional CSS File for additional styles
+    * Content Overview syntax (e.g. hide-in-overview class for sections)
 * _HTML only_:
     * Optional export of _elearn.js_ assets
     * Optional export of linked files into _elearn.js_ assets
