@@ -148,7 +148,7 @@ and
     * PDF output might break elements at page end (e.g. lines might be broken
         horizontally)
         * Workaround: add forced page break `<div style="page-break-before: always;"></div>`
-* Linux (Ubuntu):
+* Linux/Mac OS:
     * PDF output is zoomed
         * Workaround: zoom factor ~0.7
     * PDF output has no footer/page numbers.
