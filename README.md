@@ -14,9 +14,10 @@ package.
 In Atom open your Markdown file. Afterwards you can do any of the following:
 
 * use the Package tab, access elearn.js and convert to either html or pdf
-    * here you can also use `Save as...` to select an output location
 * Right-Click in the editor window and choose `elearn.js - to HTML` or
 `elearn.js - to PDF`
+* you can also use `Save as...` in the menus described above to select an
+output location
 * Convert with hotkeys:
     * To HTML: `ctrl-alt-o`
     * To PDF: `ctrl-alt-p`
