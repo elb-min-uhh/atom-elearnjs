@@ -157,7 +157,6 @@ and
 * Linux/Mac OS:
     * PDF output is zoomed
         * Workaround: zoom factor ~0.7
-    * PDF output has no footer/page numbers.
 
 ## Credits
 
