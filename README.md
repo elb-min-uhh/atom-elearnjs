@@ -59,7 +59,11 @@ The settings are further described here.
 
 ### HTML
 
-_There are no settings for HTML yet._
+* _Section Order_:
+    * _Create section levels_: Activates or deactivates leveling of sections
+    * _Subsection_: The highest heading level to be interpreted as _subsection_
+    * _Subsubsection_: The highest heading level to be interpreted as
+        _subsubsection_
 
 ### PDF
 
@@ -101,6 +105,11 @@ insert
     |||SECTION_NAME///
 
 This way the html will contain a surrounding `<section name="SECTION_NAME">`.
+
+There are also syntax extensions for _subsections_ and _subsubsections_
+
+    ||||SUB_SECTION////
+    |||||SUB_SUB_SECTION/////
 
 __Notice:__ You should always insert the first section before everything else
 (besides not displayed elements like the _meta information_ or _imprint_ below).

@@ -1,6 +1,7 @@
 ## 0.1.2 (not released)
 * General:
     * Automatic section generation at headings (with config)
+    * Leveled sections (syntax) and automatic generation
     * File chooser for export location
 * PDF:
     * Optional PDF page break at section beginning (default on)
