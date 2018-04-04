@@ -25,6 +25,59 @@ output location
 All locations will be stored by their output _type_ and the _markdown file_
 and will only be overwritten when `Save as...` (described above) is used.
 
+## Settings
+
+You can change the settings of this atom package by clicking on the tab
+_Packages_ and then go to _Settings_->_Manage Packages_. Search for
+_atom-elearnjs_ and click on _Settings_.
+
+Settings are divided into groups. _General_ settings will most likely affect
+all outputs. _HTML_ and _PDF_ will only affect their specific output. These
+settings are all global, meaning that they affect all markdown files you
+convert with _atom-elearnjs_.
+
+The settings are further described here.
+
+### General
+
+* _Start a new section at headings_:
+    * This will automatically detect headings
+    * Only markdown style headings with hashes (#),
+        not underlined headings (= or -)
+    * Sections are used by elearn.js to create pages
+    * For further information about sections read the _sections_ part in
+        __Additions to Markdown Syntax__
+* _New sections up to depth_:
+    * Only if _Start a new section at headings_ is on
+    * This will define which headings are used to create sections
+    * e.g. _H3 - ### Heading_ will activate automatic section generation for
+        * _H1 - # Heading_
+        * _H2 - ## Heading_
+        * _H3 - ### Heading_
+    * For further information about sections read the _sections_ part in
+        _Additions to Markdown Syntax_
+
+### HTML
+
+_There are no settings for HTML yet._
+
+### PDF
+
+* _Start a new page at a section start_:
+    * Works with automatically generated sections by
+        _Start a new section at headings_ and the extended syntax described below
+* _Zoom of PDF Output_:
+    * Will zoom all of the content by this factor
+    * Can be used e.g. to make the font bigger/smaller
+    * 0.5: half the size, 1: no zoom, 2: double the size
+    * Can be used as a fix for a zoom issue. See __Known Issues__
+* _Delay of HTML rendering_:
+    * The page is calculated as html in the background and then rendered to pdf
+    * Adds a wait time to make sure all the scripts are done
+    * The value is in seconds
+
+
+
 ## Additions to Markdown Syntax
 
 To use additional elearn.js features or add meta information or
@@ -142,15 +195,14 @@ and
 
 ## Planned Features
 
-* Add settings for:
-    * _HTML and PDF_:
-        * Optional MathJax integration
-        * Optional CSS File for additional styles
-    * _HTML only_:
-        * Optional export of _elearn.js_ assets
-        * Optional export of linked files into _elearn.js_ assets
-    * _PDF only_:
-        * Optional footer text
+* _HTML and PDF_:
+    * Optional MathJax integration
+    * Optional CSS File for additional styles
+* _HTML only_:
+    * Optional export of _elearn.js_ assets
+    * Optional export of linked files into _elearn.js_ assets
+* _PDF only_:
+    * Optional footer text
 
 ## Known Issues
 
@@ -160,7 +212,7 @@ and
         * Workaround: add forced page break `<div style="page-break-before: always;"></div>`
 * Linux/Mac OS:
     * PDF output is zoomed
-        * Workaround: zoom factor ~0.7
+        * Workaround: zoom factor of ~0.7
 
 ## Credits
 
