@@ -3,6 +3,7 @@
     * Automatic section generation at headings (with config)
     * Leveled sections (syntax) and automatic generation
     * File chooser for export location
+    * Syntax addition for in overview hidden sections
 * PDF:
     * Optional PDF page break at section beginning (default on)
     * Optional Zoom for PDF output

@@ -128,6 +128,23 @@ __Notice:__ You should always insert the first section before everything else
 Other displayed elements before the first section will otherwise always be
 visible.
 
+#### Content Overview
+
+Elearn.js has support for an automatically created content overview based on
+sections. You can insert this overview by adding the following block
+
+    <!-- Addition class="kachel" changes the style -->
+    <!-- Addition class="hide-read" do not show checkmarks on read sections -->
+    <div id="content-overview" class="kachel">
+        <!-- Keep this empty. This will be automatically generated. -->
+    </div>
+
+If you want to hide sections in this overview e.g. the content overview section
+itself you can add a comment like this
+
+    ## Content Overview <!--hide-in-overview-->
+    |||Content Overview/// <!--hide-in-overview-->
+
 ### Meta Information
 
 The following block has to be added to the markdown file (preferably at the top)
@@ -229,11 +246,25 @@ https://github.com/elb-min-uhh/atom-elearnjs/tree/master/assets/elearnjs/pdfAsse
 for the PDF styles.
 
 
+### Section with custom name
+
+If you use the automatically generated sections feature but want to rename
+a specific section, you can do so by writing it as follows
+
+    |||My Custom Section Name///
+    ## My Normal Section name <!--no-section-->
+
+This way you deactivate the headings automatic section generation and add your
+own.
+
+__Notice:__ You should check your section depth settings to select the correct
+section level in your custom section.
+
+
 ## Planned Features
 
 * _HTML and PDF_:
     * Optional MathJax integration
-    * Content Overview syntax (e.g. hide-in-overview class for sections)
 * _HTML only_:
     * Optional export of _elearn.js_ assets
     * Optional export of linked files into _elearn.js_ assets
