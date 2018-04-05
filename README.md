@@ -79,6 +79,18 @@ The settings are further described here.
     * The page is calculated as html in the background and then rendered to pdf
     * Adds a wait time to make sure all the scripts are done
     * The value is in seconds
+* _Custom header/footer text_:
+    * Each can be set to html based on https://github.com/marcbachmann/node-html-pdf#footers-and-headers
+    * Make sure to only use `id="pageHeader"` in the header field and
+        `id="pageFooter"` in the footer field
+    * Both will be added without any changes to the HTML before rendering
+    * You can change the style by adding a `style` attribute
+    * You can add special footers (e.g. `id="pageFooter-first"`) by just writing
+        all elements one after another
+* _Header/Footer height_:
+    * Changes internal settings of header and footer height
+    * Check https://github.com/marcbachmann/node-html-pdf#options for more
+        information on supported values
 
 
 
@@ -211,8 +223,6 @@ and
 * _HTML only_:
     * Optional export of _elearn.js_ assets
     * Optional export of linked files into _elearn.js_ assets
-* _PDF only_:
-    * Optional footer text
 
 ## Known Issues
 

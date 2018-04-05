@@ -9,6 +9,7 @@
     * Optional Render delay to wait for delayed scripts
     * Fixed footer and page number issues with Linux/Mac OS
     * Support for elearn.js content overview
+    * Support for customized footer and header (global setting)
 ## 0.1.1
 * Metadata and imprint blocks extended syntax
     * both can be written in HTML comment style
