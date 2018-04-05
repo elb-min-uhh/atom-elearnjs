@@ -1,4 +1,4 @@
-## 0.1.2 (not released)
+## 0.2.0
 * General:
     * Automatic section generation at headings (with config)
     * Leveled sections (syntax) and automatic generation
