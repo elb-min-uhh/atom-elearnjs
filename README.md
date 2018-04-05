@@ -214,15 +214,31 @@ and
       YOUR CODE HERE
     ~~~
 
+## Useful hints
+
+### Add custom style (.css)
+
+To add your own stylesheet you can use the `Custom` key described in the
+_Meta Information_ section. This will be pasted into the HTML file and also be
+added before rendering a PDF file.
+
+If you want to overwrite specific styles you should check on
+https://github.com/elb-min-uhh/atom-elearnjs/tree/master/assets/elearnjs/assets/css
+for the styles used in the HTML file and
+https://github.com/elb-min-uhh/atom-elearnjs/tree/master/assets/elearnjs/pdfAssets/css
+for the PDF styles.
+
+
 ## Planned Features
 
 * _HTML and PDF_:
     * Optional MathJax integration
-    * Optional CSS File for additional styles
     * Content Overview syntax (e.g. hide-in-overview class for sections)
 * _HTML only_:
     * Optional export of _elearn.js_ assets
     * Optional export of linked files into _elearn.js_ assets
+* _PDF only_:
+    * Optional CSS File for additional styles (included in every pdf)
 
 ## Known Issues
 
