@@ -266,7 +266,6 @@ section level in your custom section.
 * _HTML and PDF_:
     * Optional MathJax integration
 * _HTML only_:
-    * Optional export of _elearn.js_ assets
     * Optional export of linked files into _elearn.js_ assets
 * _PDF only_:
     * Optional CSS File for additional styles (included in every pdf)

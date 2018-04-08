@@ -1,3 +1,6 @@
+## 0.2.1
+* HTML:
+    * Added an option whether to export elearn.js assets or not
 ## 0.2.0
 * General:
     * Automatic section generation at headings (with config)
