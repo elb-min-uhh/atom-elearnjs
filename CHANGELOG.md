@@ -1,4 +1,6 @@
-## 0.2.1
+## 0.2.1 (not released)
+* General:
+    * Clean up of the pdf only css styles
 * HTML:
     * Added an option whether to export elearn.js assets or not
 ## 0.2.0

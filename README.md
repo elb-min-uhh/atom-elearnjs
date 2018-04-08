@@ -241,9 +241,10 @@ added before rendering a PDF file.
 
 If you want to overwrite specific styles you should check on
 https://github.com/elb-min-uhh/atom-elearnjs/tree/master/assets/elearnjs/assets/css
-for the styles used in the HTML file and
+for the styles used in the HTML file (which is also used for the PDF export)
+and additionally on
 https://github.com/elb-min-uhh/atom-elearnjs/tree/master/assets/elearnjs/pdfAssets/css
-for the PDF styles.
+for the overwriting styles only used for PDF exports.
 
 
 ### Section with custom name
