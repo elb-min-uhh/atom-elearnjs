@@ -1,3 +1,8 @@
+## 0.2.2
+* General:
+    * Important fixes with paths for
+        * export of elearn.js assets
+        * PDF output
 ## 0.2.1
 * General:
     * Clean up of the pdf only css styles
