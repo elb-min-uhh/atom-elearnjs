@@ -91,7 +91,9 @@ The settings are further described here.
     * Changes internal settings of header and footer height
     * Check https://github.com/marcbachmann/node-html-pdf#options for more
         information on supported values
-
+* _CSS Stylesheet_:
+    * You can insert an absolute path to add an additional CSS file
+    * This file can overwrite elearn.js specific styles for the PDF Output
 
 
 ## Additions to Markdown Syntax
