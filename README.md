@@ -264,6 +264,8 @@ section level in your custom section.
 
 ## Planned Features
 
+* _General_:
+    * Live preview
 * _HTML and PDF_:
     * Automated video and quiz detection to add elearn.js extensions
     * Optional (automated) MathJax integration
