@@ -1,4 +1,4 @@
-## 0.2.1 (not released)
+## 0.2.1
 * General:
     * Clean up of the pdf only css styles
 * HTML:
