@@ -3,6 +3,7 @@
     * Clean up of the pdf only css styles
 * HTML:
     * Added an option whether to export elearn.js assets or not
+    * Added an option whether to export linked files or not
 ## 0.2.0
 * General:
     * Automatic section generation at headings (with config)
