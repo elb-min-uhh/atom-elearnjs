@@ -265,9 +265,8 @@ section level in your custom section.
 ## Planned Features
 
 * _HTML and PDF_:
-    * Optional MathJax integration
-* _PDF only_:
-    * Optional CSS File for additional styles (included in every pdf)
+    * Automated video and quiz detection to add elearn.js extensions
+    * Optional (automated) MathJax integration
 
 ## Known Issues
 
