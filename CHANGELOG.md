@@ -3,6 +3,8 @@
     * Setting whether to store export locations or not
     * Setting whether to store export options or not
     * Setting whether to prompt for export options or not
+    * Change manual section syntax
+    * Fix unescaped section wrap elements leading to not detected sections
 ## 0.2.2
 * General:
     * Important fixes with paths for
