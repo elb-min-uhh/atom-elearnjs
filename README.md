@@ -307,8 +307,17 @@ __Notice:__ You should check your section depth settings to select the correct
 section level in your custom section.
 
 
-## Planned Features
+## Examples
 
+You can find an example Markdown file in the _elearn.js_ repository
+https://github.com/elb-min-uhh/elearn.js/blob/master/Template/elearn_template.md.
+Due to GitHub's Markdown preview we suggest inspecting the Markdown source code.
+You can also download the repository and export the file using _atom-elearnjs_
+to compare the source with the output. Make sure to include the assets folder
+from the repository, so you have all necessary images and other media files.
+
+## Planned Features
+* Wiki Page for explanation to shorten README
 * _General_:
     * Syntax extensions for elearn.js elements
     * Snippets for elearn.js elements
@@ -322,7 +331,8 @@ section level in your custom section.
 * All platforms:
     * PDF output might break elements at page end (e.g. lines might be broken
         horizontally)
-        * Workaround: add forced page break `<div style="page-break-before: always;"></div>`
+        * Workaround: add forced page break
+            `<div style="page-break-before: always;"></div>`
 * Linux/Mac OS:
     * PDF output is zoomed
         * Workaround: zoom factor of ~0.7
