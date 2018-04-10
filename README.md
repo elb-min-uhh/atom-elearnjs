@@ -292,6 +292,8 @@ section level in your custom section.
 ## Planned Features
 
 * _General_:
+    * Syntax extensions for elearn.js elements
+    * Snippets for elearn.js elements
     * Live preview
 * _HTML and PDF_:
     * Automated video and quiz detection to add elearn.js extensions
