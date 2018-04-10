@@ -2,6 +2,7 @@
 * General:
     * Add hints for backslash usage
     * Fix backslash unescaping in section names
+    * Fix escaping of quotes in section names
 ## 0.2.4
 * General:
     * Important fix for copy of linked files. Files will no longer be replaced
