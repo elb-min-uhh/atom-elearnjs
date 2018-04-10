@@ -1,3 +1,7 @@
+## 0.2.4
+* General:
+    * Important fix for copy of linked files. Files will no longer be replaced
+        with 0B of data
 ## 0.2.3
 * General:
     * Setting whether to store export locations or not
