@@ -40,6 +40,17 @@ The settings are further described here.
 
 ### General
 
+* _Keep export locations after exit_:
+    * On export your selection export location will be stored and reused.
+        This way you are not prompted everytime you want to export your file
+    * Check this option to keep this stored location even after closing atom
+    * You can only overwrite your export location by using
+        _elearn.js - Save as..._
+* _Keep export option defaults after exit_:
+    * On export you might be prompted with additional export options.
+        Your selected options will be stored as defaults for you next export.
+        This way you can export faster by just confirming your previous options
+    * Activate this option to keep this information even after closing atom
 * _Start a new section at headings_:
     * This will automatically detect headings
     * Only markdown style headings with hashes (#),
