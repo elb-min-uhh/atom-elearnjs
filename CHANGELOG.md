@@ -1,4 +1,4 @@
-## 0.2.3 (not released)
+## 0.2.3
 * General:
     * Setting whether to store export locations or not
     * Setting whether to store export options or not
