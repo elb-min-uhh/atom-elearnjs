@@ -1,4 +1,4 @@
-## 0.2.5 (not released)
+## 0.2.5
 * General:
     * Add hints for backslash usage
     * Fix backslash unescaping in section names
