@@ -40,25 +40,25 @@ The settings are further described here.
 
 ### General
 
-* _Keep export locations after exit_:
+* __Keep export locations after exit__:
     * On export your selection export location will be stored and reused.
         This way you are not prompted everytime you want to export your file
     * Check this option to keep this stored location even after closing atom
     * You can only overwrite your export location by using
         _elearn.js - Save as..._
-* _Keep export option defaults after exit_:
+* __Keep export option defaults after exit__:
     * On export you might be prompted with additional export options.
         Your selected options will be stored as defaults for you next export.
         This way you can export faster by just confirming your previous options
     * Activate this option to keep this information even after closing atom
-* _Start a new section at headings_:
+* __Start a new section at headings__:
     * This will automatically detect headings
     * Only markdown style headings with hashes (#),
         not underlined headings (= or -)
     * Sections are used by elearn.js to create pages
     * For further information about sections read the _sections_ part in
         __Additions to Markdown Syntax__
-* _New sections up to depth_:
+* __New sections up to depth__:
     * Only if _Start a new section at headings_ is on
     * This will define which headings are used to create sections
     * e.g. _H3 - ### Heading_ will activate automatic section generation for
@@ -70,7 +70,10 @@ The settings are further described here.
 
 ### HTML
 
-* _Section Order_:
+* __Section Order__:
+    * The following options are used for elearn.js section levels
+    * There are three levels: _Section_, _Subsection_, _Subsubsection_
+    * This sections are only displayed differently in content overviews
     * _Create section levels_: Activates or deactivates leveling of sections
     * _Subsection_: The highest heading level to be interpreted as _subsection_
     * _Subsubsection_: The highest heading level to be interpreted as
@@ -78,19 +81,19 @@ The settings are further described here.
 
 ### PDF
 
-* _Start a new page at a section start_:
+* __Start a new page at a section start__:
     * Works with automatically generated sections by
         _Start a new section at headings_ and the extended syntax described below
-* _Zoom of PDF Output_:
+* __Zoom of PDF Output__:
     * Will zoom all of the content by this factor
     * Can be used e.g. to make the font bigger/smaller
     * 0.5: half the size, 1: no zoom, 2: double the size
     * Can be used as a fix for a zoom issue. See __Known Issues__
-* _Delay of HTML rendering_:
+* __Delay of HTML rendering__:
     * The page is calculated as html in the background and then rendered to pdf
     * Adds a wait time to make sure all the scripts are done
     * The value is in seconds
-* _Custom header/footer text_:
+* __Custom header/footer text__:
     * Each can be set to html based on https://github.com/marcbachmann/node-html-pdf#footers-and-headers
     * Make sure to only use `id="pageHeader"` in the header field and
         `id="pageFooter"` in the footer field
@@ -98,11 +101,11 @@ The settings are further described here.
     * You can change the style by adding a `style` attribute
     * You can add special footers (e.g. `id="pageFooter-first"`) by just writing
         all elements one after another
-* _Header/Footer height_:
+* __Header/Footer height__:
     * Changes internal settings of header and footer height
     * Check https://github.com/marcbachmann/node-html-pdf#options for more
         information on supported values
-* _CSS Stylesheet_:
+* __CSS Stylesheet__:
     * You can insert an absolute path to add an additional CSS file
     * This file can overwrite elearn.js specific styles for the PDF Output
 
