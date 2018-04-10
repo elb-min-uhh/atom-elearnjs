@@ -4,13 +4,6 @@
   "version": "0.2.2",
   "description": "Atom package for conversion of elearn.js Markdown to HTML and PDF",
   "keywords": [],
-  "activationCommands": {
-    "atom-workspace": [
-      "atom-elearnjs:to-html",
-      "atom-elearnjs:to-pdf",
-      "atom-elearnjs:save-as"
-    ]
-  },
   "repository": "https://github.com/elb-min-uhh/atom-elearnjs",
   "license": "MIT",
   "engines": {

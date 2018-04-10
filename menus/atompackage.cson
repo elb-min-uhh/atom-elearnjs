@@ -18,7 +18,7 @@
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'eLearn.js'
+      'label': 'elearn.js'
       'submenu': [
         {
           'label': 'Save as HTML',
@@ -31,6 +31,10 @@
         {
             'label': 'Save as\u2026',
             'command': 'atom-elearnjs:save-as'
+        },
+        {
+            'label': 'Toggle always display export options',
+            'command': 'atom-elearnjs:toggle-display-export-options'
         }
       ]
     ]

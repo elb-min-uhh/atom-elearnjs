@@ -51,6 +51,12 @@ The settings are further described here.
         Your selected options will be stored as defaults for you next export.
         This way you can export faster by just confirming your previous options
     * Activate this option to keep this information even after closing atom
+* __Always display export options__:
+    * On export you might be prompted with additional export options
+    * Deactivating this option will always reuse your stored defaults
+    * To change your stored defaults you have to activate this option again
+    * You can also toggle this option via the _Package Menu - elearn.js -
+        Always display export options_
 * __Start a new section at headings__:
     * This will automatically detect headings
     * Only markdown style headings with hashes (#),

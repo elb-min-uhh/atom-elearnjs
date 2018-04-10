@@ -2,6 +2,7 @@
 * General:
     * Setting whether to store export locations or not
     * Setting whether to store export options or not
+    * Setting whether to prompt for export options or not
 ## 0.2.2
 * General:
     * Important fixes with paths for
