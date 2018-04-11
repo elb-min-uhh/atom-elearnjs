@@ -1,3 +1,7 @@
+## 0.2.6
+* General:
+    * Remove markdown attribute in HTML Output
+    * Fix unhandled markdown in section name
 ## 0.2.5
 * General:
     * Add hints for backslash usage
