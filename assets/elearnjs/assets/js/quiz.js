@@ -5,11 +5,25 @@
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
 
+var QuizJSOptions = function(timerAlertActive, timerAlertText) {
+    this.timerAlertActive = timerAlertActive;
+    this.timerAlertText = timerAlertText;
+
+    this.setTimerAlert = function(bool, text) {
+        this.timerAlertActive = bool;
+        this.timerAlertText = text;
+    };
+}
+
+var quizJS = new QuizJSOptions(false, "");
+
 // anonymous function, so functions cannot be used from console or by mistake
 (function() {
 
-var start_time = [];
-var passed_time = [];
+var nextQuestionId = 0;
+var start_time = {};
+var passed_time = {};
+var questionVisibility = {};
 
 /**
 * Aktiviert alle <button> mit der Klasse "quizButton" für das Quiz.
@@ -18,10 +32,8 @@ var passed_time = [];
 $(document).ready(function() {
     initiateQuiz();
 
-    // resize Funktion wird aufgerufen, wenn im eLearnJS eine neue section
-    // angezeigt wird
-    document.addEventListener("ejssectionchange", windowResizing);
-    document.addEventListener("ejssectionchange", initTimers);
+    // fallback for browsers who do not support IntersectionObservers, only for elearn.js
+    document.addEventListener("ejssectionchange", updateQuestionVisibility);
 });
 
 
@@ -40,8 +52,6 @@ var quizTypes = {
     PETRI : "petri",
     DRAW : "drawing"
 };
-
-var quizJS = this;
 
 
 // ------------------------------------------------------------
@@ -94,7 +104,6 @@ function initiateQuiz() {
     // Hide Weiter-Buttons
     $("button.weiter").hide();
 
-
     windowResizing();
     $(window).resize(function() {windowResizing()});
 
@@ -136,7 +145,39 @@ function initiateQuiz() {
     initiatePetriImage();
     initiateDrawingCanvas();
 
+    initListeners();
     initTimers();
+}
+
+function initListeners() {
+    $('div.question').each(function(i, e) {
+        const el = $(e);
+        try {
+            var options = {
+                root: document.body,
+                rootMargin: '0px',
+                threshold: 1.0
+            }
+
+            var observer = new IntersectionObserver(function(entries, observer) {
+                for(var entry of entries) {
+                    resizeQuestion($(entry.target));
+                }
+            }, options);
+
+            observer.observe(el.get(0));
+        } catch(e) {
+            // ignore;
+        }
+        // resizesensor as visibility listener this will only work with Chrome engine browsers
+        try {
+            new ResizeSensor(el, function(dim) {
+                resizeQuestion(el);
+            });
+        } catch(e) {
+            // ignore;
+        }
+    });
 }
 
 /**
@@ -1348,15 +1389,20 @@ function calculateHotspotDimensions() {
     var root = $('[qtype="'+quizTypes.HOTSPOT+'"]');
 
     root.each(function(i, e) {
-        var imgWidth = root.find('.hotspot_image').width();
-        var width = imgWidth * 0.05;
+        calculateHotspotDimension($(e));
+    });
+}
 
-        $(e).find('.hotspot_image').find('.hotspot').css({
-            "width" : width + "px",
-            "height" : width + "px",
-            "margin-top": "-" + (width/2) + "px",
-            "margin-left": "-" + (width/2) + "px"
-        });
+function calculateHotspotDimension(question) {
+    if(!question.is('[qtype="'+quizTypes.HOTSPOT+'"]')) return;
+    var imgWidth = question.find('.hotspot_image').width();
+    var width = imgWidth * 0.05;
+
+    question.find('.hotspot_image').find('.hotspot').css({
+        "width" : width + "px",
+        "height" : width + "px",
+        "margin-top": "-" + (width/2) + "px",
+        "margin-left": "-" + (width/2) + "px"
     });
 }
 
@@ -1546,15 +1592,20 @@ function calculatePetriDimensions() {
     var root = $('[qtype="'+quizTypes.PETRI+'"]');
 
     root.each(function(i, e) {
-        var imgWidth = root.find('.petri_image').width();
-        var width = imgWidth * 0.05;
+        calculatePetriDimension($(e));
+    });
+}
 
-        $(e).find('.petri_image').find('.place').css({
-            "width" : width + "px",
-            "height" : width + "px",
-            "margin-top": "-" + (width/2) + "px",
-            "margin-left": "-" + (width/2) + "px"
-        });
+function calculatePetriDimension(question) {
+    if(!question.is('[qtype="'+quizTypes.PETRI+'"]')) return;
+    var imgWidth = question.find('.petri_image').width();
+    var width = imgWidth * 0.05;
+
+    question.find('.petri_image').find('.place').css({
+        "width" : width + "px",
+        "height" : width + "px",
+        "margin-top": "-" + (width/2) + "px",
+        "margin-left": "-" + (width/2) + "px"
     });
 }
 
@@ -1606,97 +1657,140 @@ function contains(array, val) {
 };
 
 
-var timerAlertActivated = false;
-var timerAlertText ="";
-
 
 var quizTimer = null;
 
 /**
 * initialisiert Timer für alle Aufgaben die welche haben
+* Sollte nur einmal zu Beginn aufgerufen werden
 */
 function initTimers() {
+    $('.question').each(function(i, e) {
+        const el = $(e);
 
-    for(var activeSection=0; activeSection < $('section').length; activeSection++) {
-        if(eLearnJS.allShown || activeSection == eLearnJS.visSection) {
-            // Startet neuen Timer
-            if(start_time[activeSection] == undefined
-                || start_time[activeSection] == null) {
-                start_time[activeSection] = new Date();
-                passed_time[activeSection] = 0;
-            }
-            // Passt alten Timer an (Zeit weiterlaufen lassen)
-            else {
-                start_time[activeSection] = new Date();
-                start_time[activeSection].setTime(
-                    start_time[activeSection].getTime()
-                    - passed_time[activeSection]*1000);
+        // add unique question id if not set
+        if(!el.attr('question-id')) {
+            el.attr('question-id', nextQuestionId);
+            nextQuestionId++;
+        }
+        const qId = el.attr('question-id');
+
+        // will work in FireFox, Chrome Engine Browsers, Edge
+        try {
+            var options = {
+                root: document.body,
+                rootMargin: '0px',
+                threshold: 1.0
             }
 
-            // anzeigen der startzeit
-            $($('section').get(activeSection)).find('.question:visible').not('.answered').each(function(i,e) {
-                var max_time = $(this).attr("max-time");
-                if(max_time != undefined && max_time.length != 0) {
-                    max_time = parseInt(max_time);
-                    $(this).find('.answered_hint.timer').remove();
-                    $(this).find("h4").after("<div class='answered_hint timer'>"
-                                    + max_time + ":00</div>");
+            var observer = new IntersectionObserver(function(entries, observer) {
+                for(var entry of entries) {
+                    quizVisibilityUpdate($(entry.target));
                 }
+            }, options);
+
+            observer.observe(el.get(0));
+        } catch(e) {
+            // ignore;
+        }
+        // resizesensor as visibility listener this will only work with Chrome engine browsers
+        try {
+            new ResizeSensor(el, function(dim) {
+                quizVisibilityUpdate(el);
             });
+        } catch(e) {
+            // ignore;
+        }
+
+        quizVisibilityUpdate(el);
+
+        // add starttime
+        var max_time = el.attr("max-time");
+        if(max_time != undefined && max_time.length != 0) {
+            max_time = parseInt(max_time);
+            el.find('.answered_hint.timer').remove();
+            el.find("h4").after("<div class='answered_hint timer'>"
+                            + max_time + ":00</div>");
+        }
+    });
+
+    updateTimers();
+
+    return;
+}
+
+function quizVisibilityUpdate(question) {
+    const qId = question.attr('question-id');
+
+    if(question.is(':visible') !== questionVisibility[qId]
+        || questionVisibility[qId] == undefined) {
+        questionVisibility[qId] = question.is(':visible');
+        // was set to visible
+        if(questionVisibility[qId]) {
+            // update start time, so further time calculation is correct
+            if(start_time[qId] != undefined
+                    && passed_time[qId] != undefined) {
+                start_time[qId] = Date.now() - passed_time[qId]*1000;
+            }
+            // set new start_time and passed_time
+            else {
+                start_time[qId] = new Date();
+                passed_time[qId] = 0;
+            }
         }
     }
-    updateTimers();
+}
+
+function updateQuestionVisibility() {
+    $('.question').each(function(i, e) {
+        const el = $(e);
+        quizVisibilityUpdate(el);
+    });
 }
 
 /**
 * Aktualisieren aller Timer
 */
 function updateTimers() {
-    var now = new Date();
+    $('.question .answered_hint.timer:visible').each(function(i, e) {
+        const timer = $(e);
+        const question = timer.closest('.question');
+        const qId = question.attr('question-id');
 
-    for(var activeSection=0; activeSection < $('section').length; activeSection++) {
-        if((eLearnJS.allShown || activeSection == eLearnJS.visSection)
-            && $('.answered_hint.timer:visible').length > 0) {
-            var diff = (now.getTime() - start_time[activeSection].getTime())/1000;
-            passed_time[activeSection] = diff;
-            $($('section').get(activeSection)).find('.answered_hint').filter('.timer').filter(':visible').each(function(i,e) {
-                var timer = $(this);
-                // time in seconds
-                var time = parseInt(timer.closest('.question').attr("max-time")) * 60;
-                var time_left = time - diff;
+        if(!questionVisibility[qId]
+            || start_time[qId] == undefined
+            || question.is('.answered')) return true;
 
-                if(timer.closest('.question').is('.answered')) return true;
+        var diff = (Date.now() - start_time[qId])/1000;
+        passed_time[qId] = diff;
 
-                if(time_left > 0) {
-                    var min = Math.floor(time_left/60);
-                    var sec = Math.floor(time_left - min*60);
-                    if(sec < 10) {
-                        sec = "0" + sec;
-                    }
-                    $(this).html(min + ":" + sec);
-                }
-                else if(!$(this).closest(".question").is('.answered')) {
-                    finishQuestion($(this).closest(".question"));
-                    blockQuestion($(this).closest(".question"));
-                    $(this).closest(".question").find('.feedback.noselection').hide();
+        // time in seconds
+        var time = parseInt(question.attr("max-time")) * 60;
+        var time_left = time - diff;
 
-                    $(this).closest(".question").append("<div class='feedback timeup'>Die Zeit ist abgelaufen. Die Frage wurde automatisch beantwortet und gesperrt.</div>");
-
-                    if(timerAlertActivated) {
-                        alert(timerAlertText);
-                    }
-                }
-            });
+        if(time_left > 0) {
+            var min = Math.floor(time_left/60);
+            var sec = Math.floor(time_left - min*60);
+            if(sec < 10) {
+                sec = "0" + sec;
+            }
+            timer.html(min + ":" + sec);
         }
-    }
+        else if(!question.is('.answered')) {
+            finishQuestion(question);
+            blockQuestion(question);
+            question.find('.feedback.noselection').hide();
+
+            question.append("<div class='feedback timeup'>Die Zeit ist abgelaufen. Die Frage wurde automatisch beantwortet und gesperrt.</div>");
+
+            if(quizJS.timerAlertActive) {
+                alert(quizJS.timerAlertText);
+            }
+        }
+    });
 
     clearTimeout(quizTimer);
     quizTimer = setTimeout(function() { updateTimers(); }, 1000);
-}
-
-function setTimerAlert(bool, text) {
-    timerAlertActivated = bool;
-    timerAlertText = text;
 }
 
 
@@ -1773,28 +1867,32 @@ function zufallsArray(ohneZahlen, anzahl, untereGrenze, obereGrenze) {
 * der Breite einnimmt oder die Antworten mehr als 2 mal so hoch wie das Bild sind.
 */
 function windowResizing() {
-    $('div.question').each(function(e,i) {
-        var maxWidth = 0;
-        var maxHeight = 0;
-        $(this).children('img').each(function() {
-            maxWidth = Math.max(maxWidth, $(this).width());
-            maxHeight = Math.max(maxHeight, $(this).outerHeight());
-        });
+    $('div.question').each(function(i, e) {
+        resizeQuestion($(e));
+    });
+}
 
-
-        if(maxWidth*100/$('.question:visible').width() > 80 || $('.question:visible').children('div.answers').outerHeight() > 2*maxHeight) {
-            $(this).children('img').css("float", "none");
-            $(this).children('div.answers').css("padding-left", "0");
-        }
-        else {
-            $(this).children('img').css("float", "left");
-            $(this).children('div.answers').css("padding-left", maxWidth + "px");
-        }
+function resizeQuestion(question) {
+    var maxWidth = 0;
+    var maxHeight = 0;
+    question.children('img').each(function() {
+        maxWidth = Math.max(maxWidth, question.width());
+        maxHeight = Math.max(maxHeight, question.outerHeight());
     });
 
-    calculateHotspotDimensions();
-    calculatePetriDimensions();
-    calculateCanvasDimensions();
+
+    if(maxWidth*100/$('.question:visible').width() > 80 || $('.question:visible').children('div.answers').outerHeight() > 2*maxHeight) {
+        question.children('img').css("float", "none");
+        question.children('div.answers').css("padding-left", "0");
+    }
+    else {
+        question.children('img').css("float", "left");
+        question.children('div.answers').css("padding-left", maxWidth + "px");
+    }
+
+    calculateHotspotDimension(question);
+    calculatePetriDimension(question);
+    calculateCanvasDimension(question);
 }
 
 
@@ -1921,39 +2019,42 @@ function calculateCanvasDimensions() {
     var root = $('[qtype="'+quizTypes.DRAW+'"]:visible');
 
     root.each(function(i,e) {
-        var div = $(this);
-        div.find('canvas').each(function(ii,ee) {
+        calculateCanvasDimension($(e));
+    });
+}
 
-            // canvas to scale
-            var canvas = $(this);
+function calculateCanvasDimension(div) {
+    if(!div.is('[qtype="'+quizTypes.DRAW+'"]:visible')) return;
+    div.find('canvas').each(function(ii,ee) {
+        // canvas to scale
+        var canvas = $(this);
 
-            // clear prev. timeouts if existent
-            if(this.redrawTimeout != undefined && this.redrawTimeout != null) {
-                clearTimeout(this.redrawTimeout);
-            }
+        // clear prev. timeouts if existent
+        if(this.redrawTimeout != undefined && this.redrawTimeout != null) {
+            clearTimeout(this.redrawTimeout);
+        }
 
-            // create new timeout
-            var timeout = setTimeout(function() {
-                // clone before resize
-                var oldCanvas = canvas[0];
-                var newCanvas = document.createElement('canvas');
-                var context = newCanvas.getContext('2d');
-                newCanvas.width = oldCanvas.width;
-                newCanvas.height = oldCanvas.height;
-                context.drawImage(oldCanvas, 0, 0);
+        // create new timeout
+        var timeout = setTimeout(function() {
+            // clone before resize
+            var oldCanvas = canvas[0];
+            var newCanvas = document.createElement('canvas');
+            var context = newCanvas.getContext('2d');
+            newCanvas.width = oldCanvas.width;
+            newCanvas.height = oldCanvas.height;
+            context.drawImage(oldCanvas, 0, 0);
 
-                // change dimensions
-                canvas.attr("width", canvas.width());
-                canvas.attr("height", canvas.height());
+            // change dimensions
+            canvas.attr("width", canvas.width());
+            canvas.attr("height", canvas.height());
 
-                // redraw frome cloned canvas
-                oldCanvas.getContext('2d').drawImage(newCanvas, 0, 0, canvas.width(), canvas.height());
-                $(newCanvas).remove();
-            }, 100);
+            // redraw frome cloned canvas
+            oldCanvas.getContext('2d').drawImage(newCanvas, 0, 0, canvas.width(), canvas.height());
+            $(newCanvas).remove();
+        }, 100);
 
-            // add this timeout to the element
-            this.redrawTimeout = timeout;
-        });
+        // add this timeout to the element
+        this.redrawTimeout = timeout;
     });
 }
 
