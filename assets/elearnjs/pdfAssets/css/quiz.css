@@ -8,3 +8,7 @@
 button.quizButton {
     display: none !important;
 }
+
+.question .feedback {
+    display: none;
+}

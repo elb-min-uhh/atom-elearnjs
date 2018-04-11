@@ -2,6 +2,8 @@
 * General:
     * Remove markdown attribute in HTML Output
     * Fix unhandled markdown in section name
+* PDF:
+    * Hide elearn.js Quiz Feedbacks in Output
 ## 0.2.5
 * General:
     * Add hints for backslash usage
