@@ -40,7 +40,9 @@ examples and detailed documentation.
     * Snippets for elearn.js elements
     * Live preview
 * _HTML and PDF_:
-    * Automated video and quiz detection to add elearn.js extensions
+    * Support for [timeSlider.js](https://github.com/elb-min-uhh/timeslider.js)
+        and [clickImage.js](https://github.com/elb-min-uhh/clickimage.js)
+    * Automated elearn.js extension detection to add scripts
     * Optional (automated) MathJax integration
 
 ## Known Issues
