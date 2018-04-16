@@ -1,3 +1,6 @@
+## 0.2.7
+* General:
+    * Updated elearn.js version to fix bugs
 ## 0.2.6
 * General:
     * Remove markdown attribute in HTML Output
