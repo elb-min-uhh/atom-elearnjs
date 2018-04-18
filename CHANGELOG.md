@@ -1,6 +1,7 @@
 ## 0.2.7
 * General:
     * Updated elearn.js version to fix bugs
+    * Support for _timeslider.js_ and _clickimage.js_
 ## 0.2.6
 * General:
     * Remove markdown attribute in HTML Output
