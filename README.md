@@ -50,10 +50,10 @@ examples and detailed documentation.
         horizontally)
         * Workaround: add forced page break
             `<div style="page-break-before: always;"></div>`
-    * _.woff_ fonts are not generally supported by _phantom.js_ which is used
-        in the _.pdf_ conversion process. Fonts might appear differently.
-        Consider using a _.tff_ overwrite in the PDF specific CSS file
-        (check the settings)
+* Windows:
+    * _.woff_ fonts are not supported by _phantom.js_, which is used
+    in the _.pdf_ conversion process. Fonts might appear differently.
+    Consider using a _.ttf_ in the PDF specific CSS file (check the settings)
 * Linux/Mac OS:
     * PDF output is zoomed
         * Workaround: zoom factor of ~0.7
