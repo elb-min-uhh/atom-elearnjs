@@ -26,7 +26,7 @@ All locations will be stored by their output _type_ and the _markdown file_
 and will only be overwritten when `Save as...` (described above) is used.
 
 Markdown syntax is supported based on [Showdown's](http://showdownjs.com/)
-features. If you want to use specific _elearn.js_ features check the 
+features. If you want to use specific _elearn.js_ features check the
 __Extended Documentation__.
 
 ## Extended Documentation
@@ -40,8 +40,6 @@ examples and detailed documentation.
     * Snippets for elearn.js elements
     * Live preview
 * _HTML and PDF_:
-    * Support for [timeSlider.js](https://github.com/elb-min-uhh/timeslider.js)
-        and [clickImage.js](https://github.com/elb-min-uhh/clickimage.js)
     * Automated elearn.js extension detection to add scripts
     * Optional (automated) MathJax integration
 
@@ -52,6 +50,10 @@ examples and detailed documentation.
         horizontally)
         * Workaround: add forced page break
             `<div style="page-break-before: always;"></div>`
+    * _.woff_ fonts are not generally supported by _phantom.js_ which is used
+        in the _.pdf_ conversion process. Fonts might appear differently.
+        Consider using a _.tff_ overwrite in the PDF specific CSS file
+        (check the settings)
 * Linux/Mac OS:
     * PDF output is zoomed
         * Workaround: zoom factor of ~0.7
