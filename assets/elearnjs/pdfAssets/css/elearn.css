@@ -6,13 +6,6 @@
 * v1.0.0 17/09/25 cc-by-sa
 */
 
-@font-face {
-    font-family: 'eLearn-Icons';
-    font-style: normal;
-    font-weight: normal;
-    src: url('../font/eLearn-Icons.ttf') format('truetype');
-}
-
 body {
     font-size: 12px;
     background: 0;
