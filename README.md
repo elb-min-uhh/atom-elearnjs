@@ -44,7 +44,6 @@ examples and detailed documentation.
     * Snippets for elearn.js elements
     * Live preview
 * _HTML and PDF_:
-    * Automated elearn.js extension detection to add scripts
     * Optional (automated) MathJax integration
 
 ## Known Issues
