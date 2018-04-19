@@ -38,6 +38,10 @@ __Extended Documentation__.
 Check our [wiki pages](https://github.com/elb-min-uhh/atom-elearnjs/wiki) for
 examples and detailed documentation.
 
+There are also
+[useful hints](https://github.com/elb-min-uhh/atom-elearnjs/wiki/Useful-Hints)
+for beginners or troubleshooting.
+
 ## Planned Features
 * _General_:
     * Syntax extensions for elearn.js elements
