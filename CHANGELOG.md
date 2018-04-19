@@ -1,3 +1,6 @@
+## 0.2.8
+* General:
+    * Supports more markdown syntax (strikethrough, tables, simple links)
 ## 0.2.7
 * General:
     * Selection of extensions whether to include them in an export or not
