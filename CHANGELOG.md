@@ -1,6 +1,10 @@
 ## 0.2.7
 * General:
-    * Updated elearn.js version to fix bugs
+    * Selection of extensions whether to include them in an export or not
+        * Per default the package will automatically detect which extensions
+        should be included
+    * Updated _elearn.js_ version to fix bugs
+    * Updated _elearnvideo.js_ and _quiz.js_ and fixed print bugs
     * Support for _timeslider.js_ and _clickimage.js_
 ## 0.2.6
 * General:
