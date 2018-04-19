@@ -4,6 +4,10 @@ This package converts Markdown files to HTML and PDF and is specifically
 designed to use [elearn.js](https://github.com/elb-min-uhh/elearn.js) for styling
 and interactive elements.
 
+Create a simple _elearn.js_ based script in no time!
+
+![atom-elearnjs Demo Video](/images/demo.gif)
+
 ## Installation
 
 Simply search for `atom-elearnjs` in Atom's Settings view to install this
