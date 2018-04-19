@@ -23,10 +23,11 @@
     display: none;
 }
 
-.show_all_notes {
-    display: none !important;
-}
 .user_notes,
 .user_notes * {
     display: none !important;
+}
+
+.video_notes_wrapper {
+    color: white;
 }
