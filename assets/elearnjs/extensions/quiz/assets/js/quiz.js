@@ -5,9 +5,10 @@
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
 
+var quizJS = quizJS || {};
 
 // Quiztypen. Benennung entspricht dem, was im HTML Attribut qtype angegeben ist.
-var quizTypes = {
+quizJS.quizTypes = {
     SHORT_TEXT : "short_text",
     CHOICE : "choice",
     FREE_TEXT : "free_text" ,
@@ -22,173 +23,23 @@ var quizTypes = {
     DRAW : "drawing"
 };
 
-var QuizJSOptions = function(timerAlertActive, timerAlertText) {
-    this.timerAlertActive = timerAlertActive;
-    this.timerAlertText = timerAlertText;
+quizJS.nextQuestionId = 0;
+quizJS.start_time = {};
+quizJS.passed_time = {};
+quizJS.questionVisibility = {};
 
-    this.setTimerAlert = function(bool, text) {
-        this.timerAlertActive = bool;
-        this.timerAlertText = text;
-    };
-
-    // --------------------------------------------------------------------------------------
-    // COPY QUESTION TO SHOW AGAIN
-    // --------------------------------------------------------------------------------------
-
-    /**
-    * Kopiert die Frage ohne Bestätigungsbuttons (reiner Fragekörper)
-    */
-    this.showQuestionHere = function(button) {
-        var self = this;
-
-        var id = $(button).attr("id").replace("_ref", "");
-
-        var orig = $('#'+id);
-
-        var div = orig.clone();
-        div.addClass("cloned");
-
-        // zählt immer als beantwortet
-        div.addClass("answered");
-
-        // hinweis, dass nicht veränderbar
-        div.find(".answered_hint").remove();
-        div.find("h4").after(
-            '<span class="answered_hint">Nicht änderbar, da die Frage bereits beantwortet wurde</span>');
-
-        var type = orig.attr("qtype");
-        // Verarbeiten der vorherigen Eingaben
-        if(type === quizTypes.FREE_TEXT) {
-            this.copyFreeText(div, orig);
-        }
-        else if(type === quizTypes.FILL_BLANK) {
-            this.copyFillBlank(div, orig);
-        }
-        else if(type === quizTypes.FILL_BLANK_CHOICE) {
-            this.copyFillBlankChoice(div, orig);
-        }
-        else if(type === quizTypes.HOTSPOT) {
-            this.copyHotspot(div);
-        }
-        else if(type === quizTypes.DRAW) {
-            this.copyDrawing(div, orig);
-        }
-
-        this.blockQuestion(div);
-
-
-        var hideButton = $('<button class="free_text_ref" id="'+id+'_ref">Ausblenden</button>');
-        hideButton.on('click', function(e) {
-            self.removeQuestionHere(hideButton);
-        })
-        $(button).before(div);
-        $(button).before(hideButton)
-        $(button).hide();
-    }
-
-    this.removeQuestionHere = function(button) {
-        $(button).prev().remove();
-        $(button).next().show();
-        $(button).remove();
-    }
-
-
-    this.copyFreeText = function(div, orig) {
-        div.find("textarea").val(orig.find("textarea").val());
-    }
-
-    this.copyFillBlank = function(div, orig) {
-        div.find("input").each(function(i, e) {
-            // Kopiert ausgewählten Wert
-            $(this).val($($(orig).find("input").get(i)).val());
-        });
-    }
-
-    this.copyFillBlankChoice = function(div, orig) {
-        div.find("select").each(function(i, e) {
-            // Kopiert ausgewählten Wert
-            $(this).val($($(orig).find("select").get(i)).val());
-        });
-    }
-
-
-    this.copyHotspot = function(div) {
-        // hover funktionen
-        div.find('.hotspot').mouseover(function(event) {
-            if($(this).find('.descr').children().length > 0) $(this).find('.descr').show();
-            calculateHotspotDescriptions($(this).closest('[qtype="'+quizTypes.HOTSPOT+'"]'));
-        });
-        div.find('.hotspot').mouseout(function(event) {
-            $(this).find('.descr').hide();
-        });
-    }
-
-    this.copyDrawing = function(div, orig) {
-        var canvas_orig = orig.find('.drawing_canvas_container').find('canvas.drawing_canvas.act')[0];
-        var canvas = div.find('.drawing_canvas_container').find('canvas.drawing_canvas.act')[0];
-
-        div.find('.drawing_canvas_container').find('canvas').not('.act').remove();
-
-        div.find('.button_container').remove();
-        div.find('.feedback.correct').show();
-
-        canvas.getContext('2d').drawImage(canvas_orig, 0, 0);
-    }
-
-    this.blockQuestion = function(div) {
-        div.addClass("answered");
-
-        var type = div.attr("qtype");
-
-        if(type === quizTypes.FREE_TEXT) {
-            div.find("textarea").attr("readonly", "readonly");
-        }
-        else if(type === quizTypes.SHORT_TEXT
-                || type === quizTypes.CHOICE
-                || type === quizTypes.FILL_BLANK
-                || type === quizTypes.MATRIX_CHOICE
-                || type == undefined) {
-            // Disabled jedes input
-            div.find("input").attr("disabled", true);
-        }
-        else if(type === quizTypes.FILL_BLANK_CHOICE) {
-            div.find("select").attr("disabled", true);
-        }
-        else if(type === quizTypes.CLASSIFICATION
-                || type === quizTypes.ORDER) {
-            div.find('.object').addClass("blocked");
-        }
-        else if(type === quizTypes.HOTSPOT) {
-            div.find('.hotspot').addClass("blocked");
-        }
-        else if(type === quizTypes.PETRI) {
-            div.find('.place').addClass("blocked");
-        }
-        else if(type === quizTypes.DRAW) {
-            div.find('.drawing_canvas_container').addClass("blocked");
-        }
-    }
-}
-
-var quizJS = new QuizJSOptions(false, "");
-
-// anonymous function, so functions cannot be used from console or by mistake
-(function() {
-
-var nextQuestionId = 0;
-var start_time = {};
-var passed_time = {};
-var questionVisibility = {};
+quizJS.timerAlertActive = false;
+quizJS.timerAlertText = "";
 
 /**
 * Aktiviert alle <button> mit der Klasse "quizButton" für das Quiz.
 * Wenn fragen <input> fokussiert ist, kann mit Enter die Antwort abgeschickt werden.
 */
 $(document).ready(function() {
-    initiateQuiz();
+    quizJS.initiateQuiz();
 
     // fallback for browsers who do not support IntersectionObservers, only for elearn.js
-    document.addEventListener("ejssectionchange", updateQuestionVisibility);
+    document.addEventListener("ejssectionchange", quizJS.updateQuestionVisibility);
 });
 
 
@@ -199,10 +50,10 @@ $(document).ready(function() {
 /**
 * Gibt zurück, ob alle sichtbaren Fragen beantwortet wurden. (bool)
 */
-function getVisibleQuestionsAnswered() {
+quizJS.getVisibleQuestionsAnswered = function() {
     return $('.question:visible').filter('.answered').length
             == $('.question:visible').length;
-}
+};
 
 
 // ------------------------------------------------------------
@@ -212,7 +63,7 @@ function getVisibleQuestionsAnswered() {
 /**
 * Diese Funktion initialisiert das Quiz.
 */
-function initiateQuiz() {
+quizJS.initiateQuiz = function() {
     // Keine Tastaturnavigation
     keyAllowed = false;
 
@@ -221,11 +72,11 @@ function initiateQuiz() {
         var div = $(this);
         if(div.attr('qtype') == undefined) {
             if(div.find('input[type="text"]').length > 0) {
-                div.attr('qtype', quizTypes.SHORT_TEXT);
+                div.attr('qtype', quizJS.quizTypes.SHORT_TEXT);
             }
             else if(div.find('input[type="checkbox"]').length > 0
                     || div.find('input[type="radio"]').length > 0) {
-                div.attr('qtype', quizTypes.CHOICE);
+                div.attr('qtype', quizJS.quizTypes.CHOICE);
             }
         }
     });
@@ -242,21 +93,21 @@ function initiateQuiz() {
     // Hide Weiter-Buttons
     $("button.weiter").hide();
 
-    windowResizing();
-    $(window).resize(function() {windowResizing()});
+    quizJS.windowResizing();
+    $(window).resize(function() {quizJS.windowResizing()});
 
-    shuffleAnswers();
-    replaceRandoms();
+    quizJS.shuffleAnswers();
+    quizJS.replaceRandoms();
 
     $(":button").filter(".quizButton").click(function() {
-        submitAns(this);
+        quizJS.submitAns(this);
     });
 
     // Submit with enter for every question possible
     $(".answers label").keyup(function(event) {
         if(event.which == 13) {
             var div = $(this).closest("div.question");
-            if(!div.is('[qtype="'+quizTypes.FREE_TEXT+'"]')) {
+            if(!div.is('[qtype="'+quizJS.quizTypes.FREE_TEXT+'"]')) {
                 div.next(':button').click();
             }
         }
@@ -264,30 +115,30 @@ function initiateQuiz() {
 
 
     // Fehlertext Buttons toggle
-    $(".error_button").click(function() { toggleErrorButton(this); });
+    $(".error_button").click(function() { quizJS.toggleErrorButton(this); });
 
     $("#neustart").click(function() {
-        resetQuiz();
+        quizJS.resetQuiz();
     });
 
-    addDragAndDropToClassification();
-    addDragAndDropToOrderObjects();
+    quizJS.addDragAndDropToClassification();
+    quizJS.addDragAndDropToOrderObjects();
 
-    resetQuiz();
+    quizJS.resetQuiz();
 
-    initiateChoice();
-    initiateFreeText();
-    initiateErrorText();
-    initiateMatrix();
-    initiateHotspotImage();
-    initiatePetriImage();
-    initiateDrawingCanvas();
+    quizJS.initiateChoice();
+    quizJS.initiateFreeText();
+    quizJS.initiateErrorText();
+    quizJS.initiateMatrix();
+    quizJS.initiateHotspotImage();
+    quizJS.initiatePetriImage();
+    quizJS.initiateDrawingCanvas();
 
-    initListeners();
-    initTimers();
-}
+    quizJS.initListeners();
+    quizJS.initTimers();
+};
 
-function initListeners() {
+quizJS.initListeners = function() {
     $('div.question').each(function(i, e) {
         const el = $(e);
         try {
@@ -300,7 +151,7 @@ function initListeners() {
             var observer = new IntersectionObserver(function(entries, observer) {
                 for(var i=0; i<entries.length; i++) {
                     var entry = entries[i];
-                    resizeQuestion($(entry.target));
+                    quizJS.resizeQuestion($(entry.target));
                 }
             }, options);
 
@@ -311,20 +162,20 @@ function initListeners() {
         // resizesensor as visibility listener this will only work with Chrome engine browsers
         try {
             new ResizeSensor(el, function(dim) {
-                resizeQuestion(el);
+                quizJS.resizeQuestion(el);
             });
         } catch(e) {
             // ignore;
         }
     });
-}
+};
 
 /**
 * Wird beim Bestätigen einer Antwort aufgeruffen.
 * @param button - ist der geklickte Button von dem aus die beantwortete Frage
 *                 bestimmt wird.
 */
-function submitAns(button, force) {
+quizJS.submitAns = function(button, force) {
     if($(button).filter(".weiter").length > 0) {
         button = $(button).prev(":button");
     }
@@ -332,14 +183,14 @@ function submitAns(button, force) {
 
     // Falls die Frage bereits beantwortet wurde, wird sie zurückgesetzt. (2. Button)
     if(div.is('.answered')) {
-        resetQuestion(div);
+        quizJS.resetQuestion(div);
         return;
     }
 
-    var c = elementsToTextArray(div.find("a.ans"));
+    var c = quizJS.elementsToTextArray(div.find("a.ans"));
 
     var labels = div.find('.answers').find('label');
-    deleteLabelColoring(labels);
+    quizJS.deleteLabelColoring(labels);
 
     var type = div.attr("qtype");
 
@@ -351,66 +202,66 @@ function submitAns(button, force) {
         type = labels.find('input').attr("type");
 
         if(type === "text") {
-            correct = getCorrectForText(labels, c);
+            correct = quizJS.getCorrectForText(labels, c);
         }
         else if (type === "radio" || type === "checkbox") {
-            correct = getCorrectForRadio(labels, c, true);
+            correct = quizJS.getCorrectForRadio(labels, c, true);
         }
     }
     // Für explizit definierten qtype
     else {
-        if(type === quizTypes.SHORT_TEXT) {
-            correct = getCorrectForText(labels, c, force);
+        if(type === quizJS.quizTypes.SHORT_TEXT) {
+            correct = quizJS.getCorrectForText(labels, c, force);
         }
-        else if(type === quizTypes.CHOICE) {
-            correct = getCorrectForRadio(labels, c, true, force);
+        else if(type === quizJS.quizTypes.CHOICE) {
+            correct = quizJS.getCorrectForRadio(labels, c, true, force);
         }
-        else if(type === quizTypes.FREE_TEXT) {
-            processFreeText(div);
+        else if(type === quizJS.quizTypes.FREE_TEXT) {
+            quizJS.processFreeText(div);
         }
-        else if(type === quizTypes.FILL_BLANK) {
+        else if(type === quizJS.quizTypes.FILL_BLANK) {
             var answers = div.find("a.ans");
-            correct = getCorrectFillBlank(labels, answers, force);
+            correct = quizJS.getCorrectFillBlank(labels, answers, force);
         }
-        else if(type === quizTypes.FILL_BLANK_CHOICE) {
+        else if(type === quizJS.quizTypes.FILL_BLANK_CHOICE) {
             var answers = div.find("a.ans");
-            correct = getCorrectFillBlankChoice(labels, answers, force);
+            correct = quizJS.getCorrectFillBlankChoice(labels, answers, force);
         }
-        else if(type === quizTypes.ERROR_TEXT) {
+        else if(type === quizJS.quizTypes.ERROR_TEXT) {
             var buttons = div.find(".error_button");
-            correct = getCorrectErrorText(buttons, c, force);
+            correct = quizJS.getCorrectErrorText(buttons, c, force);
         }
-        else if(type === quizTypes.CLASSIFICATION) {
+        else if(type === quizJS.quizTypes.CLASSIFICATION) {
             var dests = div.find(".destination");
             var answers = div.find("a.ans");
-            correct = getCorrectClassification(dests, answers, force);
+            correct = quizJS.getCorrectClassification(dests, answers, force);
             if(correct !== -1) {
                 div.find('.object').addClass("blocked");
             }
         }
-        else if(type === quizTypes.ORDER) {
+        else if(type === quizJS.quizTypes.ORDER) {
             var objects = div.find(".object").not(".destination");
             var answers = div.find("a.ans");
-            correct = getCorrectOrder(objects, answers, force);
+            correct = quizJS.getCorrectOrder(objects, answers, force);
             div.find('.object').addClass("blocked");
         }
-        else if(type === quizTypes.MATRIX_CHOICE) {
+        else if(type === quizJS.quizTypes.MATRIX_CHOICE) {
             var rows = div.find("tr");
             var answers = div.find("a.ans");
-            correct = getCorrectMatrixChoice(rows, answers, force);
+            correct = quizJS.getCorrectMatrixChoice(rows, answers, force);
         }
-        else if(type === quizTypes.HOTSPOT) {
+        else if(type === quizJS.quizTypes.HOTSPOT) {
             var hss = div.find('.hotspot');
             var gesucht = div.find('.gesucht').html();
             var answer = div.find('a.ans').filter('[id="'+gesucht+'"]');
-            correct = getCorrectHotspot(div, hss, answer, force);
+            correct = quizJS.getCorrectHotspot(div, hss, answer, force);
             hss.filter('.act').removeClass('act');
             if(correct !== -1 && correct !== true && correct !== 2) return;
         }
-        else if(type === quizTypes.PETRI) {
-            correct = processPetri(div, force);
+        else if(type === quizJS.quizTypes.PETRI) {
+            correct = quizJS.processPetri(div, force);
             if(div.is(".unbewertet")) {
-                deleteLabelColoring(div);
+                quizJS.deleteLabelColoring(div);
                 div.find('.feedback').hide();
             }
             if(!correct) {
@@ -418,8 +269,8 @@ function submitAns(button, force) {
                 return;
             }
         }
-        else if(type === quizTypes.DRAW) {
-            processDrawing(div);
+        else if(type === quizJS.quizTypes.DRAW) {
+            quizJS.processDrawing(div);
         }
     }
 
@@ -428,7 +279,7 @@ function submitAns(button, force) {
     }
 
     if(correct === -1) {
-        deleteLabelColoring(labels);
+        quizJS.deleteLabelColoring(labels);
         div.children("div.feedback").filter(".correct").hide();
         div.children("div.feedback").filter(".incorrect").hide();
         div.children("div.feedback").filter(".information").hide();
@@ -436,7 +287,7 @@ function submitAns(button, force) {
         return;
     }
     else if(div.is(".unbewertet")) {
-        deleteLabelColoring(div);
+        quizJS.deleteLabelColoring(div);
         div.children("div.feedback").filter(".noselection").hide();
         div.children("div.feedback").filter(".correct").hide();
         div.children("div.feedback").filter(".incorrect").hide();
@@ -476,7 +327,7 @@ function submitAns(button, force) {
 * Liest für ein <div> alle als korrekt angegebenen Antworten aus.
 * Diese sollten MD5 Verschlüsselt sein.
 */
-function elementsToTextArray(ans) {
+quizJS.elementsToTextArray = function(ans) {
     var c = [];
     ans.each(function(i) {
         c[c.length] = $(this).html();
@@ -494,12 +345,12 @@ function elementsToTextArray(ans) {
 *                            Es werden alle Antworten die richtigen Antworten auf die Frage grün gefärbt.
 *                            Fälschlicherweise angekreute Antworten werden rot markiert. Falsche und nicht angekreuzte Antworten bleiben weiß.
 */
-function getCorrectForRadio(labels, c, colorLabels, force) {
+quizJS.getCorrectForRadio = function(labels, c, colorLabels, force) {
     var correct = true;
     var numberofchecked = 0;
     labels.each(function(i) {
         var input = $(this).find('input');
-        var correctAnswer = contains(c, encryptMD5(input.val()));
+        var correctAnswer = quizJS.contains(c, quizJS.encryptMD5(input.val()));
 
         if(input.is(':checked')) {
             numberofchecked++;
@@ -540,11 +391,11 @@ function getCorrectForRadio(labels, c, colorLabels, force) {
 * Gibt zurück, ob die eingegebene Antwort zu den korrekten gehört.
 * -1 falls Textfeld leer.
 */
-function getCorrectForText(labels, c, force) {
+quizJS.getCorrectForText = function(labels, c, force) {
     var correct = true;
     var ans = labels.children('input').val().trim();
-    ans = encryptMD5(ans);
-    if(!contains(c, ans)) {
+    ans = quizJS.encryptMD5(ans);
+    if(!quizJS.contains(c, ans)) {
         correct = false;
     }
     if(labels.children('input').val().length == 0 && !force) {
@@ -567,7 +418,7 @@ function getCorrectForText(labels, c, force) {
 *
 * -1 falls nicht alle ausgefüllt
 */
-function getCorrectFillBlank(labels, answers, force) {
+quizJS.getCorrectFillBlank = function(labels, answers, force) {
     var correct = true;
 
     labels.each(function(i, e) {
@@ -575,23 +426,23 @@ function getCorrectFillBlank(labels, answers, force) {
         var id = input.attr("id");
 
         // alle richtigen antworten zu der ID
-        var cor = elementsToTextArray(answers.filter("#"+id));
-        var ans = encryptMD5(input.val().trim());
+        var cor = quizJS.elementsToTextArray(answers.filter("#"+id));
+        var ans = quizJS.encryptMD5(input.val().trim());
 
         // nicht ausgefüllt
         if(input.val().length == 0 && !force) {
             correct = -1;
-            deleteLabelColoring($(this).closest('.question'));
+            quizJS.deleteLabelColoring($(this).closest('.question'));
             return false;
         }
 
         // antwort richtig
-        if(contains(cor, ans) || cor.length == 0) {
+        if(quizJS.contains(cor, ans) || cor.length == 0) {
             $(this).addClass("right");
             $(this).addClass("right_icon");
         }
         // antwort falsch
-        else if(!contains(cor, ans)) {
+        else if(!quizJS.contains(cor, ans)) {
             correct = false;
             $(this).addClass("wrong");
             $(this).addClass("wrong_icon");
@@ -599,7 +450,7 @@ function getCorrectFillBlank(labels, answers, force) {
     });
 
     return correct;
-}
+};
 
 
 /**
@@ -607,7 +458,7 @@ function getCorrectFillBlank(labels, answers, force) {
 *
 * kann nicht unbeantwortet sein
 */
-function getCorrectFillBlankChoice(labels, answers, force) {
+quizJS.getCorrectFillBlankChoice = function(labels, answers, force) {
     var correct = true;
 
     labels.each(function(i, e) {
@@ -615,16 +466,16 @@ function getCorrectFillBlankChoice(labels, answers, force) {
         var id = select.attr("id");
 
         // alle richtigen antworten zu der ID
-        var cor = elementsToTextArray(answers.filter("#"+id));
-        var ans = encryptMD5(select.val());
+        var cor = quizJS.elementsToTextArray(answers.filter("#"+id));
+        var ans = quizJS.encryptMD5(select.val());
 
         // antwort richtig
-        if(contains(cor, ans) || cor.length == 0) {
+        if(quizJS.contains(cor, ans) || cor.length == 0) {
             $(this).addClass("right");
             $(this).addClass("right_icon");
         }
         // antwort falsch
-        else if(!contains(cor, ans)) {
+        else if(!quizJS.contains(cor, ans)) {
             correct = false;
             $(this).addClass("wrong");
             $(this).addClass("wrong_icon");
@@ -632,7 +483,7 @@ function getCorrectFillBlankChoice(labels, answers, force) {
     });
 
     return correct;
-}
+};
 
 
 /**
@@ -640,23 +491,23 @@ function getCorrectFillBlankChoice(labels, answers, force) {
 *
 * Kann nicht unausgefüllt sein
 */
-function getCorrectErrorText(buttons, c, force) {
+quizJS.getCorrectErrorText = function(buttons, c, force) {
     var correct = true;
 
     buttons.each(function(i, e) {
-        var ans = encryptMD5($(this).text());
+        var ans = quizJS.encryptMD5($(this).text());
 
         var act = $(this).is(".act");
 
         // Wort markiert und in Antworten enthalten
-        if((contains(c, ans) && act)
-            || (!contains(c, ans) && !act)) {
+        if((quizJS.contains(c, ans) && act)
+            || (!quizJS.contains(c, ans) && !act)) {
             // richtig
             $(this).closest('label').addClass("right");
             $(this).closest('label').addClass("right_icon");
         }
         // Nicht markiert oder nicht in Antworten
-        else if(!contains(c, ans) ^ !act) {
+        else if(!quizJS.contains(c, ans) ^ !act) {
             // falsch
             correct = false;
             $(this).closest('label').addClass("wrong");
@@ -665,7 +516,7 @@ function getCorrectErrorText(buttons, c, force) {
     });
 
     return correct;
-}
+};
 
 
 /**
@@ -673,13 +524,13 @@ function getCorrectErrorText(buttons, c, force) {
 *
 * -1 falls eines der Ziele nicht gefüllt
 */
-function getCorrectClassification(dests, answers, force) {
+quizJS.getCorrectClassification = function(dests, answers, force) {
     var correct = true;
 
     // nicht min. 1 platziert
     if(dests.filter('.full').length == 0 && answers.length != 0 && !force) {
         correct = -1;
-        deleteLabelColoring($(this).closest('.question'));
+        quizJS.deleteLabelColoring($(this).closest('.question'));
         return correct;
     }
 
@@ -688,17 +539,17 @@ function getCorrectClassification(dests, answers, force) {
         var id = dest.attr("id");
 
         // alle richtigen antworten zu der ID
-        var cor = elementsToTextArray(answers.filter("#"+id));
+        var cor = quizJS.elementsToTextArray(answers.filter("#"+id));
 
-        var ans = encryptMD5(dest.children().attr("id"));
+        var ans = quizJS.encryptMD5(dest.children().attr("id"));
 
         // antwort richtig
-        if(contains(cor, ans) || cor.length == 0) {
+        if(quizJS.contains(cor, ans) || cor.length == 0) {
             $(this).addClass("right");
             $(this).addClass("right_icon");
         }
         // antwort falsch
-        else if(!contains(cor, ans)) {
+        else if(!quizJS.contains(cor, ans)) {
             correct = false;
             $(this).addClass("wrong");
             $(this).addClass("wrong_icon");
@@ -706,7 +557,7 @@ function getCorrectClassification(dests, answers, force) {
     });
 
     return correct;
-}
+};
 
 
 /**
@@ -714,7 +565,7 @@ function getCorrectClassification(dests, answers, force) {
 *
 * Kann nicht unausgefüllt sein
 */
-function getCorrectOrder(objects, answers, force) {
+quizJS.getCorrectOrder = function(objects, answers, force) {
     var correct = true;
     var index = 0;
 
@@ -727,12 +578,12 @@ function getCorrectOrder(objects, answers, force) {
         // correct position is same or next active index
 
         // same position
-        if(encryptMD5(""+index) == cor) {
+        if(quizJS.encryptMD5(""+index) == cor) {
             $(this).addClass("right");
             $(this).addClass("right_icon");
         }
         // antwort richtig
-        else if(encryptMD5(""+(index+1)) == cor) {
+        else if(quizJS.encryptMD5(""+(index+1)) == cor) {
             index++;
             $(this).addClass("right");
             $(this).addClass("right_icon");
@@ -746,20 +597,20 @@ function getCorrectOrder(objects, answers, force) {
     });
 
     return correct;
-}
+};
 
 /**
 * Matrix (single/multiple) choice
 *
 * -1 wenn nicht in jeder Zeile mindest eines ausgewählt
 */
-function getCorrectMatrixChoice(rows, answers, force) {
+quizJS.getCorrectMatrixChoice = function(rows, answers, force) {
     var correct = true;
 
     rows.each(function(i, e) {
         var row = $(this);
         var id = row.attr("id");
-        var cor = elementsToTextArray(answers.filter("#"+id)); // Mehrere Antworten können vorhanden sein
+        var cor = quizJS.elementsToTextArray(answers.filter("#"+id)); // Mehrere Antworten können vorhanden sein
 
         var inputs = row.find("input"); // alle Inputs der Zeile
 
@@ -767,17 +618,17 @@ function getCorrectMatrixChoice(rows, answers, force) {
         if(inputs.length > 0 && inputs.filter(':checked').length == 0
             && !force) {
             correct = -1;
-            deleteLabelColoring($(this).closest('.question'));
+            quizJS.deleteLabelColoring($(this).closest('.question'));
             return false;
         }
 
         inputs.each(function(ii, ee) {
             var ans = $(rows.find(".antwort").get(ii)).attr("id");
-            ans = encryptMD5(ans);
+            ans = quizJS.encryptMD5(ans);
 
             // ausgewählt und richtig oder nicht ausgewählt und nicht richtig (insg richtig)
-            if(($(ee).is(":checked") && contains(cor, ans))
-                || (!$(ee).is(":checked") && !contains(cor, ans))) {
+            if(($(ee).is(":checked") && quizJS.contains(cor, ans))
+                || (!$(ee).is(":checked") && !quizJS.contains(cor, ans))) {
             }
             // falsch
             else {
@@ -785,7 +636,7 @@ function getCorrectMatrixChoice(rows, answers, force) {
             }
 
             // should be checked
-            if(contains(cor, ans)) {
+            if(quizJS.contains(cor, ans)) {
                 $(this).closest('label').addClass("right_icon");
 
                 if($(ee).is(":checked")) $(this).closest('label').addClass("right");
@@ -802,10 +653,10 @@ function getCorrectMatrixChoice(rows, answers, force) {
     });
 
     return correct;
-}
+};
 
 
-function getCorrectHotspot(div, hss, answer, force) {
+quizJS.getCorrectHotspot = function(div, hss, answer, force) {
     var finished = false;
 
     // nichts ausgewählt
@@ -814,7 +665,7 @@ function getCorrectHotspot(div, hss, answer, force) {
     }
     else {
         var ans = hss.filter('.act').attr('id');
-        ans = encryptMD5(ans);
+        ans = quizJS.encryptMD5(ans);
 
         var correct = ans == answer.html();
         var cl = "cor";
@@ -838,19 +689,19 @@ function getCorrectHotspot(div, hss, answer, force) {
         }
 
 
-        finished = !hotspotNextObject(div);
+        finished = !quizJS.hotspotNextObject(div);
 
         if(finished) {
-            findCorrectsHotspot(div);
+            quizJS.findCorrectsHotspot(div);
             // for information show
             finished = 2;
         }
     }
     return finished;
-}
+};
 
 
-function getCorrectPetri(div, places, answers, force) {
+quizJS.getCorrectPetri = function(div, places, answers, force) {
 
     // nichts ausgewählt
     if(places.filter('.act').length == 0 && !force) {
@@ -859,15 +710,15 @@ function getCorrectPetri(div, places, answers, force) {
     else {
         correct = true;
         var ans_id = div.find('.petri_image').find('img:visible').attr('id');
-        var c = elementsToTextArray(answers.filter('#'+ans_id));
+        var c = quizJS.elementsToTextArray(answers.filter('#'+ans_id));
 
         places.each(function(i,e) {
             var ans = $(this).attr('id');
-            ans = encryptMD5(ans);
+            ans = quizJS.encryptMD5(ans);
 
             // markiert und richtig
-            if(($(this).is(".act") && contains(c, ans))
-                || (!$(this).is(".act") && !contains(c, ans))) {
+            if(($(this).is(".act") && quizJS.contains(c, ans))
+                || (!$(this).is(".act") && !quizJS.contains(c, ans))) {
                 $(this).addClass("right");
                 $(this).addClass("right_icon");
             }
@@ -892,21 +743,21 @@ function getCorrectPetri(div, places, answers, force) {
         div.addClass("show_feedback");
     }
     return false;
-}
+};
 
 // --------------------------------------------------------------------------------------
 // PROCESS ANSWER
 // --------------------------------------------------------------------------------------
 
 
-function processFreeText(div) {
+quizJS.processFreeText = function(div) {
     // do nothing
-}
+};
 
 /**
 * Verarbeiten des "Lösen" Knopfes in einer Petri-Netz Aufgabe
 */
-function processPetri(div, force) {
+quizJS.processPetri = function(div, force) {
     var places = div.find('.place');
 
     var correct = 0;
@@ -914,13 +765,13 @@ function processPetri(div, force) {
     // after answer
     if(div.is('.show_feedback')) {
         div.removeClass("show_feedback");
-        petriNextPart(div);
-        if(petriFinished(div)) {
+        quizJS.petriNextPart(div);
+        if(quizJS.petriFinished(div)) {
             // for information show
             correct = 2;
         }
         else {
-            deleteLabelColoring(places);
+            quizJS.deleteLabelColoring(places);
             places.filter('.act').removeClass('act');
             correct = false;
         }
@@ -928,29 +779,29 @@ function processPetri(div, force) {
     // before answer - when answering
     else {
         var answers = div.find('a.ans');
-        correct = getCorrectPetri(div, places, answers, force);
+        correct = quizJS.getCorrectPetri(div, places, answers, force);
         if(correct != -1) {
-            petriShowCorrectBG(div);
+            quizJS.petriShowCorrectBG(div);
             correct = false;
         }
     }
 
     return correct;
-}
+};
 
-function processDrawing(div) {
+quizJS.processDrawing = function(div) {
     div.find('.drawing_canvas_container').addClass("blocked");
-}
+};
 
 // --------------------------------------------------------------------------------------
 
-function finishQuestion(div) {
+quizJS.finishQuestion = function(div) {
     var try_count = 50;
     while(!div.is(".answered") && try_count > 0) {
-        submitAns(div.next('button'), true);
+        quizJS.submitAns(div.next('button'), true);
         try_count -= 1;
     }
-}
+};
 
 
 
@@ -959,8 +810,8 @@ function finishQuestion(div) {
 // --------------------------------------------------------------------------------------
 
 // changes type to multiple/single if .answers has class .multiple or .single
-function initiateChoice() {
-    var root = $('[qtype="'+quizTypes.CHOICE+'"]');
+quizJS.initiateChoice = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.CHOICE+'"]');
 
     root.each(function(i,e) {
         var div = $(this);
@@ -984,36 +835,36 @@ function initiateChoice() {
             }
         });
     });
-}
+};
 
 
 // --------------------------------------------------------------------------------------
 // FREE TEXT
 // --------------------------------------------------------------------------------------
 
-function initiateFreeText() {
-    var root = $('[qtype="'+quizTypes.FREE_TEXT+'"]');
+quizJS.initiateFreeText = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.FREE_TEXT+'"]');
 
     root.addClass("unbewertet");
-}
+};
 
 
 // --------------------------------------------------------------------------------------
 // ERROR TEXT (Buttons)
 // --------------------------------------------------------------------------------------
 
-function initiateErrorText() {
-    var root = $('[qtype="'+quizTypes.ERROR_TEXT+'"]');
+quizJS.initiateErrorText = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.ERROR_TEXT+'"]');
 
     root.find('.error_button').wrap("<label></label>");
-}
+};
 
 // --------------------------------------------------------------------------------------
 // MATRIX
 // --------------------------------------------------------------------------------------
 
-function initiateMatrix() {
-    var root = $('[qtype="'+quizTypes.MATRIX_CHOICE+'"]');
+quizJS.initiateMatrix = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.MATRIX_CHOICE+'"]');
 
     root.find('input').wrap("<label></label>");
 
@@ -1048,7 +899,7 @@ function initiateMatrix() {
         // set type
         ans.find('input').attr("type", type);
     });
-}
+};
 
 // --------------------------------------------------------------------------------------
 // DRAG AND DROP FUNCTIONS
@@ -1057,113 +908,113 @@ function initiateMatrix() {
 
 
 
-var draggedObjects = null;
-var startedObject = null;
+quizJS.draggedObjects = null;
+quizJS.startedObject = null;
 
 // CLASSIFICATION
 
 /**
 * Jedes Object kann gedragt und gedropt werden in jedem Object.
 */
-function addDragAndDropToClassification() {
-    var root = $('[qtype="'+quizTypes.CLASSIFICATION+'"]');
+quizJS.addDragAndDropToClassification = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.CLASSIFICATION+'"]');
     root.find('.object').attr("draggable", "true");
     root.find('.object').on("dragstart", function(event) {
-        dragObject(event.originalEvent);
+        quizJS.dragObject(event.originalEvent);
     });
     root.find('.object').on("dragover", function(event) {
-        allowObjectDrop(event.originalEvent);
+        quizJS.allowObjectDrop(event.originalEvent);
     });
     root.find('.object').on("drop", function(event) {
-        dropObject(event.originalEvent);
+        quizJS.dropObject(event.originalEvent);
     });
 
     root.find('.object').on("dragend", function(event) {
-        dragReset(event.originalEvent);
+        quizJS.dragReset(event.originalEvent);
     });
 
     root.find('.object').on("dragenter", function(event) {
-        draggedOver(event.originalEvent);
+        quizJS.draggedOver(event.originalEvent);
     });
     root.find('.object').on("dragleave", function(event) {
-        draggedOut(event.originalEvent);
+        quizJS.draggedOut(event.originalEvent);
     });
 
     // mobile unterstützung / Klick-Fallback. Auch am Desktop möglich
     root.find('.object').on("click", function(event) {
-        if(startedObject == null) {
-            dragObject(event.originalEvent);
+        if(quizJS.startedObject == null) {
+            quizJS.dragObject(event.originalEvent);
         }
         else {
-            dropObject(event.originalEvent);
-            dragReset(event.originalEvent);
+            quizJS.dropObject(event.originalEvent);
+            quizJS.dragReset(event.originalEvent);
         }
     });
 
-}
+};
 
 
 // ORDER
 
-function addDragAndDropToOrderObjects() {
-    var root = $('[qtype="'+quizTypes.ORDER+'"]');
+quizJS.addDragAndDropToOrderObjects = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.ORDER+'"]');
     root.find('.object').attr("draggable", "true");
     root.find('.object').on("dragstart", function(event) {
-        dragObject(event.originalEvent);
+        quizJS.dragObject(event.originalEvent);
     });
 
     root.find('.object').on("dragend", function(event) {
-        dragReset(event.originalEvent);
+        quizJS.dragReset(event.originalEvent);
     });
 
 
     // mobile unterstützung / Klick-Fallback. Auch am Desktop möglich
     root.find('.object').on("click", function(event) {
-        if(startedObject == null) {
-            dragObject(event.originalEvent);
+        if(quizJS.startedObject == null) {
+            quizJS.dragObject(event.originalEvent);
         }
         else {
-            dragReset(event.originalEvent);
+            quizJS.dragReset(event.originalEvent);
         }
     });
 
-    addDragAndDropToOrderDestinations(root);
-}
+    quizJS.addDragAndDropToOrderDestinations(root);
+};
 
-function addDragAndDropToOrderDestinations(root) {
+quizJS.addDragAndDropToOrderDestinations = function(root) {
     root.find('.object').after(
         "<div class='object destination'></div>");
     root.find('.object').first().before(
         "<div class='object destination'></div>");
 
     root.find('.destination').on("dragover", function(event) {
-        allowObjectDrop(event.originalEvent);
+        quizJS.allowObjectDrop(event.originalEvent);
     });
     root.find('.destination').on("drop", function(event) {
-        dropObject(event.originalEvent);
+        quizJS.dropObject(event.originalEvent);
     });
 
     root.find('.destination').on("dragend", function(event) {
-        dragReset(event.originalEvent);
+        quizJS.dragReset(event.originalEvent);
     });
 
     root.find('.destination').on("dragenter", function(event) {
-        draggedOver(event.originalEvent);
+        quizJS.draggedOver(event.originalEvent);
     });
     root.find('.destination').on("dragleave", function(event) {
-        draggedOut(event.originalEvent);
+        quizJS.draggedOut(event.originalEvent);
     });
 
     // mobile unterstützung / Klick-Fallback. Auch am Desktop möglich
     root.find('.destination').on("click", function(event) {
-        if(startedObject == null) {
+        if(quizJS.startedObject == null) {
         }
         else {
-            dropObject(event.originalEvent);
-            dragReset(event.originalEvent);
+            quizJS.dropObject(event.originalEvent);
+            quizJS.dragReset(event.originalEvent);
         }
     });
-}
+};
 
 
 // DRAG & DROP --------------------------
@@ -1172,7 +1023,7 @@ function addDragAndDropToOrderDestinations(root) {
 /**
 * Fügt dem Datentransfer alle zu verschiebenen Objekte hinzu
 */
-function dragObject(e) {
+quizJS.dragObject = function(e) {
     // get type
     var type = $(e.target).closest(".question").attr("qtype");
 
@@ -1187,17 +1038,17 @@ function dragObject(e) {
         // do nothing
     }
 
-    if(type === quizTypes.CLASSIFICATION) {
+    if(type === quizJS.quizTypes.CLASSIFICATION) {
         // Falls noch nicht benutzt
         if(!$(target).is(".used") && !$(target).is(".blocked")) {
-            draggedObjects = $(target).children();
-            startedObject = $(target);
+            quizJS.draggedObjects = $(target).children();
+            quizJS.startedObject = $(target);
             $(target).css("opacity", "0.4");
             $(target).css("background", "#888");
             $(target).closest(".answers").find(".destination").not(".full").addClass("emph");
 
             $(target).closest(".question").find(".object.used").each(function(i,e) {
-                if($(this).children().attr("id") == draggedObjects.attr("id")) {
+                if($(this).children().attr("id") == quizJS.draggedObjects.attr("id")) {
                     $(this).addClass("emph");
                 }
             });
@@ -1206,9 +1057,9 @@ function dragObject(e) {
             e.preventDefault();
         }
     }
-    else if(type === quizTypes.ORDER) {
+    else if(type === quizJS.quizTypes.ORDER) {
         if(!$(target).is(".blocked")) {
-            startedObject = $(target);
+            quizJS.startedObject = $(target);
             $(target).css("opacity", "0.4");
             $(target).css("background", "#888");
             setTimeout(function() {
@@ -1228,100 +1079,100 @@ function dragObject(e) {
         }
     }
 
-}
+};
 
 
 /**
 * Verhindert Standardfunktionen
 */
-function allowObjectDrop(e) {
+quizJS.allowObjectDrop = function(e) {
     e.preventDefault();
-}
+};
 
 /**
 * Verschiebt alle Objekte in das Ziel
 */
-function dropObject(e) {
+quizJS.dropObject = function(e) {
     // get type
     var type = $(e.target).closest(".question").attr("qtype");
 
     var target = $(e.target).closest('.object')[0];
 
-    if(type === quizTypes.CLASSIFICATION) {
-        var dragBackToStart = draggedObjects.attr('id') == $(target).children().attr('id');
+    if(type === quizJS.quizTypes.CLASSIFICATION) {
+        var dragBackToStart = quizJS.draggedObjects.attr('id') == $(target).children().attr('id');
 
         // Ablegen an freiem Platz aus StartObjekt (!= Zielobjekt)
-        if(!startedObject.is(".destination")
+        if(!quizJS.startedObject.is(".destination")
                 && $(target).is(".object.destination")
                 && $(target).is(".object")
                 && !$(target).is(".full")
                 && !$(target).is(".blocked")) {
             e.preventDefault();
-            startedObject.addClass("used");
-            $(target).append(draggedObjects.clone());
+            quizJS.startedObject.addClass("used");
+            $(target).append(quizJS.draggedObjects.clone());
             $(target).addClass("full");
-            dragReset();
+            quizJS.dragReset();
         }
         // Ablegen an freiem Platz aus Zielobjekt (verschieben)
-        else if(startedObject.is(".destination")
+        else if(quizJS.startedObject.is(".destination")
                 && $(target).is(".object.destination")
                 && !$(target).is(".full")
                 && !dragBackToStart
                 && !$(target).is(".blocked")) {
-            startedObject.removeClass("full");
-            $(target).append(draggedObjects);
+            quizJS.startedObject.removeClass("full");
+            $(target).append(quizJS.draggedObjects);
             $(target).addClass("full");
-            dragReset();
+            quizJS.dragReset();
         }
         // Zurücklegen an ursprünglichen Ort
         else if($(target).is(".object") && $(target).is(".used")
             && dragBackToStart
             && !$(target).is(".blocked")) {
-            startedObject.removeClass("full");
-            draggedObjects.remove();
+            quizJS.startedObject.removeClass("full");
+            quizJS.draggedObjects.remove();
             $(target).removeClass("used");
-            dragReset();
+            quizJS.dragReset();
         }
     }
-    else if(type === quizTypes.ORDER) {
-        $(target).after(startedObject);
+    else if(type === quizJS.quizTypes.ORDER) {
+        $(target).after(quizJS.startedObject);
 
         var root = $(target).closest(".question");
         root.find(".destination").remove();
 
-        addDragAndDropToOrderDestinations(root);
-        dragReset();
+        quizJS.addDragAndDropToOrderDestinations(root);
+        quizJS.dragReset();
     }
-}
+};
 
 /**
 * Setzt Sachen zurück die während des Dragvorgangs verwendet werden.
 */
-function dragReset(e) {
+quizJS.dragReset = function(e) {
     // remove emphasis
     if(e != undefined) $(e.target).closest(".answers").find(".emph").removeClass("emph");
 
     $('.draggedover').removeClass("draggedover");
     $(".object").css("opacity", "");
     $(".object").css("background", "");
-    $('.question[qtype="'+quizTypes.ORDER+'"]').find(".destination").removeClass("vis");
-    draggedObjects = null;
-    startedObject = null;
-}
+    $('.question[qtype="'+quizJS.quizTypes.ORDER+'"]').find(".destination").removeClass("vis");
+    quizJS.draggedObjects = null;
+    quizJS.startedObject = null;
+};
 
-function draggedOver(e) {
+quizJS.draggedOver = function(e) {
     var target = $(e.target).closest('.object')[0];
     // Leer oder zurücklegen zur Ursprungsort
     if(!$(target).is(".full")
-        || draggedObjects == $(target).children()) $(target).addClass("draggedover");
-}
+        || quizJS.draggedObjects == $(target).children()) $(target).addClass("draggedover");
+};
 
-function draggedOut(e) {
+quizJS.draggedOut = function(e) {
     var target = $(e.target).closest('.object')[0];
     // Leer oder zurücklegen zur Ursprungsort
     if(!$(target).is(".full")
-        || draggedObjects == $(target).children()) $(target).removeClass("draggedover");
-}
+        || quizJS.draggedObjects == $(target).children()) $(target).removeClass("draggedover");
+};
 
 
 
@@ -1330,10 +1181,10 @@ function draggedOut(e) {
 // HOTSPOT
 // --------------------------------------------------------------------------------------
 
-var activeElement = 0;
+quizJS.activeElement = 0;
 
-function initiateHotspotImage() {
-    var root = $('[qtype="'+quizTypes.HOTSPOT+'"]');
+quizJS.initiateHotspotImage = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]');
 
     // Descr (richtige und falsche antworten) hinzufügen
     root.find('.hotspot').append('<div class="descr"></div>')
@@ -1341,7 +1192,7 @@ function initiateHotspotImage() {
     // hover funktionen
     root.find('.hotspot').mouseover(function(event) {
         if($(this).find('.descr').children().length > 0) $(this).find('.descr').show();
-        calculateHotspotDescriptions($(this).closest('[qtype="'+quizTypes.HOTSPOT+'"]'));
+        quizJS.calculateHotspotDescriptions($(this).closest('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]'));
     });
     root.find('.hotspot').mouseout(function(event) {
         $(this).find('.descr').hide();
@@ -1350,55 +1201,55 @@ function initiateHotspotImage() {
 
     // Klicken auf Hotspot
     root.find('.hotspot').click(function() {
-        hotspotClick($(this));
+        quizJS.hotspotClick($(this));
     });
 
 
     // zeigt erstes gesuchtes objekt in .gesucht an
     root.each(function(i,e) {
-        hotspotNextObject($(e));
+        quizJS.hotspotNextObject($(e));
     });
 
     // berechnet Größe der Hotspots
-    calculateHotspotDimensions();
-}
+    quizJS.calculateHotspotDimensions();
+};
 
 
-function hotspotClick(hs) {
+quizJS.hotspotClick = function(hs) {
     if(!hs.is('.blocked')) {
-        hs.closest('[qtype="'+quizTypes.HOTSPOT+'"]').find('.hotspot').removeClass("act");
+        hs.closest('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]').find('.hotspot').removeClass("act");
         hs.addClass("act");
     }
-}
+};
 
 /**
 * Setzt in .gesucht das nächste Gesuchte Objekt ein
 * gibt zurück ob ein nicht beantwortetes Objekt gefunden wurde (bool)
 */
-function hotspotNextObject(root) {
+quizJS.hotspotNextObject = function(root) {
     var doShuffle = root.find('.hotspot_image').is('.shuffle');
 
     var ans = root.find('a.ans').not('.used');
     if(doShuffle) {
-        shuffle(ans);
+        quizJS.shuffle(ans);
     }
 
     root.find('.gesucht').html(ans.first().attr('id'));
     ans.first().addClass("used");
 
     return ans.length > 0;
-}
+};
 
-function calculateHotspotDimensions() {
-    var root = $('[qtype="'+quizTypes.HOTSPOT+'"]');
+quizJS.calculateHotspotDimensions = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]');
 
     root.each(function(i, e) {
-        calculateHotspotDimension($(e));
+        quizJS.calculateHotspotDimension($(e));
     });
-}
+};
 
-function calculateHotspotDimension(question) {
-    if(!question.is('[qtype="'+quizTypes.HOTSPOT+'"]')) return;
+quizJS.calculateHotspotDimension = function(question) {
+    if(!question.is('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]')) return;
     var imgWidth = question.find('.hotspot_image').width();
     var width = imgWidth * 0.05;
 
@@ -1408,9 +1259,9 @@ function calculateHotspotDimension(question) {
         "margin-top": "-" + (width/2) + "px",
         "margin-left": "-" + (width/2) + "px"
     });
-}
+};
 
-function calculateHotspotDescriptions(root) {
+quizJS.calculateHotspotDescriptions = function(root) {
     var descr_margin = {
         top : 5,
         left : 0
@@ -1462,14 +1313,14 @@ function calculateHotspotDescriptions(root) {
             }
         });
     });
-}
+};
 
-function blockHotspot(div) {
+quizJS.blockHotspot = function(div) {
     div.find('.hotspot').addClass('blocked');
-}
+};
 
 
-function findCorrectsHotspot(div) {
+quizJS.findCorrectsHotspot = function(div) {
     var hss = div.find('.hotspot');
     var ans = div.find('a.ans');
 
@@ -1478,7 +1329,7 @@ function findCorrectsHotspot(div) {
         // bisher nicht korrekt
         if(hs.find('.cor').length == 0) {
             var id = hs.attr("id");
-            var enc = encryptMD5(id);
+            var enc = quizJS.encryptMD5(id);
 
             ans.each(function(ii, ee) {
                 // korrekte antwort
@@ -1488,14 +1339,14 @@ function findCorrectsHotspot(div) {
             });
         }
     });
-}
+};
 
 
 
 // ---------------------------------- PETRI IMAGE --------------------------------------
 
-function initiatePetriImage() {
-    var root = $('[qtype="'+quizTypes.PETRI+'"]');
+quizJS.initiatePetriImage = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.PETRI+'"]');
 
     root.each(function(i,e) {
         var div = $(this);
@@ -1512,16 +1363,16 @@ function initiatePetriImage() {
 
         // Klicken auf Hotspot
         div.find('.place').click(function() {
-            petriClick($(this));
+            quizJS.petriClick($(this));
         });
 
         // berechnet Größe der Plätze
-        calculatePetriDimensions();
+        quizJS.calculatePetriDimensions();
     });
-}
+};
 
 
-function petriClick(element) {
+quizJS.petriClick = function(element) {
     var div = element.closest('.question');
     if(!element.is(".blocked") && !div.is('.show_feedback')) {
         if(element.is(".act")) {
@@ -1531,9 +1382,9 @@ function petriClick(element) {
             element.addClass("act");
         }
     }
-}
+};
 
-function petriShowCorrectBG(div) {
+quizJS.petriShowCorrectBG = function(div) {
     var imgs = div.find('.petri_image').find('img.correct');
 
     var act_img = div.find('.petri_image').find('img:visible');
@@ -1544,9 +1395,9 @@ function petriShowCorrectBG(div) {
         act_img.hide();
         cor_img.show();
     }
-}
+};
 
-function petriNextImage(div) {
+quizJS.petriNextImage = function(div) {
     var imgs = div.find('.petri_image').find('img').not('.correct');
 
     var act_img = div.find('.petri_image').find('img:visible');
@@ -1559,21 +1410,21 @@ function petriNextImage(div) {
         act_img.hide();
         next_img.show();
     }
-}
+};
 
-function petriNextAufgabenImage(div) {
+quizJS.petriNextAufgabenImage = function(div) {
     div.find('.petri_aufgabe').find('img').hide();
     div.find('.petri_aufgabe').find('#'+div.find('.petri_image').find('img:visible').attr("id")).show();
-}
+};
 
-function petriNextPart(div) {
+quizJS.petriNextPart = function(div) {
     div.find('.feedback').hide();
-    petriNextImage(div);
-    petriNextAufgabenImage(div);
+    quizJS.petriNextImage(div);
+    quizJS.petriNextAufgabenImage(div);
     div.find('.gesucht').html(div.find('.petri_image').find('img:visible').attr("task"));
-}
+};
 
-function petriFinished(div) {
+quizJS.petriFinished = function(div) {
     var finished = false;
 
     var act_img = div.find('.petri_image').find('img:visible');
@@ -1585,23 +1436,23 @@ function petriFinished(div) {
     }
 
     return finished;
-}
+};
 
-function blockPetri(div) {
+quizJS.blockPetri = function(div) {
     div.find('.place').addClass("blocked");
-}
+};
 
 
-function calculatePetriDimensions() {
-    var root = $('[qtype="'+quizTypes.PETRI+'"]');
+quizJS.calculatePetriDimensions = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.PETRI+'"]');
 
     root.each(function(i, e) {
-        calculatePetriDimension($(e));
+        quizJS.calculatePetriDimension($(e));
     });
-}
+};
 
-function calculatePetriDimension(question) {
-    if(!question.is('[qtype="'+quizTypes.PETRI+'"]')) return;
+quizJS.calculatePetriDimension = function(question) {
+    if(!question.is('[qtype="'+quizJS.quizTypes.PETRI+'"]')) return;
     var imgWidth = question.find('.petri_image').width();
     var width = imgWidth * 0.05;
 
@@ -1611,7 +1462,7 @@ function calculatePetriDimension(question) {
         "margin-top": "-" + (width/2) + "px",
         "margin-left": "-" + (width/2) + "px"
     });
-}
+};
 
 
 // --------------------------------------------------------------------------------------
@@ -1619,7 +1470,7 @@ function calculatePetriDimension(question) {
 /**
 * Streicht das Wort durch oder entfernt den Strich beim Draufklicken.
 */
-function toggleErrorButton(button) {
+quizJS.toggleErrorButton = function(button) {
     if(!$(button).parent().parent().is(".answered")) {
         if($(button).is(".act")) {
             $(button).removeClass("act");
@@ -1629,13 +1480,13 @@ function toggleErrorButton(button) {
         }
     }
 
-}
+};
 
 
 /**
 * Entfernt für alle übergebenen Labels die färbenden Klassen "right" und "wrong"
 */
-function deleteLabelColoring(div) {
+quizJS.deleteLabelColoring = function(div) {
     div.removeClass('right');
     div.removeClass('wrong');
     div.find('.right').removeClass('right');
@@ -1650,7 +1501,7 @@ function deleteLabelColoring(div) {
 * Gibt zurück, ob val in dem array vorhanden ist.
 * Es wird auch auf Typ-Gleichheit geprüft.
 */
-function contains(array, val) {
+quizJS.contains = function(array, val) {
     var found = false;
     for(var i=0; i<array.length; i++) {
         if(array[i] === val) {
@@ -1662,20 +1513,20 @@ function contains(array, val) {
 
 
 
-var quizTimer = null;
+quizJS.quizTimer = null;
 
 /**
 * initialisiert Timer für alle Aufgaben die welche haben
 * Sollte nur einmal zu Beginn aufgerufen werden
 */
-function initTimers() {
+quizJS.initTimers = function() {
     $('.question').each(function(i, e) {
         const el = $(e);
 
         // add unique question id if not set
         if(!el.attr('question-id')) {
-            el.attr('question-id', nextQuestionId);
-            nextQuestionId++;
+            el.attr('question-id', quizJS.nextQuestionId);
+            quizJS.nextQuestionId++;
         }
         const qId = el.attr('question-id');
 
@@ -1690,7 +1541,7 @@ function initTimers() {
             var observer = new IntersectionObserver(function(entries, observer) {
                 for(var i=0; i<entries.length; i++) {
                     var entry = entries[i];
-                    quizVisibilityUpdate($(entry.target));
+                    quizJS.quizVisibilityUpdate($(entry.target));
                 }
             }, options);
 
@@ -1701,13 +1552,13 @@ function initTimers() {
         // resizesensor as visibility listener this will only work with Chrome engine browsers
         try {
             new ResizeSensor(el, function(dim) {
-                quizVisibilityUpdate(el);
+                quizJS.quizVisibilityUpdate(el);
             });
         } catch(e) {
             // ignore;
         }
 
-        quizVisibilityUpdate(el);
+        quizJS.quizVisibilityUpdate(el);
 
         // add starttime
         var max_time = el.attr("max-time");
@@ -1719,55 +1570,55 @@ function initTimers() {
         }
     });
 
-    updateTimers();
+    quizJS.updateTimers();
 
     return;
-}
+};
 
-function quizVisibilityUpdate(question) {
+quizJS.quizVisibilityUpdate = function(question) {
     const qId = question.attr('question-id');
 
-    if(question.is(':visible') !== questionVisibility[qId]
-        || questionVisibility[qId] == undefined) {
-        questionVisibility[qId] = question.is(':visible');
+    if(question.is(':visible') !== quizJS.questionVisibility[qId]
+        || quizJS.questionVisibility[qId] == undefined) {
+        quizJS.questionVisibility[qId] = question.is(':visible');
         // was set to visible
-        if(questionVisibility[qId]) {
+        if(quizJS.questionVisibility[qId]) {
             // update start time, so further time calculation is correct
-            if(start_time[qId] != undefined
-                    && passed_time[qId] != undefined) {
-                start_time[qId] = Date.now() - passed_time[qId]*1000;
+            if(quizJS.start_time[qId] != undefined
+                    && quizJS.passed_time[qId] != undefined) {
+                quizJS.start_time[qId] = Date.now() - quizJS.passed_time[qId]*1000;
             }
-            // set new start_time and passed_time
+            // set new quizJS.start_time and quizJS.passed_time
             else {
-                start_time[qId] = new Date();
-                passed_time[qId] = 0;
+                quizJS.start_time[qId] = new Date();
+                quizJS.passed_time[qId] = 0;
             }
         }
     }
-}
+};
 
-function updateQuestionVisibility() {
+quizJS.updateQuestionVisibility = function() {
     $('.question').each(function(i, e) {
         const el = $(e);
-        quizVisibilityUpdate(el);
+        quizJS.quizVisibilityUpdate(el);
     });
-}
+};
 
 /**
 * Aktualisieren aller Timer
 */
-function updateTimers() {
+quizJS.updateTimers = function() {
     $('.question .answered_hint.timer:visible').each(function(i, e) {
         const timer = $(e);
         const question = timer.closest('.question');
         const qId = question.attr('question-id');
 
-        if(!questionVisibility[qId]
-            || start_time[qId] == undefined
+        if(!quizJS.questionVisibility[qId]
+            || quizJS.start_time[qId] == undefined
             || question.is('.answered')) return true;
 
-        var diff = (Date.now() - start_time[qId])/1000;
-        passed_time[qId] = diff;
+        var diff = (Date.now() - quizJS.start_time[qId])/1000;
+        quizJS.passed_time[qId] = diff;
 
         // time in seconds
         var time = parseInt(question.attr("max-time")) * 60;
@@ -1782,7 +1633,7 @@ function updateTimers() {
             timer.html(min + ":" + sec);
         }
         else if(!question.is('.answered')) {
-            finishQuestion(question);
+            quizJS.finishQuestion(question);
             quizJS.blockQuestion(question);
             question.find('.feedback.noselection').hide();
 
@@ -1794,28 +1645,28 @@ function updateTimers() {
         }
     });
 
-    clearTimeout(quizTimer);
-    quizTimer = setTimeout(function() { updateTimers(); }, 1000);
-}
+    clearTimeout(quizJS.quizTimer);
+    quizJS.quizTimer = setTimeout(function() { quizJS.updateTimers(); }, 1000);
+};
 
 
 /**
 * Mischt die Antwortenreihenfolge bei dafür markierten Fragen.
 */
-function shuffleAnswers() {
+quizJS.shuffleAnswers = function() {
     $("div.answers").filter(".shuffle").each(function(i) {
         var labels = $(this).children("label");
-        shuffle(labels);
+        quizJS.shuffle(labels);
         $(labels).remove();
         $(this).append($(labels));
         $(this).removeClass("shuffle");
     });
-}
+};
 
 /**
 * Ersetzt alle Inputs mit "rnd" als Value und %rnd im Text durch Werte aus dem vorgegebenem Wertebereich.
 */
-function replaceRandoms() {
+quizJS.replaceRandoms = function() {
     $("div.answers").filter(".rnd").each(function(i) {
         var bereich = $(this).attr('class').replace("answers", "").replace("rnd","").replace("shuffle","").replace(/\s+/, "");
         var min = parseInt(bereich.split("-")[0]);
@@ -1826,7 +1677,7 @@ function replaceRandoms() {
         $(this).children("label").children("input").not(".rnd").each(function(j,c) {
             ohneZahlen[ohneZahlen.length] = parseInt($(c).val())/mul;
         });
-        var randoms = zufallsArray(ohneZahlen, inputs.length, min, max);
+        var randoms = quizJS.zufallsArray(ohneZahlen, inputs.length, min, max);
         $(inputs).each(function(j, c) {
             $(this).removeClass("rnd");
             $(this).val(randoms[j]*mul);
@@ -1835,19 +1686,19 @@ function replaceRandoms() {
         $(this).removeClass("rnd");
         $(this).removeClass(bereich);
     });
-}
+};
 
 /**
     Gibt eine ganze Zufallszahl zwischen der unteren und oberen Grenze (beide enthalten) zurück.
 */
-function randomInt(untereGrenze, obereGrenze) {
+quizJS.randomInt = function(untereGrenze, obereGrenze) {
     var x = Math.floor((Math.random() * (obereGrenze-untereGrenze+1)) + untereGrenze);
     return x;
-}
+};
 
 /**+ Jonas Raoni Soares Silva
-//@ http://jsfromhell.com/array/shuffle [v1.0] */
-function shuffle(o){ //v1.0
+//@ http://jsfromhell.com/array/quizJS.shuffle [v1.0] */
+quizJS.shuffle = function(o){ //v1.0
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
@@ -1855,15 +1706,15 @@ function shuffle(o){ //v1.0
 /**
     Gibt ein Array zurück mit 'anzahl' Zufallszahlen zwischen untereG. und obereG. ohne die 'ohneZahl'
 */
-function zufallsArray(ohneZahlen, anzahl, untereGrenze, obereGrenze) {
+quizJS.zufallsArray = function(ohneZahlen, anzahl, untereGrenze, obereGrenze) {
     var zufallArray = [];
     var x=0;
     do{
-        x=randomInt(untereGrenze, obereGrenze);
+        x=quizJS.randomInt(untereGrenze, obereGrenze);
         if($.inArray(x, zufallArray) == -1 && $.inArray(x, ohneZahlen) == -1) zufallArray[zufallArray.length] = x;
     } while(zufallArray.length < anzahl);
     return zufallArray;
-}
+};
 
 
 
@@ -1871,13 +1722,13 @@ function zufallsArray(ohneZahlen, anzahl, untereGrenze, obereGrenze) {
 * Bricht die Antworten in neue Zeile unter das Bild, falls das Bild mehr als 60%
 * der Breite einnimmt oder die Antworten mehr als 2 mal so hoch wie das Bild sind.
 */
-function windowResizing() {
+quizJS.windowResizing = function() {
     $('div.question').each(function(i, e) {
-        resizeQuestion($(e));
+        quizJS.resizeQuestion($(e));
     });
-}
+};
 
-function resizeQuestion(question) {
+quizJS.resizeQuestion = function(question) {
     var maxWidth = 0;
     var maxHeight = 0;
     question.children('img').each(function() {
@@ -1895,19 +1746,19 @@ function resizeQuestion(question) {
         question.children('div.answers').css("padding-left", maxWidth + "px");
     }
 
-    calculateHotspotDimension(question);
-    calculatePetriDimension(question);
-    calculateCanvasDimension(question);
-}
+    quizJS.calculateHotspotDimension(question);
+    quizJS.calculatePetriDimension(question);
+    quizJS.calculateCanvasDimension(question);
+};
 
 
 /**
 * Setzt eine Frage auf den Anfangszustand zurück
 */
-function resetQuestion(div) {
+quizJS.resetQuestion = function(div) {
     div.removeClass("answered");
     div.find(".feedback").hide();
-    deleteLabelColoring(div);
+    quizJS.deleteLabelColoring(div);
 
     div.find("input:text").val("");
     div.find("input:radio").prop("checked", false);
@@ -1936,23 +1787,23 @@ function resetQuestion(div) {
     div.find('.petri_image').find('img').hide();
     // erste aufgabe anzeigen
     div.find('.petri_image').find('img').first().show();
-    div.filter('[qtype="'+quizTypes.PETRI+'"]').find('.petri_aufgabe').find('img')
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_aufgabe').find('img')
         .filter('#'+div.find('.petri_image').find('img:visible').attr("id")).show();
-    div.filter('[qtype="'+quizTypes.PETRI+'"]').find('.gesucht').html(div.find('.petri_image').find('img').first().attr("task"));
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.gesucht').html(div.find('.petri_image').find('img').first().attr("task"));
 
-    resetCanvas(div);
+    quizJS.resetCanvas(div);
 
     div.nextAll("button.quizButton").first().show();
     div.nextAll("button.quizButton.weiter").first().hide();
-}
+};
 
 /**
 * Setzt alle Fragen des Quiz' auf den Anfangszustand zurück.
 */
-function resetQuiz() {
+quizJS.resetQuiz = function() {
     $(".question").removeClass("answered");
     $(".feedback").hide();
-    deleteLabelColoring($("label"));
+    quizJS.deleteLabelColoring($("label"));
     $("input:text").val("");
     $("input:radio").prop("checked", false);
     $("input:checkbox").prop("checked", false);
@@ -1960,9 +1811,9 @@ function resetQuiz() {
     $('.question').find('textarea').attr('readonly', false);
 
     $(".question").each(function() {
-        resetQuestion($(this));
+        quizJS.resetQuestion($(this));
     });
-}
+};
 
 
 
@@ -1975,20 +1826,20 @@ function resetQuiz() {
 ******************************************************************************/
 // Für jede Frage wird hinterlegt, welcher Canvas angezeigt wird
 // genutzt für rückgängig/wiederholen Funktion
-var canvasIndex = [];
+quizJS.canvasIndex = [];
 
 /**
 * Initialisiert alle DrawingCanvas Elemente. Für Jede Frage dieses Typs.
 */
-function initiateDrawingCanvas() {
-    var root = $('[qtype="'+quizTypes.DRAW+'"]');
+quizJS.initiateDrawingCanvas = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.DRAW+'"]');
 
     root.each(function(i,e) {
         var div = $(this);
 
         div.addClass("unbewertet");
 
-        resetCanvas(div);
+        quizJS.resetCanvas(div);
 
         // Container für zusätzliche Steuerelemente
         div.find('.drawing_canvas_container').after('<div class="button_container"></div>');
@@ -1997,39 +1848,39 @@ function initiateDrawingCanvas() {
         if(!div.find('.drawing_canvas_container').is('.no_steps')) {
             div.find('.button_container').append('<button class="stepforw">Wiederholen</button><br>');
             div.find('.stepforw').click(function() {
-                canvasStepForward(div.find('.drawing_canvas_container'));
+                quizJS.canvasStepForward(div.find('.drawing_canvas_container'));
             });
 
             div.find('.button_container').append('<button class="stepback">Rückgängig</button><br>');
             div.find('.stepback').click(function() {
-                canvasStepBack(div.find('.drawing_canvas_container'));
+                quizJS.canvasStepBack(div.find('.drawing_canvas_container'));
             });
         }
 
         // Bild komplett löschen Button
         div.find('.button_container').append('<button class="clear">Löschen</button>');
         div.find('.clear').click(function() {
-            resetCanvas(div);
+            quizJS.resetCanvas(div);
         });
 
-        calculateCanvasDimensions();
+        quizJS.calculateCanvasDimensions();
     });
-}
+};
 
 /**
 * Skaliert sichtbare Canvas auf aktuelle Größe
 * Falls nötig werden dabei die canvas inhalte neu gezeichnet
 */
-function calculateCanvasDimensions() {
-    var root = $('[qtype="'+quizTypes.DRAW+'"]:visible');
+quizJS.calculateCanvasDimensions = function() {
+    var root = $('[qtype="'+quizJS.quizTypes.DRAW+'"]:visible');
 
     root.each(function(i,e) {
-        calculateCanvasDimension($(e));
+        quizJS.calculateCanvasDimension($(e));
     });
-}
+};
 
-function calculateCanvasDimension(div) {
-    if(!div.is('[qtype="'+quizTypes.DRAW+'"]:visible')) return;
+quizJS.calculateCanvasDimension = function(div) {
+    if(!div.is('[qtype="'+quizJS.quizTypes.DRAW+'"]:visible')) return;
     div.find('canvas').each(function(ii,ee) {
         // canvas to scale
         var canvas = $(this);
@@ -2061,87 +1912,87 @@ function calculateCanvasDimension(div) {
         // add this timeout to the element
         this.redrawTimeout = timeout;
     });
-}
+};
 
 /**
 * Stellt den Startzustand wieder her.
 *
 * alle <canvas> Elemente werden entfernt
 * neuere original canvas wird erstellt und DrawingCanvas initialisiert
-* canvasIndex wird zurückgesetzt.
+* quizJS.canvasIndex wird zurückgesetzt.
 * block wird aufgehoben
 */
-function resetCanvas(div) {
-    if(div.is('[qtype="'+quizTypes.DRAW+'"]')) {
+quizJS.resetCanvas = function(div) {
+    if(div.is('[qtype="'+quizJS.quizTypes.DRAW+'"]')) {
         div.find('canvas').remove();
         div.find('.drawing_canvas_container').append('<canvas class="drawing_canvas act"></canvas>');
-        createDrawingCanvas(div.find('.drawing_canvas_container').find('canvas'),
-                            getCanvasStrokeColor(div));
+        quizJS.createDrawingCanvas(div.find('.drawing_canvas_container').find('canvas'),
+                            quizJS.getCanvasStrokeColor(div));
 
-        setCanvasIndex(div.find('.drawing_canvas_container'), 0);
+        quizJS.setCanvasIndex(div.find('.drawing_canvas_container'), 0);
         div.find('.drawing_canvas_container').removeClass(".blocked");
-        calculateCanvasDimensions();
+        quizJS.calculateCanvasDimensions();
     }
-}
+};
 
 /**
 * Geht einen gezeichneten Schritt zurück
 *
-* Dazu wird der ältere Canvas wieder angezeigt und der canvasIndex angepasst
+* Dazu wird der ältere Canvas wieder angezeigt und der quizJS.canvasIndex angepasst
 */
-function canvasStepBack(div) {
-    var c_Idx = getCanvasIndex(div);
+quizJS.canvasStepBack = function(div) {
+    var c_Idx = quizJS.getCanvasIndex(div);
 
     var canvasList = div.find('canvas').not('#imageTemp');
 
     if(c_Idx > 0) {
         canvasList.removeClass("act");
         $(canvasList.get(c_Idx - 1)).addClass("act");
-        setCanvasIndex(div, getCanvasIndex(div)-1);
+        quizJS.setCanvasIndex(div, quizJS.getCanvasIndex(div)-1);
     }
-}
+};
 
 /**
 * Wiederholt einen gezeichneten Schritt
 *
-* Dazu wird der neuere Canvas wieder angezeigt und der canvasIndex angepasst
+* Dazu wird der neuere Canvas wieder angezeigt und der quizJS.canvasIndex angepasst
 */
-function canvasStepForward(div) {
-    var c_Idx = getCanvasIndex(div);
+quizJS.canvasStepForward = function(div) {
+    var c_Idx = quizJS.getCanvasIndex(div);
 
     var canvasList = div.find('canvas').not('#imageTemp');
 
     if(c_Idx < canvasList.length - 1) {
         canvasList.removeClass("act");
         $(canvasList.get(c_Idx + 1)).addClass("act");
-        setCanvasIndex(div, getCanvasIndex(div)+1);
+        quizJS.setCanvasIndex(div, quizJS.getCanvasIndex(div)+1);
     }
-}
+};
 
 /**
-* Gibt den aktuell angezeigten canvasIndex für ein .drawing_canvas_container Element zurück
+* Gibt den aktuell angezeigten quizJS.canvasIndex für ein .drawing_canvas_container Element zurück
 */
-function getCanvasIndex(div) {
-    var draw_can = $('[qtype="'+quizTypes.DRAW+'"]').find('.drawing_canvas_container');
+quizJS.getCanvasIndex = function(div) {
+    var draw_can = $('[qtype="'+quizJS.quizTypes.DRAW+'"]').find('.drawing_canvas_container');
 
-    return canvasIndex[draw_can.index(div)];
-}
+    return quizJS.canvasIndex[draw_can.index(div)];
+};
 
 /**
-* Setzt den aktuell angezeigten canvasIndex auf idx für ein .drawing_canvas_container Element
+* Setzt den aktuell angezeigten quizJS.canvasIndex auf idx für ein .drawing_canvas_container Element
 */
-function setCanvasIndex(div, idx) {
-    var draw_can = $('[qtype="'+quizTypes.DRAW+'"]').find('.drawing_canvas_container');
+quizJS.setCanvasIndex = function(div, idx) {
+    var draw_can = $('[qtype="'+quizJS.quizTypes.DRAW+'"]').find('.drawing_canvas_container');
 
-    canvasIndex[draw_can.index(div)] = idx;
-}
+    quizJS.canvasIndex[draw_can.index(div)] = idx;
+};
 
 /**
 * Gibt einen Farbcode String zurück wie zB "#FF0000" für eine Zeichenaufgabe
 *
-* @param: div - das div.question[qtype=quizTypes.DRAW]
+* @param: div - das div.question[qtype=quizJS.quizTypes.DRAW]
 */
-function getCanvasStrokeColor(root) {
+quizJS.getCanvasStrokeColor = function(root) {
     var color = "#000000";
 
     var div = root.find('.drawing_canvas_container');
@@ -2175,16 +2026,16 @@ function getCanvasStrokeColor(root) {
     }
 
     return color;
-}
+};
 
 /* © 2009 ROBO Design
  * http://www.robodesign.ro
  */
 
 // Keep everything in anonymous function, called on window load.
-function createDrawingCanvas(element, color) {
+quizJS.createDrawingCanvas = function(element, color) {
 
-  initTouchToMouse(element.closest('.drawing_canvas_container'));
+  quizJS.initTouchToMouse(element.closest('.drawing_canvas_container'));
 
   var canvas, context, canvasoList, contextoList;
   var root = element.closest('.drawing_canvas_container');
@@ -2274,14 +2125,14 @@ function createDrawingCanvas(element, color) {
     if(!root.is('no_steps')) {
         new_canvas();
     }
-    contextoList[getCanvasIndex(root)].drawImage(canvas, 0, 0);
+    contextoList[quizJS.getCanvasIndex(root)].drawImage(canvas, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   function new_canvas() {
       // clear all others after this
       var canvasList = root.find('canvas').not('#imageTemp');
-      for(var i = getCanvasIndex(root)+1; i<canvasList.length; i++) {
+      for(var i = quizJS.getCanvasIndex(root)+1; i<canvasList.length; i++) {
           $(canvasList.get(i)).remove();
       }
 
@@ -2295,12 +2146,12 @@ function createDrawingCanvas(element, color) {
       context_new = canvas_new.getContext('2d');
 
       // copy active image to new
-      context_new.drawImage(canvasoList[getCanvasIndex(root)], 0, 0);
+      context_new.drawImage(canvasoList[quizJS.getCanvasIndex(root)], 0, 0);
 
       // add to lists
-      setCanvasIndex(root, getCanvasIndex(root)+1);
-      canvasoList[getCanvasIndex(root)] = canvas_new;
-      contextoList[getCanvasIndex(root)] = context_new;
+      quizJS.setCanvasIndex(root, quizJS.getCanvasIndex(root)+1);
+      canvasoList[quizJS.getCanvasIndex(root)] = canvas_new;
+      contextoList[quizJS.getCanvasIndex(root)] = context_new;
 
       var container = canvasoList[0].parentNode;
       container.insertBefore(canvas_new, canvas);
@@ -2311,7 +2162,7 @@ function createDrawingCanvas(element, color) {
 
   function show_active_canvas() {
       for(var i=0; i<canvasoList.length; i++) {
-          if(i == getCanvasIndex(root)) {
+          if(i == quizJS.getCanvasIndex(root)) {
               $(canvasoList[i]).addClass("act");
           }
           else {
@@ -2439,12 +2290,153 @@ function createDrawingCanvas(element, color) {
   initCanvas();
 
   return this;
-}
+};
+
+quizJS.setTimerAlert = function(bool, text) {
+    quizJS.timerAlertActive = bool;
+    quizJS.timerAlertText = text;
+};
+
+// --------------------------------------------------------------------------------------
+// COPY QUESTION TO SHOW AGAIN
+// --------------------------------------------------------------------------------------
+
+/**
+* Kopiert die Frage ohne Bestätigungsbuttons (reiner Fragekörper)
+*/
+quizJS.showQuestionHere = function(button) {
+    var id = $(button).attr("id").replace("_ref", "");
+
+    var orig = $('#'+id);
+
+    var div = orig.clone();
+    div.addClass("cloned");
+
+    // zählt immer als beantwortet
+    div.addClass("answered");
+
+    // hinweis, dass nicht veränderbar
+    div.find(".answered_hint").remove();
+    div.find("h4").after(
+        '<span class="answered_hint">Nicht änderbar, da die Frage bereits beantwortet wurde</span>');
+
+    var type = orig.attr("qtype");
+    // Verarbeiten der vorherigen Eingaben
+    if(type === quizJS.quizTypes.FREE_TEXT) {
+        quizJS.copyFreeText(div, orig);
+    }
+    else if(type === quizJS.quizTypes.FILL_BLANK) {
+        quizJS.copyFillBlank(div, orig);
+    }
+    else if(type === quizJS.quizTypes.FILL_BLANK_CHOICE) {
+        quizJS.copyFillBlankChoice(div, orig);
+    }
+    else if(type === quizJS.quizTypes.HOTSPOT) {
+        quizJS.copyHotspot(div);
+    }
+    else if(type === quizJS.quizTypes.DRAW) {
+        quizJS.copyDrawing(div, orig);
+    }
+
+    quizJS.blockQuestion(div);
+
+
+    var hideButton = $('<button class="free_text_ref" id="'+id+'_ref">Ausblenden</button>');
+    hideButton.on('click', function(e) {
+        quizJS.removeQuestionHere(hideButton);
+    })
+    $(button).before(div);
+    $(button).before(hideButton)
+    $(button).hide();
+};
+
+quizJS.removeQuestionHere = function(button) {
+    $(button).prev().remove();
+    $(button).next().show();
+    $(button).remove();
+};
+
+
+quizJS.copyFreeText = function(div, orig) {
+    div.find("textarea").val(orig.find("textarea").val());
+};
+
+quizJS.copyFillBlank = function(div, orig) {
+    div.find("input").each(function(i, e) {
+        // Kopiert ausgewählten Wert
+        $(this).val($($(orig).find("input").get(i)).val());
+    });
+};
+
+quizJS.copyFillBlankChoice = function(div, orig) {
+    div.find("select").each(function(i, e) {
+        // Kopiert ausgewählten Wert
+        $(this).val($($(orig).find("select").get(i)).val());
+    });
+};
+
+
+quizJS.copyHotspot = function(div) {
+    // hover funktionen
+    div.find('.hotspot').mouseover(function(event) {
+        if($(this).find('.descr').children().length > 0) $(this).find('.descr').show();
+        quizJS.calculateHotspotDescriptions($(this).closest('[qtype="'+quizJS.quizTypes.HOTSPOT+'"]'));
+    });
+    div.find('.hotspot').mouseout(function(event) {
+        $(this).find('.descr').hide();
+    });
+};
+
+quizJS.copyDrawing = function(div, orig) {
+    var canvas_orig = orig.find('.drawing_canvas_container').find('canvas.drawing_canvas.act')[0];
+    var canvas = div.find('.drawing_canvas_container').find('canvas.drawing_canvas.act')[0];
+
+    div.find('.drawing_canvas_container').find('canvas').not('.act').remove();
+
+    div.find('.button_container').remove();
+    div.find('.feedback.correct').show();
+
+    canvas.getContext('2d').drawImage(canvas_orig, 0, 0);
+};
+
+quizJS.blockQuestion = function(div) {
+    div.addClass("answered");
+
+    var type = div.attr("qtype");
+
+    if(type === quizJS.quizTypes.FREE_TEXT) {
+        div.find("textarea").attr("readonly", "readonly");
+    }
+    else if(type === quizJS.quizTypes.SHORT_TEXT
+            || type === quizJS.quizTypes.CHOICE
+            || type === quizJS.quizTypes.FILL_BLANK
+            || type === quizJS.quizTypes.MATRIX_CHOICE
+            || type == undefined) {
+        // Disabled jedes input
+        div.find("input").attr("disabled", true);
+    }
+    else if(type === quizJS.quizTypes.FILL_BLANK_CHOICE) {
+        div.find("select").attr("disabled", true);
+    }
+    else if(type === quizJS.quizTypes.CLASSIFICATION
+            || type === quizJS.quizTypes.ORDER) {
+        div.find('.object').addClass("blocked");
+    }
+    else if(type === quizJS.quizTypes.HOTSPOT) {
+        div.find('.hotspot').addClass("blocked");
+    }
+    else if(type === quizJS.quizTypes.PETRI) {
+        div.find('.place').addClass("blocked");
+    }
+    else if(type === quizJS.quizTypes.DRAW) {
+        div.find('.drawing_canvas_container').addClass("blocked");
+    }
+};
 
 /**
 * Konvertiert Touch events in mouse events für DrawingCanvas auf Touchgeräten.
 */
-function touchHandler(event)
+quizJS.touchHandler = function(event)
 {
     event = event.originalEvent;
     var touches = event.changedTouches,
@@ -2472,18 +2464,18 @@ function touchHandler(event)
     first.target.dispatchEvent(simulatedEvent);
     event.preventDefault();
     event.stopPropagation();
-}
+};
 
 /**
 * Initialisiert das Touch->Mouse für ein Element.
 */
-function initTouchToMouse(element)
+quizJS.initTouchToMouse = function(element)
 {
-    element.on("touchstart", touchHandler);
-    element.on("touchmove", touchHandler);
-    element.on("touchend", touchHandler);
-    element.on("touchcancel", touchHandler);
-}
+    element.on("touchstart", quizJS.touchHandler);
+    element.on("touchmove", quizJS.touchHandler);
+    element.on("touchend", quizJS.touchHandler);
+    element.on("touchcancel", quizJS.touchHandler);
+};
 
 
 /** *********************************************************************
@@ -2492,7 +2484,7 @@ function initTouchToMouse(element)
 *                                                                       *
 * ******************************************************************** */
 
-function encryptMD5(str) {
+quizJS.encryptMD5 = function(str) {
   //  discuss at: http://phpjs.org/functions/md5/
   // original by: Webtoolkit.info (http://www.webtoolkit.info/)
   // improved by: Michael White (http://getsprink.com)
@@ -2500,7 +2492,7 @@ function encryptMD5(str) {
   // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
   //    input by: Brett Zamir (http://brett-zamir.me)
   // bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  //  depends on: utf8_encode
+  //  depends on: quizJS.utf8_encode
   //   example 1: md5('Kevin van Zonneveld');
   //   returns 1: '6e658d4bfcb59cc13f96c14450ac40b9'
 
@@ -2618,7 +2610,7 @@ function encryptMD5(str) {
     S44 = 21;
 
 
-  str = utf8_encode(str);
+  str = quizJS.utf8_encode(str);
   x = convertToWordArray(str);
   a = 0x67452301;
   b = 0xEFCDAB89;
@@ -2704,10 +2696,10 @@ function encryptMD5(str) {
   var temp = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
 
   return temp.toLowerCase();
-}
+};
 
-function utf8_encode(argString) {
-  //  discuss at: http://phpjs.org/functions/utf8_encode/
+quizJS.utf8_encode = function(argString) {
+  //  discuss at: http://phpjs.org/functions/quizJS.utf8_encode/
   // original by: Webtoolkit.info (http://www.webtoolkit.info/)
   // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
   // improved by: sowberry
@@ -2719,7 +2711,7 @@ function utf8_encode(argString) {
   // bugfixed by: Ulrich
   // bugfixed by: Rafal Kukawski
   // bugfixed by: kirilloid
-  //   example 1: utf8_encode('Kevin van Zonneveld');
+  //   example 1: quizJS.utf8_encode('Kevin van Zonneveld');
   //   returns 1: 'Kevin van Zonneveld'
 
   if (argString === null || typeof argString === 'undefined') {
@@ -2773,6 +2765,4 @@ function utf8_encode(argString) {
   }
 
   return utftext;
-}
-
-}())
+};
