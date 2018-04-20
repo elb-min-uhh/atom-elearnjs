@@ -1,6 +1,11 @@
+/**
+* Basic script containing only necessary elements
+*/
+
+const eLearnJS = eLearnJS || {};
 
 $(document).ready(function() {
-    createContentOverview();
+    eLearnJS.createContentOverview();
 });
 
 // -------------------------------------------------------------------------------------
@@ -8,12 +13,12 @@ $(document).ready(function() {
 // -------------------------------------------------------------------------------------
 
 // beinhaltet eine Liste alle bereits betrachteten Sections.
-var sectionsVisited = [];
+eLearnJS.sectionsVisited = [];
 
 /**
 * Erstellt ein Inhaltsverzeichnis. Wird #content-overview hinzugefügt.
 */
-function createContentOverview() {
+eLearnJS.createContentOverview = function() {
     if($('#content-overview').length > 0) {
         var text = "<ul>";
         var level = 0;
@@ -72,7 +77,7 @@ function createContentOverview() {
 
             text += "</li>";
 
-            sectionsVisited.push(false);
+            eLearnJS.sectionsVisited.push(false);
         }
         // close all open ul's
         while(level >= 0) {
@@ -91,3 +96,14 @@ function createContentOverview() {
         });
     }
 }
+
+// dummy functions to catch undefined errors
+eLearnJS.toggleAllSections = function() {};
+eLearnJS.setNavigationTitle = function() {};
+eLearnJS.setBackButtonEnabled = function() {};
+eLearnJS.setBackButtonText = function() {};
+eLearnJS.setBackPage = function() {};
+
+eLearnJS.generalDirectionButtonsEnabled = function() {};
+eLearnJS.setKeyNavigationEnabled = function() {};
+eLearnJS.generalProgressbarEnabled = function() {};
