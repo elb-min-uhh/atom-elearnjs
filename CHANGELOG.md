@@ -1,9 +1,10 @@
 ## 0.2.8
 * General:
     * Supports more markdown syntax (strikethrough, tables, simple links)
+    * Updated _elearn.js_, _elearnvideo.js_ and _quiz.js_
 * PDF:
     * Fix of crash on eLearnJS interface functions
-    * Display video note times for `elearnvideo.js` videos
+    * Display video note times for _elearnvideo.js_ videos
 ## 0.2.7
 * General:
     * Selection of extensions whether to include them in an export or not
