@@ -1,6 +1,5 @@
 /*
-* video.js v0.4.0 - 18/04/16
-* Ergänzend zum elearn.js v1.0.1
+* video.js v0.4.1 - 18/04/16
 * JavaScript Videoplayer - by Arne Westphal
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
@@ -140,34 +139,10 @@ eLearnVideoJS.initListeners = function() {
 */
 eLearnVideoJS.addGenerelVideoPlayerListener = function() {
     // Fullscreenchange
-    $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function() {
-        eLearnVideoJS.checkVideoFullscreen();
-    });
+    $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange',
+        eLearnVideoJS.checkVideoFullscreen);
 
-    // Video Progress Mouseup
-    $(document).on('mouseup touchend', function(event) {
-        if((event.type === "touchend" || event.button == 0) && eLearnVideoJS.videoProgressMouseDown) {
-            if(eLearnVideoJS.videoProgressMouseDownTarget != null) {
-                event.preventDefault();
-                event.stopPropagation();
-                if(!eLearnVideoJS.videoOverProgress) eLearnVideoJS.videoProgressMouseDownTarget.find('.progress-hover-time').remove();
-                eLearnVideoJS.setVideoMouseDown(eLearnVideoJS.videoProgressMouseDownTarget, false);
-            }
-            return false;
-        }
-        else {
-            return true;
-        }
-    });
-
-    // Video Volume Mouseup
-    $(document).on('mouseup touchend', function(event) {
-        if(eLearnVideoJS.videoVolumeMouseDownTarget != null) {
-            event.preventDefault();
-            event.stopPropagation();
-            eLearnVideoJS.setVideoVolumeMouseDown(eLearnVideoJS.videoVolumeMouseDownTarget, false, event);
-        }
-    });
+    $(document).on('mouseup touchend', eLearnVideoJS.onMouseUp);
 };
 
 /**
@@ -262,6 +237,7 @@ eLearnVideoJS.videoAddUserInteractionListeners = function(div) {
             eLearnVideoJS.videoHover(div);
         }
     });
+    div.on('mouseup touchend', eLearnVideoJS.onMouseUp);
     div.on('mouseup touchend', function(event) {
         if(event.type === "touchend" || event.button == 0) {
             // other listeneres take care of these
@@ -382,6 +358,27 @@ eLearnVideoJS.videoAddEventListeners = function(div) {
     });
     eLearnVideoJS.videoCheckDelayedError(div);
 };
+
+eLearnVideoJS.onMouseUp = function(event) {
+    if(eLearnVideoJS.videoVolumeMouseDownTarget != null) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        eLearnVideoJS.setVideoVolumeMouseDown(eLearnVideoJS.videoVolumeMouseDownTarget, false, event);
+        return false;
+    }
+    else if((event.type === "touchend" || event.button == 0) && eLearnVideoJS.videoProgressMouseDown) {
+        if(eLearnVideoJS.videoProgressMouseDownTarget != null) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if(!eLearnVideoJS.videoOverProgress) eLearnVideoJS.videoProgressMouseDownTarget.find('.progress-hover-time').remove();
+            eLearnVideoJS.setVideoMouseDown(eLearnVideoJS.videoProgressMouseDownTarget, false);
+        }
+        return false;
+    }
+    else {
+        return true;
+    }
+}
 
 
 /**
@@ -1282,7 +1279,7 @@ eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index) {
                     // skip if already shown
                     if(display_note.length > 0) continue;
                     // create new node
-                    eLearnVideoJS.showVideoNote(notes_con, info);
+                    eLearnVideoJS.showVideoNote(notes_con, info, vid);
                 }
             }
         }
@@ -1291,10 +1288,14 @@ eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index) {
 };
 
 /**
-* Displays a video note specified by its @param info object within the
+* Displays a video note specified by its info.
+*
 * @param notes_con notes container.
+* @param info object within the
+* @param video (optional) if given, the video might stop or will get an overlay
+*              to hint the note
 */
-eLearnVideoJS.showVideoNote = function(notes_con, info) {
+eLearnVideoJS.showVideoNote = function(notes_con, info, video) {
     var original_note = notes_con.find('.video_note.backup').filter('#'+info["index"]);
     var new_note = original_note.clone(true, true); // clone with all listeners
     new_note.removeClass('backup');
@@ -1314,6 +1315,11 @@ eLearnVideoJS.showVideoNote = function(notes_con, info) {
         new_note.prepend(div);
     }
     original_note.after(new_note);
+
+    // check for hin display
+    if(info.hinted && video) {
+        eLearnVideoJS.showVideoNoteHint(video, new_note);
+    }
 };
 
 /**
@@ -1336,6 +1342,65 @@ eLearnVideoJS.hideAllVideoNotes = function(notes_con) {
     });
 };
 
+eLearnVideoJS.showVideoNoteHint = function(video, note) {
+    const div = $(video).closest('.elearnjs-video');
+    const vid = video;
+    const parent = $(vid).parent();
+    const note_const = note;
+
+    if(parent.has('.note-hint-con').length) {
+        parent.children('.note-hint-con').remove();
+    }
+
+    if(!parent.has('.note-hint-con').length) {
+        const con = $('<div class="note-hint-con">');
+
+        var hint = $('<div class="note-hint">');
+        hint.text("Notiz anzeigen");
+        //hint.append('<span class="note-hint-arrow">');
+        con.append(hint);
+
+        // prevent mouseup/down events
+        hint.on('mousedown mouseup', function(event) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            return false;
+        });
+
+        hint.on('click', function(event) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+
+            // pause the video
+            vid.pause();
+            // stop fullscreen if necessary
+            if(div.is('.full')) eLearnVideoJS.videoToggleFullscreen(div);
+            // scroll to note
+            if(note_const.is(':visible')
+                    && !eLearnVideoJS.isScrolledIntoView(note_const)) {
+                note_const.get(0).scrollIntoView();
+            }
+
+            note.addClass("emphasized");
+
+            con.remove();
+            return false;
+        });
+
+        var close = $('<span class="note-hint-close">');
+        hint.append(close);
+
+        close.on('click', function(event) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            con.remove();
+            return false;
+        });
+
+        parent.append(con);
+    }
+}
+
 /**
 * Checks if atleast one note is displayed. Sets the
 * @param videoContainer's class based on that.
@@ -1346,6 +1411,11 @@ eLearnVideoJS.checkVisibleNotes = function(videoContainer, notes_con) {
     }
     else {
         videoContainer.parent().removeClass('noted_video');
+    }
+
+    // hide video note hints, if all hinted notes are hidden
+    if(notes_con.find('.video_note.hinted').not('.backup').length === 0) {
+        videoContainer.find('.note-hint-con').remove();
     }
 };
 
@@ -1376,6 +1446,7 @@ eLearnVideoJS.getVideoNoteTimeArray = function(videoContainer) {
         times.push({"time" : eLearnVideoJS.parseTimeString(timeFrom),
                     "time_to" : eLearnVideoJS.parseTimeString(timeTo),
                     "user_note" : user_note,
+                    "hinted" : $(this).is('.hinted'),
                     "index" : id});
     });
     times.sort(function(a,b) {
@@ -2254,6 +2325,16 @@ eLearnVideoJS.fireEvent = function(element, event) {
       element.fireEvent("on" + event.eventType, event);
     }
 };
+
+eLearnVideoJS.isScrolledIntoView = function(elem) {
+    var docViewTop = $(window).scrollTop();
+    var docViewBottom = docViewTop + $(window).height();
+
+    var elemTop = $(elem).offset().top;
+    var elemBottom = elemTop + $(elem).height();
+
+    return elemTop >= docViewTop && elemBottom <= docViewBottom;
+}
 
 // --------------------------------------------------------------------------------------
 // JSON - CSV

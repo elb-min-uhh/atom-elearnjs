@@ -1,6 +1,5 @@
 /*
-* Styles zum video.js v0.4.0 by Arne Westphal
-* Ergänzend zum elearn.js v1.0.1
+* Styles zum video.js v0.4.1 by Arne Westphal
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
 
@@ -772,6 +771,87 @@
 .user_note_import_filechoser {
     display: none;
 }
+
+/* Video note hint on video */
+
+.elearnjs-video .note-hint-con {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.elearnjs-video .note-hint {
+    line-height: initial;
+    padding: 5px 10px;
+    background: #dcdcdc;
+    background: #dcdcdcCC;
+    color: #444;
+    border-radius: 5px;
+}
+
+.elearnjs-video .note-hint:hover {
+    background: #dcdcdc;
+    text-decoration: underline;
+}
+
+.elearnjs-video .note-hint-arrow,
+.elearnjs-video .note-hint-close {
+    position: relative;
+    top: 2px;
+    display: inline-block;
+    text-decoration: none;
+    margin-left: 0.25em;
+}
+
+.elearnjs-video .note-hint-arrow:before {
+    font-family: eLearn-icons;
+    content: "c";
+}
+
+.elearnjs-video .note-hint-close {
+    position: relative;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    font-size: 20pt;
+    line-height: 18px;
+    border-radius: 50%;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.elearnjs-video .note-hint-close:hover {
+    background: #88888844;
+    color: #000;
+}
+
+.elearnjs-video .note-hint-close:before {
+    content: "+";
+}
+
+
+.video_notes_wrapper .video_note.emphasized {
+    animation-name: note_emphasize;
+    animation-duration: 2s;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 1;
+}
+
+@keyframes note_emphasize {
+    from {
+        color: #444;
+        background: #dcdcdc;
+    }
+    to {
+        color: white;
+        background: #666;
+    }
+}
+
+
 
 /* ---------------------------------------------------------------------- */
 
