@@ -36,7 +36,8 @@ function clickimageToggle(element, pin_number)
     /* Get all »div« */
     var child_nodes = Array.prototype.filter.call(parent_node.children, function(node)
         {
-            return node.matches('div');
+            // FIXED FOR PHANTOM.JS
+            return node && node.matches ? node.matches('div') : false;
         });
 
     /* Counts pins to determine current pin */

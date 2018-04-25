@@ -9,14 +9,22 @@
  */
 
 
-/* ====[ Configuration ]===================================================== */
+/* ====[ Configuration ]========================================================================= */
 
 $box_background_color: #666
 $box_color: #ccc
 $accent_color: #e2001a
 
 
-/* ====[ Code ]============================================================== */
+/* ====[ Mixin ]================================================================================= */
+
+@mixin prefix($property, $value, $prefixes: ())
+    @each $prefix in $prefixes
+        #{'-' + $prefix + '-' + $property}: $value;
+    #{$property}: $value;
+
+
+/* ====[ Code ]================================================================================== */
 
 /* Parent node */
 div.clickimage
@@ -52,13 +60,13 @@ div.clickimage
                     display: block
 
                 i
-                    transform: translateY(-.1em) translateX(-.3em)
+                    @include prefix(transform, translateY(-.1em) translateX(-.3em), webkit)
                     font-size: 3em
                     color: $accent_color
                     text-shadow: -1px -1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, 1px 1px 0 #fff
 
                 span
-                    transform: translateY(-.7em) translateX(.28em)
+                    @include prefix(transform, translateY(-.7em) translateX(.28em), webkit)
                     font-weight: bold
 
                 &.visited i:first-child
@@ -70,24 +78,24 @@ div.clickimage
 
                 &.top
                     i
-                        transform: rotate(180deg) translateY(-0.5em) translateX(.32em)
+                        @include prefix(transform, rotate(180deg) translateY(-0.5em) translateX(.32em), webkit)
                     
                     span
-                        transform: translateY(2em) translateX(.28em)
+                        @include prefix(transform, translateY(2em) translateX(.28em), webkit)
 
                 &.right
                     i
-                        transform: rotate(270deg) translateY(-.65em) translateX(-.2em)
+                        @include prefix(transform, rotate(270deg) translateY(-.65em) translateX(-.2em), webkit)
                     
                     span
-                        transform: translateY(.6em) translateX(-1.2em)
+                        @include prefix(transform, translateY(.6em) translateX(-1.2em), webkit)
 
                 &.left
                     i
-                        transform: rotate(90deg) translateX(.2em)
+                        @include prefix(transform, rotate(90deg) translateX(.2em), webkit)
                     
                     span
-                        transform: translateY(.6em) translateX(1.7em)
+                        @include prefix(transform, translateY(.6em) translateX(1.7em), webkit)
 
         .buzzer
             position: absolute
@@ -354,13 +362,13 @@ div.clickimage
 @supports(-moz-appearance:meterbar)
     div.clickimage .imagebox ol.pins li
         span
-            transform: translateY(-1em) translateX(.3em)
+            @include prefix(transform, translateY(-1em) translateX(.3em), webkit)
 
         &.top i
-            transform: rotate(180deg) translateY(-0.45em) translateX(.32em)
+            @include prefix(transform, rotate(180deg) translateY(-0.45em) translateX(.32em), webkit)
 
         &.right i
-            transform: rotate(270deg) translateY(-.55em) translateX(-.2em)
+            @include prefix(transform, rotate(270deg) translateY(-.55em) translateX(-.2em), webkit)
         
         &.left i
-            transform: rotate(90deg) translateY(.05em) translateX(.2em)
+            @include prefix(transform, rotate(90deg) translateY(.05em) translateX(.2em), webkit)
