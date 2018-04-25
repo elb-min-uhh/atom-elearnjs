@@ -1,3 +1,6 @@
+## 0.3.0
+* HTML:
+    * Support for section descriptions with `<--desc TEXT-->`
 ## 0.2.9
 * General:
     * Updates for _elearn.js_ and all extensions
