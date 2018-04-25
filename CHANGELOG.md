@@ -1,3 +1,7 @@
+## 0.2.9
+* General:
+    * Updates for _elearn.js_ and all extensions
+        * This includes bug fixes and new features
 ## 0.2.8
 * General:
     * Supports more markdown syntax (strikethrough, tables, simple links)

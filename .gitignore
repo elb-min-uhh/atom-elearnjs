@@ -1,9 +1,5 @@
 .DS_Store
 
-assets/elearnjs/extensions/*/assets/js/min.js
-assets/elearnjs/extensions/*/assets/js/elearn.js
-assets/elearnjs/extensions/*/assets/css/elearn.css
-
 # Logs
 *.log
 npm-debug.log*
