@@ -31,7 +31,7 @@ and will only be overwritten when `Save as...` (described above) is used.
 
 Markdown syntax is supported based on [Showdown's](http://showdownjs.com/)
 features. If you want to use specific _elearn.js_ features check the
-__Extended Documentation__.
+[extended documentation](#extended-documentation).
 
 ## Extended Documentation
 

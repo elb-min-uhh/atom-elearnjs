@@ -1,4 +1,7 @@
 ## 0.3.0
+* General:
+    * Support for export of unsaved files
+    * Settings rearranged
 * HTML:
     * Support for section descriptions with `<--desc TEXT-->`
 ## 0.2.9
