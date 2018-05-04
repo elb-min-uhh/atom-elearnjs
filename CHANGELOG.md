@@ -1,3 +1,6 @@
+## 0.3.1
+* General:
+    * Updated _elearn.js_ to v1.0.2
 ## 0.3.0
 * General:
     * Support for export of unsaved files
