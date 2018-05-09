@@ -1,6 +1,7 @@
 ## 0.3.1
 * General:
     * Updated _elearn.js_ to v1.0.2
+    * Updated _elearnvideo.js_ to support `stopping`
 * HTML:
     * Export of linked files after bundled asset export
         * Possible to overwrite bundled versions

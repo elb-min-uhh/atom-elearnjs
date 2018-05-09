@@ -1316,9 +1316,12 @@ eLearnVideoJS.showVideoNote = function(notes_con, info, video) {
     }
     original_note.after(new_note);
 
-    // check for hin display
+    // check for hint display
     if(info.hinted && video) {
         eLearnVideoJS.showVideoNoteHint(video, new_note);
+    }
+    if(info.stopping && video) {
+        video.pause();
     }
 };
 
@@ -1343,6 +1346,7 @@ eLearnVideoJS.hideAllVideoNotes = function(notes_con) {
 };
 
 eLearnVideoJS.showVideoNoteHint = function(video, note) {
+    const videoContainer = $(video).closest('.video-container');
     const div = $(video).closest('.elearnjs-video');
     const vid = video;
     const parent = $(vid).parent();
@@ -1375,6 +1379,10 @@ eLearnVideoJS.showVideoNoteHint = function(video, note) {
             vid.pause();
             // stop fullscreen if necessary
             if(div.is('.full')) eLearnVideoJS.videoToggleFullscreen(div);
+            // display tab if necessary
+            if(videoContainer.find('.tabs').length) {
+                eLearnVideoJS.selectTab(videoContainer.find('.tabs').children().first());
+            }
             // scroll to note
             if(note_const.is(':visible')
                     && !eLearnVideoJS.isScrolledIntoView(note_const)) {
@@ -1447,6 +1455,7 @@ eLearnVideoJS.getVideoNoteTimeArray = function(videoContainer) {
                     "time_to" : eLearnVideoJS.parseTimeString(timeTo),
                     "user_note" : user_note,
                     "hinted" : $(this).is('.hinted'),
+                    "stopping" : $(this).is('.stopping'),
                     "index" : id});
     });
     times.sort(function(a,b) {
