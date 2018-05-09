@@ -16,8 +16,7 @@ class PromiseCounter {
         const self = this;
 
         if(!promises || promises.length == undefined) {
-            self.error = "No promise array given.";
-            return;
+            throw "No promise array given.";
         }
 
         self.count = 0;
@@ -26,7 +25,7 @@ class PromiseCounter {
         // add timeout if given
         if(timeout && timeout === parseInt(timeout, 10)) {
             self.timeout = setTimeout(() => {
-                self.onError(`Timeout in PromiseCounter after ${timeout} ms`);
+                self.onError(`Timeout in PromiseCounter after ${timeout} ms.`);
             }, timeout);
         }
 
@@ -57,7 +56,7 @@ class PromiseCounter {
     }
 
     onError(err) {
-        if(!err) this.error = "Undefined error in PromiseCounter";
+        if(!err) this.error = "Undefined error in PromiseCounter.";
         else this.error = err;
         this.checkDone();
     }
