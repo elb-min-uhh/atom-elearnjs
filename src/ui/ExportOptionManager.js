@@ -1,7 +1,7 @@
 "use strict";
 
 const OptionMenuManager = require('./OptionMenuManager.js');
-const ExtensionManager = require('./ExtensionManager.js');
+const ExtensionManager = require('../export/ExtensionManager.js');
 
 class ExportOptionManager {
     constructor(optionMenuManager) {

@@ -1,10 +1,10 @@
 "use babel";
 
-const OptionMenuManager = require('./OptionMenuManager.js');
-const FileWriter = require('./FileWriter.js');
-const ElearnJSMenuManager = require('./ElearnJSMenuManager.js');
-const CommandListener = require('./CommandListener.js');
-var config = require('./config.js');
+const OptionMenuManager = require('./ui/OptionMenuManager.js');
+const ElearnJSMenuManager = require('./ui/ElearnJSMenuManager.js');
+const CommandListener = require('./ui/CommandListener.js');
+const FileWriter = require('./export/FileWriter.js');
+var config = require('../spec/config.js');
 
 // This is your main singleton.
 // The whole state of your package will be stored and managed here.

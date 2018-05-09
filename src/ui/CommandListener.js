@@ -2,8 +2,8 @@
 "use strict";
 
 import { CompositeDisposable } from 'atom';
-const FileWriter = require('./FileWriter.js');
 const ElearnJSMenuManager = require('./ElearnJSMenuManager.js');
+const FileWriter = require('../export/FileWriter.js');
 
 class CommandListener {
     constructor(fileWriter, elearnJSMenuManager) {

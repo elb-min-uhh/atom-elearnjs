@@ -5,6 +5,13 @@ const path = require('path');
 const divClassRegExp = /<div[ \t]((?:(?!class[ \t]*=[ \t]*["'])\S+[ \t]*=[ \t]*(["'])(?:\\\2|(?!\2).)*\2[ \t]*)*)class[ \t]*=[ \t]*(["'])((?:\\\3|(?!\3).)*)\3((?:(?!\/?>).|[^\/>])*)(\/?)>/gi;
 const videoRegExp = /<video[ \t>]/g;
 
+const assetsPath = '../../assets';
+
+/**
+* Allows to parse HTML code for usage of elearn.js extensions.
+* Allows to get path to extension necessary files.
+* Allows to get include strings for extension necessary files.
+*/
 class ExtensionManager {
 
     // Scan
@@ -44,19 +51,19 @@ class ExtensionManager {
     // Locations to copy from
 
     static getQuizAssetDir() {
-        return path.resolve(__dirname + '/../assets/elearnjs/extensions/quiz/assets/');
+        return path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/quiz/assets/`);
     }
 
     static getElearnVideoAssetDir() {
-        return path.resolve(__dirname + '/../assets/elearnjs/extensions/elearnvideo/assets/');
+        return path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/elearnvideo/assets/`);
     }
 
     static getClickImageAssetDir() {
-        return path.resolve(__dirname + '/../assets/elearnjs/extensions/clickimage/assets/');
+        return path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/clickimage/assets/`);
     }
 
     static getTimeSliderAssetDir() {
-        return path.resolve(__dirname + '/../assets/elearnjs/extensions/timeslider/assets/');
+        return path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/timeslider/assets/`);
     }
 
     // Asset Strings for a HTML Export
@@ -102,38 +109,38 @@ class ExtensionManager {
 
     static getQuizPDFAssetString() {
         return `<link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/quiz/assets/css/quiz.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/quiz/assets/css/quiz.css`).replace(/\\/g, "/")}" />
                 <link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/pdfAssets/css/quiz.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/pdfAssets/css/quiz.css`).replace(/\\/g, "/")}" />
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/quiz/assets/js/quiz.js').replace(/\\/g, "/")}"></script>`;
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/quiz/assets/js/quiz.js`).replace(/\\/g, "/")}"></script>`;
     }
 
     static getElearnVideoPDFAssetString() {
         return `<link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/elearnvideo/assets/css/elearnvideo.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/elearnvideo/assets/css/elearnvideo.css`).replace(/\\/g, "/")}" />
                 <link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/pdfAssets/css/elearnvideo.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/pdfAssets/css/elearnvideo.css`).replace(/\\/g, "/")}" />
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/elearnvideo/assets/js/elearnvideo.js').replace(/\\/g, "/")}"></script>
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/elearnvideo/assets/js/elearnvideo.js`).replace(/\\/g, "/")}"></script>
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/pdfAssets/js/elearnvideo.js').replace(/\\/g, "/")}"></script>`;
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/pdfAssets/js/elearnvideo.js`).replace(/\\/g, "/")}"></script>`;
     }
 
     static getClickImagePDFAssetString() {
         return `<link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/clickimage/assets/css/clickimage.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/clickimage/assets/css/clickimage.css`).replace(/\\/g, "/")}" />
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/pdfAssets/js/clickimage.js').replace(/\\/g, "/")}"></script>`;
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/pdfAssets/js/clickimage.js`).replace(/\\/g, "/")}"></script>`;
     }
 
     static getTimeSliderPDFAssetString() {
         return `<link rel="stylesheet" type="text/css"
-                    href="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/timeslider/assets/css/timeslider.css').replace(/\\/g, "/")}" />
+                    href="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/timeslider/assets/css/timeslider.css`).replace(/\\/g, "/")}" />
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/extensions/timeslider/assets/js/moment.js').replace(/\\/g, "/")}"></script>
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/extensions/timeslider/assets/js/moment.js`).replace(/\\/g, "/")}"></script>
                 <script type="text/javascript"
-                    src="file:///${path.resolve(__dirname + '/../assets/elearnjs/pdfAssets/js/timeslider.js').replace(/\\/g, "/")}"></script>`;
+                    src="file:///${path.resolve(`${__dirname}/${assetsPath}/elearnjs/pdfAssets/js/timeslider.js`).replace(/\\/g, "/")}"></script>`;
     }
 }
 

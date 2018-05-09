@@ -13,13 +13,18 @@ const EXTRACT_ALL_LINKED_FILES = 2;
 
 const Showdown = require('showdown');
 const PDF = require('html-pdf');
-const OptionMenuManager = require('./OptionMenuManager.js');
 const FileExtractor = require('./FileExtractor.js');
 const FileExtractorObject = require('./FileExtractorObject.js');
 const ExtensionManager = require('./ExtensionManager.js');
-const ExportOptionManager = require('./ExportOptionManager.js');
 const elearnExtension = require('./ShowdownElearnJS.js');
+const OptionMenuManager = require('../ui/OptionMenuManager.js');
+const ExportOptionManager = require('../ui/ExportOptionManager.js');
 
+const assetsPath = '../../assets';
+
+/**
+* Manages the markdown conversion and file export.
+*/
 class FileWriter {
     constructor(optionMenuManager) {
         this.exportOptionManager = new ExportOptionManager(optionMenuManager);
@@ -164,7 +169,7 @@ class FileWriter {
                 filesToExport = filesToExport.concat(fileExtractorObject.files);
             }
 
-            FileWriter.readFile(path.resolve(__dirname + '/../assets/elearnjs/template.html'), (data) => {
+            FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template.html`), (data) => {
                 // data => template.html
                 var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
                     .replace(/\$\$extensions\$\$/, () => {
@@ -246,7 +251,7 @@ class FileWriter {
                 customStyle = `<link rel="stylesheet" type="text/css" href="${customStyleFile}">`;
             }
 
-            FileWriter.readFile(path.resolve(__dirname + '/../assets/elearnjs/template_pdf.html'), (data) => {
+            FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template_pdf.html`), (data) => {
                 // data => template.html
                 var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
                     .replace(/\$\$extensions\$\$/, () => {
@@ -261,7 +266,7 @@ class FileWriter {
                     .replace(/\$\$header\$\$/, () => {return header})
                     .replace(/\$\$footer\$\$/, () => {return footer})
                     .replace(/\$\$body\$\$/, () => {return html})
-                    .replace(/\$\$assetspath\$\$/g, () => {return "file:///" + path.resolve(__dirname + '/../assets/elearnjs/').replace(/\\/g, "/")});
+                    .replace(/\$\$assetspath\$\$/g, () => {return "file:///" + path.resolve(`${__dirname}/${assetsPath}/elearnjs/`).replace(/\\/g, "/")});
 
                 // For debugging only
                 //self.saveToFilePath(fileContent, filePath + ".html", EXTRACT_NOTHING);
@@ -541,7 +546,7 @@ class FileWriter {
     */
     static writeAssets(dirPath, opts, callback, error) {
         var outPath = path.resolve(dirPath + "/assets/");
-        var folders = [path.resolve(__dirname + '/../assets/elearnjs/assets/')];
+        var folders = [path.resolve(`${__dirname}/${assetsPath}/elearnjs/assets/`)];
 
         if(opts.includeQuiz) folders.push(ExtensionManager.getQuizAssetDir());
         if(opts.includeElearnVideo) folders.push(ExtensionManager.getElearnVideoAssetDir());

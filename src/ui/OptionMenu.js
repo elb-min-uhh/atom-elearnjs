@@ -1,6 +1,5 @@
 "use strict";
 
-
 class OptionMenu {
     /**
     * Creates an option menu.

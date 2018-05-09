@@ -1,6 +1,6 @@
 {
   "name": "atom-elearnjs",
-  "main": "./lib/main",
+  "main": "./src/main",
   "version": "0.3.0",
   "description": "Atom package for conversion of elearn.js Markdown to HTML and PDF",
   "keywords": [],
