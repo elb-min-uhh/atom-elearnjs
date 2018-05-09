@@ -787,6 +787,8 @@
     background: #dcdcdcCC;
     color: #444;
     border-radius: 5px;
+    box-shadow: 0 0 5px rgb(0,0,0);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 .elearnjs-video .note-hint:hover {

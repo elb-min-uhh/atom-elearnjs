@@ -269,8 +269,8 @@ eLearnVideoJS.videoAddUserInteractionListeners = function(div) {
         }
     });
 
-    div.bind('keypress', function(event) {
-        eLearnVideoJS.videoKeyPress(div, event);
+    div.bind('keydown', function(event) {
+        eLearnVideoJS.videoKeyDown(div, event);
     });
 };
 
@@ -809,16 +809,43 @@ eLearnVideoJS.updateVideoVolume = function(div) {
 // VIDEO KEYBOARD EVENTS ------------------------------------
 
 /**
-* Processes a keypress event on a video player. The player needs to be target
+* Processes a keydown event on a video player. The player needs to be target
 * of the event so this is triggered. (e.g. Space to toggle play/pause)
 * @param div: the .elearnjs-video Wrapper of the video element.
 */
-eLearnVideoJS.videoKeyPress = function(div, event) {
-    if(event.which === 32) {
+eLearnVideoJS.videoKeyDown = function(div, event) {
+    var keyCode = event.keyCode || event.which;
+
+    // space
+    if(keyCode === 32) {
         event.preventDefault();
+        event.stopImmediatePropagation();
         eLearnVideoJS.videoTogglePlay(div);
         eLearnVideoJS.videoHover(div);
     }
+    // left arrow
+    else if(keyCode === 37) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        eLearnVideoJS.videoKeyTimeChange(div, -5000);
+    }
+    else if(keyCode === 39) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        eLearnVideoJS.videoKeyTimeChange(div, 5000);
+    }
+};
+
+/**
+* Changes the current video time of the video contained in the div
+* by `timeChange`.
+*
+* @param div: the .elearnjs-video Wrapper of the video element.
+* @param timeChange: int, the time to be added in ms. e.g. `5000` for +5 seconds
+*/
+eLearnVideoJS.videoKeyTimeChange = function(div, timeChange) {
+    div.find('video').get(0).currentTime += (timeChange / 1000);
+    eLearnVideoJS.videoHover(div);
 };
 
 // PROGRESSBAR ----------------------------------------------
@@ -1165,7 +1192,9 @@ eLearnVideoJS.getUserVideoNotesContainer = function() {
 * Adds the "show all notes" checkbox to a notes container.
 */
 eLearnVideoJS.addShowAllTo = function(notes) {
+    notes.prepend('<div style="clear: both">');
     notes.prepend('<label class="show_all_notes"><input type="checkbox" name="show_all" value="show_all"/>Alle einblenden</label>');
+
     notes.find('input[name="show_all"]').on('change', function(e) {
         eLearnVideoJS.showAllNotes(notes, $(this).is(':checked'));
     });
