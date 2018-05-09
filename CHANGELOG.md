@@ -1,6 +1,9 @@
 ## 0.3.1
 * General:
     * Updated _elearn.js_ to v1.0.2
+* HTML:
+    * Export of linked files after bundled asset export
+        * Possible to overwrite bundled versions
 ## 0.3.0
 * General:
     * Support for export of unsaved files
