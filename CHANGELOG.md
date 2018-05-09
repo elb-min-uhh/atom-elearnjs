@@ -5,6 +5,9 @@
 * HTML:
     * Export of linked files after bundled asset export
         * Possible to overwrite bundled versions
+    * _File successfully saved_ will be displayed correctly after everything was
+    exported
+        * Export of linked files was ignored before
 ## 0.3.0
 * General:
     * Support for export of unsaved files

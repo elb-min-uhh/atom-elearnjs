@@ -3,7 +3,8 @@
 const path = require('path');
 const fs = require('fs');
 
-const FileExtractorObject = require('./FileExtractorObject.js')
+const FileExtractorObject = require('./FileExtractorObject.js');
+const PromiseCounter = require('../util/PromiseCounter.js');
 
 // Capturing groups: 1, 2 for attributes before src, 3: wrapping char ["'], 4: src value
 var imageSrcRegExp = /<(img)[ \t]((?:(?!src[ \t]*=[ \t]*["'])\S+[ \t]*=[ \t]*(["'])(?:\\\3|(?!\3).)*\3[ \t]*)*)src[ \t]*=[ \t]*(["'])((?:\\\4|(?!\4).)*)\4((?:(?!\/?>).|[^\/>])*)(\/?)>/gi;
@@ -51,60 +52,62 @@ var processSourceReplacement = function(wholeMatch, tag, before, wrapBefore, wra
 /**
 * Copy a file, creates nonexistent directories
 */
-function copyFile(source, target, ignoreNotExistent, cb) {
-    // do not overwrite with itself [will create a 0B file]
-    if(path.resolve(source) === path.resolve(target)) {
-        done();
-        return;
-    }
-
-    // nonexistent source
-    if(!fs.existsSync(source)) {
-        if(!ignoreNotExistent) cb(`File does not exist ${source}`);
-        return;
-    }
-
-    var ensureDirectoryExistence = function (filePath) {
-        var dirname = path.dirname(filePath);
-        if (fs.existsSync(dirname)) {
-            return true;
+function copyFile(source, target, ignoreNotExistent) {
+    var promise = new Promise((resolve, reject) => {
+        // do not overwrite with itself [will create a 0B file]
+        if(path.resolve(source) === path.resolve(target)) {
+            resolve();
+            return;
         }
-        ensureDirectoryExistence(dirname);
-        fs.mkdirSync(dirname);
-    }
-    ensureDirectoryExistence(target);
 
-    var cbCalled = false;
-    var rd = fs.createReadStream(source);
-    rd.on("error", function (err) {
-        done(err);
-    });
-    var wr = fs.createWriteStream(target);
-    wr.on("error", function (err) {
-        done(err);
-    });
-    wr.on("close", function (ex) {
-        done();
-    });
-    rd.pipe(wr);
-    function done(err) {
-        if (!cbCalled) {
-            cb(err);
-            cbCalled = true;
+        // nonexistent source
+        if(!fs.existsSync(source)) {
+            if(!ignoreNotExistent) reject(`File does not exist ${source}`);
+            return;
         }
-    }
+
+        var ensureDirectoryExistence = function (filePath) {
+            var dirname = path.dirname(filePath);
+            if (fs.existsSync(dirname)) {
+                return true;
+            }
+            ensureDirectoryExistence(dirname);
+            fs.mkdirSync(dirname);
+        }
+        ensureDirectoryExistence(target);
+
+        var cbCalled = false;
+        var rd = fs.createReadStream(source);
+        rd.on("error", function (err) {
+            reject(err);
+        });
+        var wr = fs.createWriteStream(target);
+        wr.on("error", function (err) {
+            reject(err);
+        });
+        wr.on("close", function (ex) {
+            resolve();
+        });
+        rd.pipe(wr);
+    });
+    return promise;
 };
 
 class FileExtractor {
-    static extractAll(files, inputRoot, outputRoot) {
+    static extractAll(files, inputRoot, outputRoot, timeout) {
+        var promises = [];
+
         for(var file of files) {
             var inputPath = path.resolve(`${inputRoot}/${file.relativeInputPath}`).replace(/\\/g, "/");
             var outputPath = path.resolve(`${outputRoot}/${file.relativeOutputPath}`).replace(/\\/g, "/");
 
-            copyFile(inputPath, outputPath, true, (err) => {
-                if(err) throw err;
-            });
+            var promise = copyFile(inputPath, outputPath, true);
+            promises.push(promise);
         }
+
+        return new Promise((resolve, reject) => {
+            new PromiseCounter(promises, timeout).then(resolve, reject);
+        });
     }
 
     static replaceAllLinks(html) {

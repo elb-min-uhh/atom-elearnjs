@@ -148,6 +148,19 @@ class FileWriter {
 
             var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
 
+            // define finishing functions
+            var resolve = () => {
+                if(notification) notification.dismiss();
+                atom.notifications.addSuccess("File saved successfully.");
+                if(callback) callback();
+            };
+            var reject = (err) => {
+                if(notification) notification.dismiss();
+                if(callback) callback(err);
+                else throw err;not
+            };
+
+            // conversion
             var meta = elearnExtension.parseMetaData(text);
             var imprint = "";
 
@@ -169,37 +182,57 @@ class FileWriter {
                 filesToExport = filesToExport.concat(fileExtractorObject.files);
             }
 
-            FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template.html`), (data) => {
-                // data => template.html
-                var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
-                    .replace(/\$\$extensions\$\$/, () => {
-                        return ExtensionManager.getHTMLAssetStrings(
-                            opts.includeQuiz,
-                            opts.includeElearnVideo,
-                            opts.includeClickImage,
-                            opts.includeTimeSlider);
-                    })
-                    .replace(/\$\$imprint\$\$/, () => {return imprint})
-                    .replace(/\$\$body\$\$/, () => {return html});
-
-                var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
-                self.saveToFilePath(fileContent, filePath, extractFiles, opts, notification)
-                    .then(() => {
-                        // export linked files
-                        if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                            var pathIn = self.getFileDir();
-                            var pathOut = self.getFileDir(filePath);
-                            FileExtractor.extractAll(filesToExport, pathIn, pathOut);
-                        }
-                    }, (err) => {
-                        throw err;
-                    });
-                if(callback) callback();
-            }, (err) => {
-                if(callback) callback(err);
-                else throw err;
-            });
+            // write to file
+            self.exportHTML(filePath, html, meta, imprint, opts, filesToExport, resolve, reject);
         });
+    }
+
+    /**
+    * Exports the converted content into a file.
+    * Based on options and filesToExport it will also export/copy additional
+    * files.
+    *
+    * @param filePath: the path where the .html output file is stored (including name)
+    * @param html: the converted HTML content, not the whole file, ohne what is
+    *              within the elearn.js div.page (check the template)
+    * @param meta: the converted meta part. HTML <scripts> and other added to
+    *              the html <head>
+    * @param imprint: HTML to be inserted into the elearn.js imprint
+    * @param opts: the ExportOptions from the ExportOptionManager
+    * @param filesToExport: list of file infos for export.
+    *                       Check FileExtractorObject for more info
+    * @param resolve: function() to be called when resolved correctly
+    * @param reject: function(error) to be called on error
+    */
+    exportHTML(filePath, html, meta, imprint, opts, filesToExport, resolve, reject) {
+        const self = this;
+
+        FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template.html`), (data) => {
+            // data => template.html
+            var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
+                .replace(/\$\$extensions\$\$/, () => {
+                    return ExtensionManager.getHTMLAssetStrings(
+                        opts.includeQuiz,
+                        opts.includeElearnVideo,
+                        opts.includeClickImage,
+                        opts.includeTimeSlider);
+                })
+                .replace(/\$\$imprint\$\$/, () => {return imprint})
+                .replace(/\$\$body\$\$/, () => {return html});
+
+            var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
+            self.saveToFilePath(fileContent, filePath, extractFiles, opts)
+                .then(() => {
+                    // export linked files
+                    if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
+                        var pathIn = self.getFileDir();
+                        var pathOut = self.getFileDir(filePath);
+                        FileExtractor.extractAll(filesToExport, pathIn, pathOut, 30000)
+                            .then(resolve, reject);
+                    }
+                    else resolve();
+                }, reject);
+        }, reject);
     }
 
     /**
@@ -465,15 +498,13 @@ class FileWriter {
     *
     * @return Promise to be solved when done
     */
-    saveToFilePath(content, filePath, extractFiles, extractOpts, notification) {
+    saveToFilePath(content, filePath, extractFiles, extractOpts) {
         const self = this;
         const fileOut = filePath;
         var promise = new Promise((resolve, reject) => {
             var writeFile = () => {
                 FileWriter.writeFile(fileOut, content, () => {
                     console.log("File saved at:", fileOut);
-                    if(notification) notification.dismiss();
-                    atom.notifications.addSuccess("File saved successfully.");
                     if(resolve) resolve();
                 });
             };
