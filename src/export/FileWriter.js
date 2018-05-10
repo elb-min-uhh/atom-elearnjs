@@ -209,16 +209,7 @@ class FileWriter {
 
         FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template.html`), (data) => {
             // data => template.html
-            var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
-                .replace(/\$\$extensions\$\$/, () => {
-                    return ExtensionManager.getHTMLAssetStrings(
-                        opts.includeQuiz,
-                        opts.includeElearnVideo,
-                        opts.includeClickImage,
-                        opts.includeTimeSlider);
-                })
-                .replace(/\$\$imprint\$\$/, () => {return imprint})
-                .replace(/\$\$body\$\$/, () => {return html});
+            var fileContent = self.getHTMLFileContent(data, html, meta, imprint, opts);
 
             var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
             self.saveToFilePath(fileContent, filePath, extractFiles, opts)
@@ -233,6 +224,31 @@ class FileWriter {
                     else resolve();
                 }, reject);
         }, reject);
+    }
+
+    /**
+    * Inserts necessary elements into the PDF Template to create the
+    * final fileContent.
+    *
+    * @param data: the content of the template_pdf.html as string
+    * @param html: the converted HTML content, not the whole file, ohne what is
+    *              within the elearn.js div.page (check the template)
+    * @param meta: the converted meta part. HTML <scripts> and other added to
+    *              the html <head>
+    * @param imprint: HTML to be inserted into the elearn.js imprint
+    * @param opts: the ExportOptions from the ExportOptionManager
+    */
+    getHTMLFileContent(data, html, meta, imprint, opts) {
+        return data.replace(/\$\$meta\$\$/, () => {return meta})
+            .replace(/\$\$extensions\$\$/, () => {
+                return ExtensionManager.getHTMLAssetStrings(
+                    opts.includeQuiz,
+                    opts.includeElearnVideo,
+                    opts.includeClickImage,
+                    opts.includeTimeSlider);
+            })
+            .replace(/\$\$imprint\$\$/, () => {return imprint})
+            .replace(/\$\$body\$\$/, () => {return html});
     }
 
     /**
@@ -253,8 +269,6 @@ class FileWriter {
         var text = atom.workspace.getActiveTextEditor().getText();
         var html = self.pdfBodyConverter.makeHtml(text);
 
-        // TODO document DetectionMethod Setting in WIKI
-        // TODO open PDF Export Options
         self.exportOptionManager.openPDFExportOptions(
                 self.exportOptionManager.getPDFExportOptionDefaults(html),
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
@@ -266,70 +280,113 @@ class FileWriter {
 
             var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
 
-            var meta = elearnExtension.parseMetaData(text);
-            var zoom = `<style>html {zoom: ${atom.config.get('atom-elearnjs.pdfConfig.zoom')}}</style>`;
-            // header and footer
-            var header = atom.config.get('atom-elearnjs.pdfConfig.header');
-            if(!header) header = self.getDefaultHeader();
-            var footer = atom.config.get('atom-elearnjs.pdfConfig.footer');
-            if(!footer) footer = self.getDefaultFooter();
-
-            var customStyleFile = atom.config.get('atom-elearnjs.pdfConfig.customStyle');
-            var customStyle;
-            if(!customStyleFile || !fs.existsSync(path.resolve(customStyleFile))) {
-                customStyle = "";
-            }
-            else {
-                customStyleFile = "file:///" + path.resolve(customStyleFile).replace(/\\/g, "/");
-                customStyle = `<link rel="stylesheet" type="text/css" href="${customStyleFile}">`;
-            }
-
-            FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template_pdf.html`), (data) => {
-                // data => template.html
-                var fileContent = data.replace(/\$\$meta\$\$/, () => {return meta})
-                    .replace(/\$\$extensions\$\$/, () => {
-                        return ExtensionManager.getPDFAssetStrings(
-                            opts.includeQuiz,
-                            opts.includeElearnVideo,
-                            opts.includeClickImage,
-                            opts.includeTimeSlider);
-                    })
-                    .replace(/\$\$zoom\$\$/, () => {return zoom})
-                    .replace(/\$\$custom_style\$\$/, () => {return customStyle})
-                    .replace(/\$\$header\$\$/, () => {return header})
-                    .replace(/\$\$footer\$\$/, () => {return footer})
-                    .replace(/\$\$body\$\$/, () => {return html})
-                    .replace(/\$\$assetspath\$\$/g, () => {return "file:///" + path.resolve(`${__dirname}/${assetsPath}/elearnjs/`).replace(/\\/g, "/")});
-
-                // For debugging only
-                //self.saveToFilePath(fileContent, filePath + ".html", EXTRACT_NOTHING);
-
-                const renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
-
-                // generate pdf content
-                var pdf = PDF.create(fileContent, self.getPdfOutputOptions(renderDelay))
-                        .toFile(filePath, (err, res) => {
-                    if(err) {
-                        if(callback) callback(err);
-                        else throw err;
-                    }
-
-                    console.log("File saved at:", res);
-                    notification.dismiss();
-                    atom.notifications.addSuccess("File saved successfully.");
-                    if(callback) callback();
-                });
-            }, (err) => {
+            // define finishing functions
+            var resolve = () => {
+                if(notification) notification.dismiss();
+                atom.notifications.addSuccess("File saved successfully.");
+                if(callback) callback();
+            };
+            var reject = (err) => {
+                if(notification) notification.dismiss();
                 if(callback) callback(err);
-                else throw err;
-            });
+                else throw err;not
+            };
+
+            var meta = elearnExtension.parseMetaData(text);
+
+            self.exportPDF(filePath, html, meta, opts, resolve, reject);
         });
     }
 
+    /**
+    * Exports the converted content into a file.
+    * Based on options and filesToExport it will also export/copy additional
+    * files.
+    *
+    * @param filePath: the path where the .html output file is stored (including name)
+    * @param html: the converted HTML content, not the whole file, ohne what is
+    *              within the elearn.js div.page (check the template)
+    * @param meta: the converted meta part. HTML <scripts> and other added to
+    *              the html <head>
+    * @param opts: the ExportOptions from the ExportOptionManager
+    * @param resolve: function() to be called when resolved correctly
+    * @param reject: function(error) to be called on error
+    */
+    exportPDF(filePath, html, meta, opts, resolve, reject) {
+        const self = this;
+
+        FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template_pdf.html`), (data) => {
+            // data => template.html
+            var fileContent = self.getPDFFileContent(data, html, meta, opts);
+
+            // For debugging only
+            //self.saveToFilePath(fileContent, filePath + ".html", EXTRACT_NOTHING);
+
+            const renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
+
+            // generate pdf content
+            var pdf = PDF.create(fileContent, self.getPdfOutputOptions(renderDelay))
+                    .toFile(filePath, (err, res) => {
+                if(err) reject(err);
+
+                console.log("File saved at:", res);
+                resolve();
+            });
+        }, reject);
+    }
+
+    /**
+    * Inserts necessary elements into the PDF Template to create the
+    * final fileContent.
+    *
+    * @param data: the content of the template_pdf.html as string
+    * @param html: the base HTML as generated HTML Body of the file
+    * @param meta: additional header elements for the HTML file
+    * @param opts: the ExportOptions from the ExportOptionManager
+    */
+    getPDFFileContent(data, html, meta, opts) {
+        const self = this;
+
+        var zoom = `<style>html {zoom: ${atom.config.get('atom-elearnjs.pdfConfig.zoom')}}</style>`;
+        // header and footer
+        var header = atom.config.get('atom-elearnjs.pdfConfig.header');
+        if(!header) header = self.getDefaultHeader();
+        var footer = atom.config.get('atom-elearnjs.pdfConfig.footer');
+        if(!footer) footer = self.getDefaultFooter();
+
+        var customStyleFile = atom.config.get('atom-elearnjs.pdfConfig.customStyle');
+        var customStyle = "";
+        if(customStyleFile && fs.existsSync(path.resolve(customStyleFile))) {
+            customStyleFile = "file:///" + path.resolve(customStyleFile).replace(/\\/g, "/");
+            customStyle = `<link rel="stylesheet" type="text/css" href="${customStyleFile}">`;
+        }
+
+        return data.replace(/\$\$meta\$\$/, () => {return meta})
+            .replace(/\$\$extensions\$\$/, () => {
+                return ExtensionManager.getPDFAssetStrings(
+                    opts.includeQuiz,
+                    opts.includeElearnVideo,
+                    opts.includeClickImage,
+                    opts.includeTimeSlider);
+            })
+            .replace(/\$\$zoom\$\$/, () => {return zoom})
+            .replace(/\$\$custom_style\$\$/, () => {return customStyle})
+            .replace(/\$\$header\$\$/, () => {return header})
+            .replace(/\$\$footer\$\$/, () => {return footer})
+            .replace(/\$\$body\$\$/, () => {return html})
+            .replace(/\$\$assetspath\$\$/g, () => {return "file:///" + path.resolve(`${__dirname}/${assetsPath}/elearnjs/`).replace(/\\/g, "/")});
+    }
+
+    /**
+    * The default PDF Header HTML elements
+    */
     getDefaultHeader() {
         return ``;
     }
 
+    /**
+    * The default PDF Footer HTML elements
+    */
     getDefaultFooter() {
         return `<div id="pageFooter" style="font-family: Arial, Verdana, sans-serif; color: #666; position: absolute; height: 100%; width: 100%;">
                     <span style="position: absolute; bottom: 0; right: 0">{{page}}</span>
@@ -587,6 +644,9 @@ class FileWriter {
         FileWriter.writeFolders(folders, outPath, callback, error);
     }
 
+    /**
+    * Copies/writes a list of folders by their absolute paths to the outPath
+    */
     static writeFolders(folders, outPath, callback, error) {
         if(!folders || !folders.length) {
             if(callback) callback();
