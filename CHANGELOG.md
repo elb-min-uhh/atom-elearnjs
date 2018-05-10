@@ -4,7 +4,7 @@
     * Updated _elearnvideo.js_ to support `stopping`
 * HTML:
     * Export of linked files after bundled asset export
-        * Possible to overwrite bundled versions
+        * Makes it possible to overwrite bundled versions
     * _File successfully saved_ will be displayed correctly after everything was
     exported
         * Export of linked files was ignored before
