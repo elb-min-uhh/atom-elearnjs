@@ -125,7 +125,7 @@ var pdfConfig = {
     },
     header: {
         title: 'Custom header text',
-        description: 'HTML to be set as header. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be passed into the <body> directly. Make sure to use it correctly.',
+        description: 'HTML to be set as header. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be pasted into the `<body>` directly. Make sure to use it correctly.',
         type: 'string',
         default: '',
         order: 30,
@@ -139,7 +139,7 @@ var pdfConfig = {
     },
     footer: {
         title: 'Custom footer text',
-        description: 'HTML to be set as footer. The footer dimensions are set to a height of 17mm by default. If you want to overwrite the origin footer use `<div id="pageFooter">YOUR CONTENT</div>`. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be passed into the <body> directly. Make sure to use it correctly.',
+        description: 'HTML to be set as footer. The footer dimensions are set to a height of 17mm by default. If you want to overwrite the origin footer use `<div id="pageFooter">YOUR CONTENT</div>`. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be pasted into the `<body>` directly. Make sure to use it correctly.',
         type: 'string',
         default: '',
         order: 50,
@@ -157,7 +157,7 @@ var pdfConfig = {
         type: 'string',
         default: '',
         order: 70,
-    }
+    },
 };
 
 var config = {
