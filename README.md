@@ -6,7 +6,7 @@ and interactive elements.
 
 Create a simple _elearn.js_ based script in no time!
 
-![atom-elearnjs Demo Video](/images/demo.gif)
+![atom-elearnjs Demo Video](https://raw.githubusercontent.com/elb-min-uhh/atom-elearnjs/master/images/demo.gif)
 
 ## Installation
 
