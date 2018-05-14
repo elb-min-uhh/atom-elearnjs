@@ -1,6 +1,5 @@
 /*
-* quiz.js v0.4.1 - 18/04/25
-* Ergänzend zum elearn.js v1.0.1
+* quiz.js v0.4.2 - 18/05/15
 * JavaScript Quiz - by Arne Westphal
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
@@ -22,6 +21,33 @@ quizJS.quizTypes = {
     PETRI : "petri",
     DRAW : "drawing"
 };
+
+quizJS.localization = {
+    "de" : {
+        "solve": "Lösen",
+        "reset": "Zurücksetzen",
+        "hide": "Ausblenden",
+        "unanswered": "Du musst diese Frage zuerst beantworten, bevor du lösen kannst.",
+        "already_answered": "Nicht änderbar, da die Frage bereits beantwortet wurde",
+        "timeup": "Die Zeit ist abgelaufen. Die Frage wurde automatisch beantwortet und gesperrt.",
+        "canvas.redo": "Wiederholen",
+        "canvas.undo": "Rückgängig",
+        "canvas.clear": "Löschen",
+    },
+    "en" : {
+        "solve": "Solve",
+        "reset": "Reset",
+        "hide": "Hide",
+        "unanswered": "You have to answer the question before you can solve.",
+        "already_answered": "Cannot be changed because it was solved already.",
+        "timeup": "The timer has expired. The question was solved and blocked automatically.",
+        "canvas.redo": "Redo",
+        "canvas.undo": "Undo",
+        "canvas.clear": "Clear",
+    },
+};
+
+quizJS.selectedLocale = quizJS.selectedLocale || "de";
 
 quizJS.nextQuestionId = 0;
 quizJS.start_time = {};
@@ -64,6 +90,7 @@ quizJS.getVisibleQuestionsAnswered = function() {
 * Diese Funktion initialisiert das Quiz.
 */
 quizJS.initiateQuiz = function() {
+    quizJS.setLanguage(quizJS.selectedLocale);
     // Keine Tastaturnavigation
     keyAllowed = false;
 
@@ -79,29 +106,42 @@ quizJS.initiateQuiz = function() {
                 div.attr('qtype', quizJS.quizTypes.CHOICE);
             }
         }
-    });
 
-    // Buttons hinzufügen
-    $('div.question').after('<button class="quizButton">Lösen</button><button class="quizButton weiter">Zurücksetzen</button>');
+        var lang;
+        if(div.attr('lang') && quizJS.localization[div.attr('lang').toLowerCase()]) lang = div.attr('lang').toLowerCase();
+
+        // Buttons hinzufügen
+        var solve = $('<button lang-code="solve" class="quizButton solve"></button>');
+        if(lang) solve.attr('lang', lang);
+        div.after(solve);
+        quizJS.localizeElement(solve);
+
+        solve.click(function(e) { quizJS.submitAns(div);});
+
+        var reset = $('<button lang-code="reset" class="quizButton reset"></button>');
+        if(lang) reset.attr('lang', lang);
+        solve.after(reset);
+        quizJS.localizeElement(reset);
+
+        reset.click(function(e) { quizJS.submitAns(div);});
+
+        // Add No Selection Feedback
+        var unanswered = $('<div lang-code="unanswered" class="feedback noselection"></div>');
+        div.append(unanswered);
+        quizJS.localizeElement(unanswered);
+    });
 
     // Hide Feedbacks
     $("div.question").children("div.feedback").hide();
 
-    // Add No Selection Feedback
-    $("div.question").append('<div class="feedback noselection">Du musst diese Frage zuerst beantworten, bevor du lösen kannst.</div>');
-
-    // Hide Weiter-Buttons
-    $("button.weiter").hide();
+    // Hide reset-Buttons
+    $("button.reset").hide();
 
     quizJS.windowResizing();
     $(window).resize(function() {quizJS.windowResizing()});
 
     quizJS.shuffleAnswers();
     quizJS.replaceRandoms();
-
-    $(":button").filter(".quizButton").click(function() {
-        quizJS.submitAns(this);
-    });
 
     // Submit with enter for every question possible
     $(".answers label").keyup(function(event) {
@@ -171,16 +211,42 @@ quizJS.initListeners = function() {
 };
 
 /**
+* Sets the language for all elements.
+*/
+quizJS.setLanguage = function(langCode) {
+    langCode = langCode.toLowerCase();
+    if(quizJS.localization[langCode] !== undefined) {
+        quizJS.selectedLocale = langCode;
+        $('[lang-code]').each(function(i,e) {
+            quizJS.localizeElement($(e));
+        });
+    }
+    else {
+        throw "Unsupported language selected. Supported language codes are: "  + Object.keys(quizJS.localization).toString();
+    }
+}
+quizJS.selectLanguage = quizJS.setLanguage;
+
+/**
+* Localizes one specific element to match the selected language.
+* The selected language is the quizJS.selectedLocale if not specific
+* `lang` attribute is present in the HTML element
+*/
+quizJS.localizeElement = function(el) {
+    var loc = quizJS.selectedLocale;
+    if(el.closest('[lang]').length) {
+        var lang = el.closest('[lang]').attr('lang').toLowerCase();
+        if(quizJS.localization[lang]) loc = lang;
+    }
+    el.text(quizJS.localization[loc][el.attr("lang-code")]);
+}
+
+/**
 * Wird beim Bestätigen einer Antwort aufgeruffen.
 * @param button - ist der geklickte Button von dem aus die beantwortete Frage
 *                 bestimmt wird.
 */
-quizJS.submitAns = function(button, force) {
-    if($(button).filter(".weiter").length > 0) {
-        button = $(button).prev(":button");
-    }
-    var div = $(button).prev('div.question');
-
+quizJS.submitAns = function(div, force) {
     // Falls die Frage bereits beantwortet wurde, wird sie zurückgesetzt. (2. Button)
     if(div.is('.answered')) {
         quizJS.resetQuestion(div);
@@ -193,7 +259,6 @@ quizJS.submitAns = function(button, force) {
     quizJS.deleteLabelColoring(labels);
 
     var type = div.attr("qtype");
-
 
     var correct = true;
 
@@ -252,15 +317,15 @@ quizJS.submitAns = function(button, force) {
         }
         else if(type === quizJS.quizTypes.HOTSPOT) {
             var hss = div.find('.hotspot');
-            var gesucht = div.find('.gesucht').html();
-            var answer = div.find('a.ans').filter('[id="'+gesucht+'"]');
+            var task = div.find('.gesucht,.task').html();
+            var answer = div.find('a.ans').filter('[id="'+task+'"]');
             correct = quizJS.getCorrectHotspot(div, hss, answer, force);
             hss.filter('.act').removeClass('act');
             if(correct !== -1 && correct !== true && correct !== 2) return;
         }
         else if(type === quizJS.quizTypes.PETRI) {
             correct = quizJS.processPetri(div, force);
-            if(div.is(".unbewertet")) {
+            if(div.is(".unbewertet") || div.is(".unranked")) {
                 quizJS.deleteLabelColoring(div);
                 div.find('.feedback').hide();
             }
@@ -286,7 +351,7 @@ quizJS.submitAns = function(button, force) {
         div.children("div.feedback").filter(".noselection").show();
         return;
     }
-    else if(div.is(".unbewertet")) {
+    else if(div.is(".unbewertet") || div.is(".unranked")) {
         quizJS.deleteLabelColoring(div);
         div.children("div.feedback").filter(".noselection").hide();
         div.children("div.feedback").filter(".correct").hide();
@@ -316,9 +381,9 @@ quizJS.submitAns = function(button, force) {
     quizJS.blockQuestion(div);
 
     div.addClass("answered");
-    div.next("button.quizButton").hide();
+    div.next("button.quizButton.solve").hide();
 
-    if(!div.is('.reset_blocked')) div.nextUntil("div").filter("button.quizButton.weiter").show();
+    if(!div.is('.reset_blocked')) div.nextUntil("div").filter("button.quizButton.reset").show();
 };
 
 
@@ -623,7 +688,7 @@ quizJS.getCorrectMatrixChoice = function(rows, answers, force) {
         }
 
         inputs.each(function(ii, ee) {
-            var ans = $(rows.find(".antwort").get(ii)).attr("id");
+            var ans = $(rows.find(".antwort,.answer").get(ii)).attr("id");
             ans = quizJS.encryptMD5(ans);
 
             // ausgewählt und richtig oder nicht ausgewählt und nicht richtig (insg richtig)
@@ -672,10 +737,10 @@ quizJS.getCorrectHotspot = function(div, hss, answer, force) {
         if(!correct) cl = "inc";
 
         hss.filter('.act').find('.descr').append("<div class='"+cl+"'>"
-                                                    + div.find('.gesucht').html()
+                                                    + div.find('.gesucht,.task').html()
                                                     + "</div>");
 
-        if(!div.is('.unbewertet')) {
+        if(!div.is('.unbewertet') && !div.is(".unranked")) {
             if(correct) {
                 div.children("div.feedback").filter(".noselection").hide();
                 div.children("div.feedback").filter(".incorrect").hide();
@@ -798,7 +863,7 @@ quizJS.processDrawing = function(div) {
 quizJS.finishQuestion = function(div) {
     var try_count = 50;
     while(!div.is(".answered") && try_count > 0) {
-        quizJS.submitAns(div.next('button'), true);
+        quizJS.submitAns(div, true);
         try_count -= 1;
     }
 };
@@ -845,7 +910,7 @@ quizJS.initiateChoice = function() {
 quizJS.initiateFreeText = function() {
     var root = $('[qtype="'+quizJS.quizTypes.FREE_TEXT+'"]');
 
-    root.addClass("unbewertet");
+    root.addClass("unranked");
 };
 
 
@@ -1234,7 +1299,7 @@ quizJS.hotspotNextObject = function(root) {
         quizJS.shuffle(ans);
     }
 
-    root.find('.gesucht').html(ans.first().attr('id'));
+    root.find('.gesucht,.task').html(ans.first().attr('id'));
     ans.first().addClass("used");
 
     return ans.length > 0;
@@ -1355,11 +1420,11 @@ quizJS.initiatePetriImage = function() {
         div.find('.petri_image').find('img').hide();
         div.find('.petri_image').find('img').first().show();
 
-        div.find('.petri_aufgabe').find('img').hide();
-        div.find('.petri_aufgabe').find(
+        div.find('.petri_aufgabe,.petri_task').find('img').hide();
+        div.find('.petri_aufgabe,.petri_task').find(
             '#'+div.find('.petri_image').find('img').first().attr("id")).show();
 
-        div.find('.gesucht').html(div.find('.petri_image').find('img').first().attr("task"));
+        div.find('.gesucht,.task').html(div.find('.petri_image').find('img').first().attr("task"));
 
         // Klicken auf Hotspot
         div.find('.place').click(function() {
@@ -1413,15 +1478,15 @@ quizJS.petriNextImage = function(div) {
 };
 
 quizJS.petriNextAufgabenImage = function(div) {
-    div.find('.petri_aufgabe').find('img').hide();
-    div.find('.petri_aufgabe').find('#'+div.find('.petri_image').find('img:visible').attr("id")).show();
+    div.find('.petri_aufgabe,.petri_task').find('img').hide();
+    div.find('.petri_aufgabe,.petri_task').find('#'+div.find('.petri_image').find('img:visible').attr("id")).show();
 };
 
 quizJS.petriNextPart = function(div) {
     div.find('.feedback').hide();
     quizJS.petriNextImage(div);
     quizJS.petriNextAufgabenImage(div);
-    div.find('.gesucht').html(div.find('.petri_image').find('img:visible').attr("task"));
+    div.find('.gesucht,.task').html(div.find('.petri_image').find('img:visible').attr("task"));
 };
 
 quizJS.petriFinished = function(div) {
@@ -1637,7 +1702,9 @@ quizJS.updateTimers = function() {
             quizJS.blockQuestion(question);
             question.find('.feedback.noselection').hide();
 
-            question.append("<div class='feedback timeup'>Die Zeit ist abgelaufen. Die Frage wurde automatisch beantwortet und gesperrt.</div>");
+            var timeup = $("<div lang-code='timeup' class='feedback timeup'></div>");
+            question.append(timeup);
+            quizJS.localizeElement(timeup);
 
             if(quizJS.timerAlertActive) {
                 alert(quizJS.timerAlertText);
@@ -1784,17 +1851,18 @@ quizJS.resetQuestion = function(div) {
     div.find('.hotspot').find('.descr').children().remove();
 
     // petrinetz
-    div.find('.petri_image').find('img').hide();
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_image').find('img').hide();
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_aufgabe,.petri_task').find('img').hide();
     // erste aufgabe anzeigen
-    div.find('.petri_image').find('img').first().show();
-    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_aufgabe').find('img')
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_image').find('img').first().show();
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.petri_aufgabe,.petri_task').find('img')
         .filter('#'+div.find('.petri_image').find('img:visible').attr("id")).show();
-    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.gesucht').html(div.find('.petri_image').find('img').first().attr("task"));
+    div.filter('[qtype="'+quizJS.quizTypes.PETRI+'"]').find('.gesucht,.task').html(div.find('.petri_image').find('img').first().attr("task"));
 
     quizJS.resetCanvas(div);
 
-    div.nextAll("button.quizButton").first().show();
-    div.nextAll("button.quizButton.weiter").first().hide();
+    div.nextAll("button.quizButton.solve").first().show();
+    div.nextAll("button.quizButton.reset").first().hide();
 };
 
 /**
@@ -1837,7 +1905,7 @@ quizJS.initiateDrawingCanvas = function() {
     root.each(function(i,e) {
         var div = $(this);
 
-        div.addClass("unbewertet");
+        div.addClass("unranked");
 
         quizJS.resetCanvas(div);
 
@@ -1846,19 +1914,27 @@ quizJS.initiateDrawingCanvas = function() {
 
         // Rückgängig und Wiederholen
         if(!div.find('.drawing_canvas_container').is('.no_steps')) {
-            div.find('.button_container').append('<button class="stepforw">Wiederholen</button><br>');
+            var redo = $('<button lang-code="canvas.redo" class="stepforw"></button>');
+            div.find('.button_container').append(redo);
+            quizJS.localizeElement(redo);
+            div.find('.button_container').append('<br>');
             div.find('.stepforw').click(function() {
                 quizJS.canvasStepForward(div.find('.drawing_canvas_container'));
             });
 
-            div.find('.button_container').append('<button class="stepback">Rückgängig</button><br>');
+            var undo = $('<button lang-code="canvas.undo" class="stepback"></button>');
+            div.find('.button_container').append(undo);
+            quizJS.localizeElement(undo);
+            div.find('.button_container').append('<br>');
             div.find('.stepback').click(function() {
                 quizJS.canvasStepBack(div.find('.drawing_canvas_container'));
             });
         }
 
         // Bild komplett löschen Button
-        div.find('.button_container').append('<button class="clear">Löschen</button>');
+        var clear = $('<button lang-code="canvas.clear" class="clear"></button>');
+        div.find('.button_container').append(clear);
+        quizJS.localizeElement(clear);
         div.find('.clear').click(function() {
             quizJS.resetCanvas(div);
         });
@@ -2317,8 +2393,9 @@ quizJS.showQuestionHere = function(button) {
 
     // hinweis, dass nicht veränderbar
     div.find(".answered_hint").remove();
-    div.find("h4").after(
-        '<span class="answered_hint">Nicht änderbar, da die Frage bereits beantwortet wurde</span>');
+    var answered = $('<span lang-code="already_answered" class="answered_hint"></span>');
+    div.find("h4").after(answered);
+    quizJS.localizeElement(answered);
 
     var type = orig.attr("qtype");
     // Verarbeiten der vorherigen Eingaben
@@ -2341,13 +2418,14 @@ quizJS.showQuestionHere = function(button) {
     quizJS.blockQuestion(div);
 
 
-    var hideButton = $('<button class="free_text_ref" id="'+id+'_ref">Ausblenden</button>');
+    var hideButton = $('<button lang-code="hide" class="free_text_ref" id="'+id+'_ref"></button>');
     hideButton.on('click', function(e) {
         quizJS.removeQuestionHere(hideButton);
     })
     $(button).before(div);
     $(button).before(hideButton)
     $(button).hide();
+    quizJS.localizeElement(hideButton);
 };
 
 quizJS.removeQuestionHere = function(button) {
