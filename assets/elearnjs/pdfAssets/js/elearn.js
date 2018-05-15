@@ -103,6 +103,8 @@ eLearnJS.setNavigationTitle = function() {};
 eLearnJS.setBackButtonEnabled = function() {};
 eLearnJS.setBackButtonText = function() {};
 eLearnJS.setBackPage = function() {};
+eLearnJS.setLanguage = function() {};
+eLearnJS.selectLanguage = function() {};
 
 eLearnJS.generalDirectionButtonsEnabled = function() {};
 eLearnJS.setKeyNavigationEnabled = function() {};
