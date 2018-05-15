@@ -57,6 +57,10 @@ class ExportOptionManager {
     getHTMLExportOptionDefaults(html) {
         const self = this;
 
+        var language = (self.lastHTMLExportOptions
+            && self.lastHTMLExportOptions.language !== undefined)
+            ? self.lastHTMLExportOptions.language : "de";
+
         var exportElearnjs = (self.lastHTMLExportOptions
             && self.lastHTMLExportOptions.exportAssets !== undefined)
             ? self.lastHTMLExportOptions.exportAssets : true;
@@ -93,6 +97,7 @@ class ExportOptionManager {
 
         // return
         return {
+            language: language,
             exportElearnjs: exportElearnjs,
             exportLinkedFiles: exportLinkedFiles,
             includeQuiz: includeQuiz,
@@ -111,6 +116,16 @@ class ExportOptionManager {
         const self = this;
 
         var content = document.createElement('div');
+
+        // Language
+        content.appendChild(OptionMenuManager.getHeading('Language'));
+        var language = OptionMenuManager.getSelectLabel("",
+            [
+                {"text": "German", value: "de"},
+                {"text": "English", value:"en"}
+            ],
+            defaults.language);
+        content.appendChild(language);
 
         // Assets export
         content.appendChild(OptionMenuManager.getHeading('Asset exports'));
@@ -151,6 +166,7 @@ class ExportOptionManager {
         // return necessary elements
         return {
             content: content,
+            language: language.select,
             exportElearnjs: exportElearnjs.checkbox,
             exportLinkedFiles: exportLinkedFiles.checkbox,
             includeQuiz: includeQuiz.checkbox,
@@ -169,6 +185,7 @@ class ExportOptionManager {
     */
     parseHTMLExportOptions(contentObj) {
         return {
+            language: contentObj.language.value,
             exportAssets: contentObj.exportElearnjs.checked,
             exportLinkedFiles: contentObj.exportLinkedFiles.checked,
             includeQuiz: contentObj.includeQuiz.checked,

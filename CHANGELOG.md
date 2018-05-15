@@ -1,8 +1,9 @@
 ## 0.3.2
 * General:
     * Updated _elearn.js_ to v1.0.3, _quiz.js_ to v0.4.2 and _elearnvideo.js_
-    to v0.4.2 to add Localization support.
+    to v0.4.2 to add Localization support
         * German as default language. English supported.
+    * Added an export option for HTML export to enable language selection
 ## 0.3.1
 * General:
     * Updated _elearn.js_ to v1.0.2

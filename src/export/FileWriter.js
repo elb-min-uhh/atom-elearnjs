@@ -248,7 +248,17 @@ class FileWriter {
                     opts.includeTimeSlider);
             })
             .replace(/\$\$imprint\$\$/, () => {return imprint})
-            .replace(/\$\$body\$\$/, () => {return html});
+            .replace(/\$\$body\$\$/, () => {return html})
+            .replace(/\$\$language\$\$/, () => {
+                if(opts.language !== "de") {
+                    return `<script>
+                                eLearnJS.setLanguage("${opts.language}");
+                                try { eLearnVideoJS.setLanguage("${opts.language}") } catch(e){ console.log(e) };
+                                try { quizJS.setLanguage("${opts.language}") } catch(e){ console.log(e) };
+                            </script>`;
+                }
+                return "";
+            });
     }
 
     /**

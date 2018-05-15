@@ -100,6 +100,30 @@ class OptionMenuManager {
 
         return label;
     }
+
+    static getSelectLabel(text, options, selected, containsHTML) {
+        var label = document.createElement('label');
+
+        var span = document.createElement('span');
+        if(!containsHTML) span.textContent = text;
+        else span.innerHTML = text;
+        label.appendChild(span);
+
+        var select = document.createElement('select');
+        select.classList.add('form-control');
+        for(var opt of options) {
+            var o = document.createElement('option');
+            o.value = opt.value;
+            o.textContent = opt.text;
+            select.appendChild(o);
+        }
+        select.value = selected;
+        label.appendChild(select);
+
+        label.select = select;
+
+        return label;
+    }
 }
 
 module.exports = OptionMenuManager;
