@@ -1,5 +1,6 @@
 ## 0.3.2
 * GeneraL:
+    * Updated _elearn.js_ to v1.0.3
     * Updated _quiz.js_ to v0.4.2
 ## 0.3.1
 * General:
