@@ -217,9 +217,10 @@ quizJS.setLanguage = function(langCode) {
     langCode = langCode.toLowerCase();
     if(quizJS.localization[langCode] !== undefined) {
         quizJS.selectedLocale = langCode;
-        $('[lang-code]').each(function(i,e) {
+        $('[lang-code],[lang-code-title]').each(function(i,e) {
             quizJS.localizeElement($(e));
         });
+        quizJS.windowResizing();
     }
     else {
         throw "Unsupported language selected. Supported language codes are: "  + Object.keys(quizJS.localization).toString();
@@ -232,13 +233,29 @@ quizJS.selectLanguage = quizJS.setLanguage;
 * The selected language is the quizJS.selectedLocale if not specific
 * `lang` attribute is present in the HTML element
 */
-quizJS.localizeElement = function(el) {
+quizJS.localizeElement = function(el, force) {
+    if($(el).attr('localized') === "false" && !force) return;
+
     var loc = quizJS.selectedLocale;
     if(el.closest('[lang]').length) {
         var lang = el.closest('[lang]').attr('lang').toLowerCase();
         if(quizJS.localization[lang]) loc = lang;
     }
-    el.text(quizJS.localization[loc][el.attr("lang-code")]);
+
+    if(el.attr("lang-code")) {
+        var text = quizJS.localization[loc][el.attr("lang-code")];
+        if(text) {
+            if($(el).attr('localized') === "html") el.html(text);
+            else el.text(text);
+        }
+    }
+
+    if(el.attr("lang-code-title")) {
+        var text = quizJS.localization[loc][el.attr("lang-code-title")];
+        if(text) {
+            el.attr('title', text);
+        }
+    }
 }
 
 /**
