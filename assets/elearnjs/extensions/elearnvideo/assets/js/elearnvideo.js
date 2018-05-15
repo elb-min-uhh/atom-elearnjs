@@ -1,10 +1,92 @@
 /*
-* video.js v0.4.1 - 18/04/16
+* video.js v0.4.2 - 18/05/15
 * JavaScript Videoplayer - by Arne Westphal
 * eLearning Buero MIN-Fakultaet - Universitaet Hamburg
 */
 
 var eLearnVideoJS = eLearnVideoJS || {};
+
+eLearnVideoJS.localization = {
+    "de" : {
+        "play": "Abspielen",
+        "pause": "Pausieren",
+        "mute": "Stummschalten",
+        "time": "Zeit",
+        "timeleft": "Verbleibende Zeit",
+        "duration": "Dauer",
+        "fullscreen": "Vollbild",
+        "annotations": "Annotationen",
+        "usernotes": "Notizen",
+        "notehint": "Notiz anzeigen",
+        "notesave": "Notiz speichern",
+        "notecancel": "Abbrechen",
+        "noteadd": "Notiz hinzufügen",
+        "displayall": "Alle einblenden",
+        "error": "Ein Fehler ist aufgetreten.<br>Das Video kann nicht abgespielt werden.<br>Klicken zum neu laden!",
+        "alert.notenotext": "Text eingeben, um Notiz speichern zu können.",
+        "alert.noteinvalidstart": "Die Startzeit ist keine gültige Eingabe.\r\nFormat: HH:MM:SS",
+        "alert.noteinvalidend": "Die Endzeit ist keine gültige Eingabe.\r\nFormat: HH:MM:SS",
+        "alert.importreset": "Aktuelle Notizen können vor dem Import gelöscht und somit durch neue Notizen ersetzt werden.\r\n'OK' zum Ersetzen, 'Abbrechen' zum Hinzufügen.",
+        "alert.importsuccess": "Notizen erfolgreich importiert.",
+        "alert.importerror": "Die Datei scheint nicht zum import geeignet zu sein.",
+        "alert.nonotes": "Keine Notizen vorhanden.",
+        "alert.localstorageerror": "Die letzte Notizänderung konnte nicht gespeichert werden, da der lokale Speicher voll ist.",
+        "alert.remove": "Soll diese Notiz wirklich dauerhaft gelöscht werden?",
+        "alert.removeall": "Sollen wirklich alle Notizen dieses Videos dauerhaft gelöscht werden?",
+        "dropdown.import": "Notizen importieren",
+        "dropdown.export": "Notizen exportieren als JSON",
+        "dropdown.exportcsv": "Notizen exportieren als CSV",
+        "dropdown.removeall": "Alle Notizen löschen",
+        "dropdown.edit": "Bearbeiten",
+        "dropdown.remove": "Löschen",
+        "dropdown.moveup": "Nach oben bewegen",
+        "dropdown.movedown": "Nach unten bewegen",
+        "placeholder.start": "Start",
+        "placeholder.end": "Ende",
+        "placeholder.writenote": "Schreibe eine Notiz... (diese sind lokal gespeichert und nicht öffentlich)",
+
+    },
+    "en" : {
+        "play": "Play",
+        "pause": "Pause",
+        "mute": "Mute",
+        "time": "Time",
+        "timeleft": "Time left",
+        "duration": "Duration",
+        "fullscreen": "Fullscreen",
+        "annotations": "Annotations",
+        "usernotes": "Notes",
+        "notehint": "Display Note",
+        "notesave": "Save Note",
+        "notecancel": "Cancel",
+        "noteadd": "Add Note",
+        "displayall": "Display all",
+        "error": "An error occurred.<br>The video cannot be played.<br>Click to reload!",
+        "alert.notenotext": "Insert a text before saving a note.",
+        "alert.noteinvalidstart": "Start time is not valid.\r\nFormat: HH:MM:SS",
+        "alert.noteinvalidend": "End time is not valid.\r\nFormat: HH:MM:SS",
+        "alert.importreset": "You can delete current notes before importing others to replace them.\r\n'OK' to replace, 'Cancel' to keep both.",
+        "alert.importsuccess": "Notes imported successfully",
+        "alert.importerror": "The file seems to be invalid and cannot be imported.",
+        "alert.nonotes": "No notes existing.",
+        "alert.localstorageerror": "The last notes change could not be saved. The LocalStorage seems to be full.",
+        "alert.remove": "Really remove this note permanently?",
+        "alert.removeall": "Really remove all notes for this video permanently?",
+        "dropdown.import": "Import Notes",
+        "dropdown.export": "Export Notes as JSON",
+        "dropdown.exportcsv": "Export Notes as CSV",
+        "dropdown.removeall": "Remove all Notes",
+        "dropdown.edit": "Edit",
+        "dropdown.remove": "Remove",
+        "dropdown.moveup": "Move Up",
+        "dropdown.movedown": "Move Down",
+        "placeholder.start": "Start",
+        "placeholder.end": "End",
+        "placeholder.writenote": "Write a note... (notes are saved locally and are not public)",
+    },
+};
+
+eLearnVideoJS.selectedLocale = eLearnVideoJS.selectedLocale || "de";
 
 /**
 * Initialisiert die Videoplayer
@@ -12,6 +94,7 @@ var eLearnVideoJS = eLearnVideoJS || {};
 $(document).ready(function() {
     eLearnVideoJS.initiateTouchDetection();
     eLearnVideoJS.initiateVideoPlayers();
+    eLearnVideoJS.setLanguage(eLearnVideoJS.selectedLocale);
 });
 
 // ----------------------------------------------------------------------------
@@ -64,9 +147,9 @@ eLearnVideoJS.initiateVideoPlayers = function() {
         }
         div.append("<div class='controls'>"
                       + "<div class='bottom-row'>"
-                        + "<div class='icon playpause playing' title='Play'></div>"
+                        + "<div class='icon playpause playing'></div>"
                         + "<div class='volume'>"
-                            + "<div class='icon high' title='Mute'></div>"
+                            + "<div class='icon high' lang-code-title='mute'></div>"
                             + "<div class='volume-con'>"
                                 + "<div class='volume-wrap'>"
                                     + "<div class='volume-bar'></div>"
@@ -74,13 +157,13 @@ eLearnVideoJS.initiateVideoPlayers = function() {
                                 + "</div>"
                             + "</div>"
                         + "</div>"
-                        + "<div class='text playtime' title='Time'></div>"
+                        + "<div class='text playtime' lang-code-title='time'></div>"
                         + "<div class='video-progress-con'>"
                             + "<div class='video-progress'><div class='video-progress-loaded'></div><div class='video-progress-bar'></div></div>"
                             + "<div class='video-progress-pointer'></div>"
                         + "</div>"
-                        + "<div class='text timeleft' title='Time left'></div>"
-                        + "<div class='icon fullscreen' title='Fullscreen'></div>"
+                        + "<div class='text timeleft'></div>"
+                        + "<div class='icon fullscreen' lang-code-title='fullscreen'></div>"
                       + "</div>"
                     + "</div>");
 
@@ -203,7 +286,7 @@ eLearnVideoJS.videoAddButtonListeners = function(div) {
     div.find('.timeleft').click(function(event) {
         event.preventDefault();
         event.stopPropagation();
-        eLearnVideoJS.videoToggleTimeleftDuration(div);
+        eLearnVideoJS.videoToggleTimeleftDuration();
     });
     div.find('.fullscreen').click(function(event) {
         event.preventDefault();
@@ -378,6 +461,96 @@ eLearnVideoJS.onMouseUp = function(event) {
     else {
         return true;
     }
+};
+
+/**
+* Sets the language for all elements.
+*/
+eLearnVideoJS.setLanguage = function(langCode) {
+    langCode = langCode.toLowerCase();
+    if(eLearnVideoJS.localization[langCode] !== undefined) {
+        eLearnVideoJS.selectedLocale = langCode;
+        $('[lang-code],[lang-code-title],[lang-code-tab],[lang-code-placeholder]').each(function(i,e) {
+            eLearnVideoJS.localizeElement($(e));
+        });
+
+        // additional updates
+        eLearnVideoJS.resizeAllVideoPlayers();
+        eLearnVideoJS.videoUpdateTimeleftDuration();
+        $('.elearnjs-video').each(function(i,e) {
+            eLearnVideoJS.videoUpdatePlayPauseButton($(e));
+            eLearnVideoJS.updateVideoUserNoteTime($(e));
+        })
+    }
+    else {
+        throw "Unsupported language selected. Supported language codes are: "  + Object.keys(eLearnVideoJS.localization).toString();
+    }
+};
+eLearnVideoJS.selectLanguage = eLearnVideoJS.setLanguage;
+
+/**
+* Localizes one specific element to match the selected language.
+* The selected language is the eLearnVideoJS.selectedLocale if not specific
+* `lang` attribute is present in the HTML element
+*/
+eLearnVideoJS.localizeElement = function(el, force) {
+    if($(el).attr('localized') === "false" && !force) return;
+
+    var loc = eLearnVideoJS.selectedLocale;
+    if(el.closest('[lang]').length) {
+        var lang = el.closest('[lang]').attr('lang').toLowerCase();
+        if(eLearnVideoJS.localization[lang]) loc = lang;
+    }
+
+    if(el.attr("lang-code")) {
+        var text = eLearnVideoJS.localization[loc][el.attr("lang-code")];
+        if(text) {
+            if($(el).attr('localized') === "html") el.html(text);
+            else el.text(text);
+        }
+    }
+
+    if(el.attr("lang-code-title")) {
+        var text = eLearnVideoJS.localization[loc][el.attr("lang-code-title")];
+        if(text) {
+            el.attr('title', text);
+        }
+    }
+
+    if(el.attr("lang-code-tab")) {
+        var text = eLearnVideoJS.localization[loc][el.attr("lang-code-tab")];
+        if(text) {
+            var index = el.parent().children().index(el);
+            var tabs = el.closest('.tabbed-container').children('.tabs').children('.tab-select');
+            tabs.eq(index).text(text);
+        }
+    }
+
+    if(el.attr("lang-code-placeholder")) {
+        var text = eLearnVideoJS.localization[loc][el.attr("lang-code-placeholder")];
+        if(text) {
+            el.attr('placeholder', text);
+        }
+    }
+};
+
+/**
+* Localizes all children of an element.
+* Will not localize the element itself.
+*/
+eLearnVideoJS.localizeChildren = function(el, force) {
+    el.find('[lang-code],[lang-code-title],[lang-code-tab]').each(function(i,e) {
+        eLearnVideoJS.localizeElement($(e), force);
+    });
+};
+
+eLearnVideoJS.getLocalizationFor = function(code) {
+    var loc = eLearnVideoJS.selectedLocale;
+    if($('html').attr('lang')
+            && eLearnVideoJS.localization[$('html').attr('lang').toLowerCase()] !== undefined) {
+        loc = $('html').attr('lang').toLowerCase();
+    }
+    return eLearnVideoJS.localization[loc][code];
 }
 
 
@@ -544,13 +717,13 @@ eLearnVideoJS.videoUpdatePlayPauseButton = function(div) {
 
     // paused now -> play
     if(vid.paused || vid.ended) {
-        div.find('.playpause').attr("title", 'Play');
+        div.find('.playpause').attr("title", eLearnVideoJS.getLocalizationFor("play"));
         div.find('.playpause').removeClass("playing");
         div.find('.playpause').addClass("paused");
     }
     // pause
     else {
-        div.find('.playpause').attr("title", 'Pause');
+        div.find('.playpause').attr("title", eLearnVideoJS.getLocalizationFor("pause"));
         div.find('.playpause').addClass("playing");
         div.find('.playpause').removeClass("paused");
     }
@@ -560,19 +733,31 @@ eLearnVideoJS.videoUpdatePlayPauseButton = function(div) {
 * Toggles between the display of timeleft (e.g. -0:12) and the videos duration
 * (e.g. 0:28, static)
 */
-eLearnVideoJS.videoToggleTimeleftDuration = function(div) {
+eLearnVideoJS.videoToggleTimeleftDuration = function() {
     eLearnVideoJS.video_timestyle = (eLearnVideoJS.video_timestyle + 1) % 2;
 
-    var timeleft_field = div.find('.timeleft');
+    eLearnVideoJS.videoUpdateTimeleftDuration();
+};
+
+/**
+* Toggles between the display of timeleft (e.g. -0:12) and the videos duration
+* (e.g. 0:28, static)
+*/
+eLearnVideoJS.videoUpdateTimeleftDuration = function() {
+    var timeleft_field = $('.timeleft');
 
     var title = "";
     switch(eLearnVideoJS.video_timestyle) {
-        case eLearnVideoJS.video_timetypes.DURATION: title = "Duration"; break;
-        case eLearnVideoJS.video_timetypes.TIMELEFT: title = "Time left"; break;
+        case eLearnVideoJS.video_timetypes.DURATION:
+            title = eLearnVideoJS.getLocalizationFor("duration"); break;
+        case eLearnVideoJS.video_timetypes.TIMELEFT:
+            title = eLearnVideoJS.getLocalizationFor("timeleft"); break;
     }
     timeleft_field.attr("title", title);
 
-    eLearnVideoJS.updateVideoTime(div);
+    $('.elearnjs-video').each(function(i,e) {
+        eLearnVideoJS.updateVideoTime($(e));
+    });
 };
 
 /**
@@ -997,7 +1182,9 @@ eLearnVideoJS.updateVideoTime = function(div) {
 */
 eLearnVideoJS.videoOnError = function(div, event) {
     div.append('<div class="error-con">');
-    div.find('.error-con').append('<span>Ein Fehler ist aufgetreten.<br>Das Video kann nicht abgespielt werden.<br>Klicken zum neu laden!</span>');
+    var errormsg = $('<span lang-code="error" localized="html"></span>')
+    div.find('.error-con').append(errormsg);
+    eLearnVideoJS.localizeElement(errormsg);
     div.find('.error-con').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -1134,10 +1321,10 @@ eLearnVideoJS.initiateVideoNotes = function() {
             videoNotesContainer.addClass("tabbed-box");
 
             videoNotes.addClass("tab");
-            videoNotes.attr("name", "Annotationen");
+            videoNotes.attr("lang-code-tab", "annotations");
 
             userNotes.addClass("tab");
-            userNotes.attr("name", "Notizen");
+            userNotes.attr("lang-code-tab", "usernotes");
 
             eLearnVideoJS.initiateTabbedBox(videoNotesContainer);
 
@@ -1161,7 +1348,7 @@ eLearnVideoJS.initiateVideoNotes = function() {
         eLearnVideoJS.updateUserNotes(videoContainer);
 
         $(this).find('video').on('timeupdate', function(event) {
-            eLearnVideoJS.noteTimeUpdate($(e), videoNotesContainer, idx);
+            eLearnVideoJS.noteTimeUpdate($(e), videoNotesContainer, idx, event);
         });
     });
 
@@ -1172,18 +1359,18 @@ eLearnVideoJS.initiateVideoNotes = function() {
 * Creates and returns a user video notes container
 */
 eLearnVideoJS.getUserVideoNotesContainer = function() {
-    var userNotes = $('<div class="user_notes timestamps"><h4>Notizen</h4></div>');
+    var userNotes = $('<div class="user_notes timestamps"><h4 lang-code="usernotes"></h4></div>');
     userNotes.append('<div class="note_add_container">'
                         + '<hr>'
                         + '<form accept-charset="UTF-8">'
-                        + '<input class="user_note_from" placeholder="Startzeit (<HH>:<MM>:SS)" type="text"/>'
-                        + '<input class="user_note_to" placeholder="Endzeit (<HH>:<MM>:SS)" type="text"/>'
-                        + '<textarea class="user_note_text" placeholder="Schreibe eine Notiz... (diese sind lokal gespeichert und nicht öffentlich)"></textarea>'
+                        + '<input class="user_note_from" type="text"/>'
+                        + '<input class="user_note_to" type="text"/>'
+                        + '<textarea class="user_note_text" lang-code-placeholder="placeholder.writenote"></textarea>'
                         + '</form>'
-                        + '<button class="note_add">Notiz speichern</button>'
-                        + '<button class="note_cancel">Abbrechen</button>'
+                        + '<button class="note_add" lang-code="notesave"></button>'
+                        + '<button class="note_cancel" lang-code="notecancel"></button>'
                         + '</div>');
-    userNotes.append('<button class="toggle_note_add">Notiz hinzufügen</button>');
+    userNotes.append('<button class="toggle_note_add" lang-code="noteadd"></button>');
 
     return userNotes;
 };
@@ -1193,7 +1380,7 @@ eLearnVideoJS.getUserVideoNotesContainer = function() {
 */
 eLearnVideoJS.addShowAllTo = function(notes) {
     notes.prepend('<div style="clear: both">');
-    notes.prepend('<label class="show_all_notes"><input type="checkbox" name="show_all" value="show_all"/>Alle einblenden</label>');
+    notes.prepend('<label class="show_all_notes"><input type="checkbox" name="show_all" value="show_all"/><span lang-code="displayall"></span></label>');
 
     notes.find('input[name="show_all"]').on('change', function(e) {
         eLearnVideoJS.showAllNotes(notes, $(this).is(':checked'));
@@ -1224,7 +1411,6 @@ eLearnVideoJS.showAllNotes = function(notes, b) {
         notes.addClass("show_all");
         for(var i=0; i<eLearnVideoJS.videoNoteTimes[idx].length; i++) {
             var info = eLearnVideoJS.videoNoteTimes[idx][i];
-            console.log(info);
             var display_note = notes.find('.video_note').not('.backup').filter('#'+info["index"]);
             if(display_note.length == 0) {
                 eLearnVideoJS.showVideoNote(notes, info);
@@ -1280,8 +1466,11 @@ eLearnVideoJS.addNotesToProgressbar = function(videoContainer, index) {
 /**
 * Wird beim timeupdate event eines videos ausgeführt. Blendet notes ein oder aus
 * @param videoContainer: the .video-container wrapper around the video
+* @param notes_con: the video_notes_wrapper
+* @param index: index of the .elearnjs-video in all .elearnjs-videos
+* @param event: will be used to check if a video has to stop on a note or not
 */
-eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index) {
+eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index, event) {
     var vid = videoContainer.find('video')[0];
     var time = vid.currentTime;
 
@@ -1308,7 +1497,7 @@ eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index) {
                     // skip if already shown
                     if(display_note.length > 0) continue;
                     // create new node
-                    eLearnVideoJS.showVideoNote(notes_con, info, vid);
+                    eLearnVideoJS.showVideoNote(notes_con, info, vid, event && event.type === "timeupdate");
                 }
             }
         }
@@ -1324,7 +1513,7 @@ eLearnVideoJS.noteTimeUpdate = function(videoContainer, notes_con, index) {
 * @param video (optional) if given, the video might stop or will get an overlay
 *              to hint the note
 */
-eLearnVideoJS.showVideoNote = function(notes_con, info, video) {
+eLearnVideoJS.showVideoNote = function(notes_con, info, video, stopAllowed) {
     var original_note = notes_con.find('.video_note.backup').filter('#'+info["index"]);
     var new_note = original_note.clone(true, true); // clone with all listeners
     new_note.removeClass('backup');
@@ -1349,8 +1538,12 @@ eLearnVideoJS.showVideoNote = function(notes_con, info, video) {
     if(info.hinted && video) {
         eLearnVideoJS.showVideoNoteHint(video, new_note);
     }
-    if(info.stopping && video) {
-        video.pause();
+    if(stopAllowed && info.stopping && video) {
+        // do not stop on time skip
+        if(!eLearnVideoJS.videoProgressMouseDown
+                || eLearnVideoJS.videoProgressMouseDownTarget.get(0) !== $(video).closest('.elearnjs-video').get(0)) {
+            video.pause();
+        }
     }
 };
 
@@ -1389,9 +1582,9 @@ eLearnVideoJS.showVideoNoteHint = function(video, note) {
         const con = $('<div class="note-hint-con">');
 
         var hint = $('<div class="note-hint">');
-        hint.text("Notiz anzeigen");
-        //hint.append('<span class="note-hint-arrow">');
         con.append(hint);
+        var hinttext = $('<span lang-code="notehint">');
+        hint.append(hinttext);
 
         // prevent mouseup/down events
         hint.on('mousedown mouseup', function(event) {
@@ -1435,6 +1628,7 @@ eLearnVideoJS.showVideoNoteHint = function(video, note) {
         });
 
         parent.append(con);
+        eLearnVideoJS.localizeElement(hinttext);
     }
 }
 
@@ -1451,7 +1645,7 @@ eLearnVideoJS.checkVisibleNotes = function(videoContainer, notes_con) {
     }
 
     // hide video note hints, if all hinted notes are hidden
-    if(notes_con.find('.video_note.hinted').not('.backup').length === 0) {
+    if(notes_con.closest('.video_notes_container ').find('.video_note.hinted').not('.backup').length === 0) {
         videoContainer.find('.note-hint-con').remove();
     }
 };
@@ -1626,15 +1820,15 @@ eLearnVideoJS.saveVideoNote = function(videoContainer) {
     }
 
     if(text.length == 0) {
-        alert("Text eingeben, um Notiz speichern zu können.");
+        alert(eLearnVideoJS.getLocalizationFor("alert.notenotext"));
         return;
     }
     else if(eLearnVideoJS.parseTimeString(fr) == undefined) {
-        alert("Die Startzeit ist keine gültige Eingabe.\r\nFormat: HH:MM:SS");
+        alert(eLearnVideoJS.getLocalizationFor("alert.noteinvalidstart"));
         return;
     }
     else if(eLearnVideoJS.parseTimeString(to) == undefined) {
-        alert("Die Endzeit ist keine gültige Eingabe.\r\nFormat: HH:MM:SS");
+        alert(eLearnVideoJS.getLocalizationFor("alert.noteinvalidend"));
         return;
     }
 
@@ -1760,7 +1954,6 @@ eLearnVideoJS.updateUserNotesArray = function(videoContainer) {
                                 text: text};
         user_video_notes.push(video_note_object);
     });
-    console.log(videoContainer, user_video_notes);
     eLearnVideoJS.setVideoNotesFor(src, user_video_notes);
 };
 
@@ -1784,7 +1977,9 @@ eLearnVideoJS.updateVideoUserNoteTime = function(div) {
     // Not entered anything
     if(timeFrom == undefined) {
         timeFrom = div.find('video')[0].currentTime;
-        userNoteFrom.attr("placeholder", "Start: " + eLearnVideoJS.createTimeStringColons(timeFrom));
+        userNoteFrom.attr("placeholder",
+            eLearnVideoJS.getLocalizationFor("placeholder.start")
+            + ": " + eLearnVideoJS.createTimeStringColons(timeFrom));
     }
 
     if(timeTo == undefined || timeTo < timeFrom) {
@@ -1792,7 +1987,9 @@ eLearnVideoJS.updateVideoUserNoteTime = function(div) {
         if(timeTo > div.find('video')[0].duration) {
             timeTo = Math.ceil(div.find('video')[0].duration);
         }
-        userNoteTo.attr("placeholder", "Ende: " + eLearnVideoJS.createTimeStringColons(timeTo));
+        userNoteTo.attr("placeholder",
+            eLearnVideoJS.getLocalizationFor("placeholder.end")
+            + ": " + eLearnVideoJS.createTimeStringColons(timeTo));
     }
 };
 
@@ -1810,8 +2007,7 @@ eLearnVideoJS.importUserNotes = function(videoContainer) {
         fileChoser = $('<input type="file" class="user_note_import_filechoser"/>');
         $('body').append(fileChoser);
         fileChoser.on('change', function(e) {
-            var overwrite = confirm("Aktuelle Notizen können vor dem Import gelöscht und somit durch neue Notizen ersetzt werden.\r\n"
-                + "'OK' zum Ersetzen, 'Abbrechen' zum Hinzufügen.");
+            var overwrite = confirm(eLearnVideoJS.getLocalizationFor("alert.importreset"));
             eLearnVideoJS.importFileChosen(videoContainer, e, overwrite);
             fileChoser.remove();
         });
@@ -1831,7 +2027,7 @@ eLearnVideoJS.exportUserNotes = function(videoContainer, type) {
     var text;
 
     if(eLearnVideoJS.user_notes[src] == undefined || eLearnVideoJS.user_notes[src].length == 0) {
-        alert("Keine Notizen vorhanden.");
+        alert(eLearnVideoJS.getLocalizationFor("alert.nonotes"));
         return;
     }
 
@@ -1868,6 +2064,9 @@ eLearnVideoJS.importFileChosen = function(videoContainer, e, overwrite) {
             else if(type === eLearnVideoJS.FILETYPE_CSV) {
                 notes = JSON.parse(eLearnVideoJS.getJSONFromCSV(event.target.result));
             }
+            else {
+                throw "Unsupported file type.";
+            }
             eLearnVideoJS.user_notes[src] = notes;
 
             if(overwrite) videoContainer.find('.user_note').remove();
@@ -1884,10 +2083,10 @@ eLearnVideoJS.importFileChosen = function(videoContainer, e, overwrite) {
 
             eLearnVideoJS.updateUserNotes(videoContainer);
             eLearnVideoJS.updateUserNotesArray(videoContainer);
-            alert("Notizen erfolgreich importiert.");
+            alert(eLearnVideoJS.getLocalizationFor("alert.importsuccess"));
         }
         catch(exc) {
-            alert("Die Datei scheint nicht zum import geeignet zu sein.");
+            alert(eLearnVideoJS.getLocalizationFor("alert.importerror"));
         }
     }
     reader.readAsText(file);
@@ -1911,7 +2110,7 @@ eLearnVideoJS.loadLocalVideoNotesStorage = function() {
         eLearnVideoJS.user_notes = JSON.parse(user_notes_str);
     }
     catch(e) {
-        console.log("LocalStorage konnte nicht geladen werden");
+        console.error("LocalStorage could not be cleared.");
     }
 
 };
@@ -1924,13 +2123,13 @@ eLearnVideoJS.updateLocalVideoNotesStorage = function() {
         if(!localStorage) return;
     }
     catch(e) {
-        console.log("Zugriff auf localStorage wurde verweigert.");
+        console.error("Could not access LocalStorage.");
     }
     try {
         localStorage.setItem('elearnjs-user-notes', JSON.stringify(eLearnVideoJS.user_notes));
     }
     catch(e) {
-        alert("Die letzte Notizänderung konnte nicht gespeichert werden, da der lokale Speicher voll ist.");
+        alert(eLearnVideoJS.getLocalizationFor("alert.localstorageerror"));
     }
 };
 
@@ -1946,7 +2145,6 @@ eLearnVideoJS.getVideoNotesFor = function(src) {
 * in the local storage and updates the "eLearnVideoJS.user_notes" object.
 */
 eLearnVideoJS.setVideoNotesFor = function(src, val) {
-    console.log("ASDASD", src, val);
     eLearnVideoJS.user_notes[src] = val;
     eLearnVideoJS.updateLocalVideoNotesStorage();
 };
@@ -1958,13 +2156,14 @@ eLearnVideoJS.setVideoNotesFor = function(src, val) {
 * This element will be displayed and positioned on click of the menu button.
 */
 eLearnVideoJS.createGeneralUserNoteMenu = function() {
-    var dropDownCode = '<div class="user_note_dropdown general">'
-        + '<div class="dropdown_element note_import">Notizen importieren</div>'
-        + '<div class="dropdown_element note_export">Notizen exportieren als JSON</div>'
-        + '<div class="dropdown_element note_export_csv">Notizen exportieren als CSV</div>'
-        + '<div class="dropdown_element note_remove_all">Alle Notizen löschen</div>'
-        + '</div>';
+    var dropDownCode = $('<div class="user_note_dropdown general">'
+        + '<div class="dropdown_element note_import" lang-code="dropdown.import"></div>'
+        + '<div class="dropdown_element note_export" lang-code="dropdown.export"></div>'
+        + '<div class="dropdown_element note_export_csv" lang-code="dropdown.exportcsv"></div>'
+        + '<div class="dropdown_element note_remove_all" lang-code="dropdown.removeall"></div>'
+        + '</div>');
     $('body').append(dropDownCode);
+    eLearnVideoJS.localizeChildren(dropDownCode);
 
     var dropDown = $('.user_note_dropdown.general');
 
@@ -1981,7 +2180,7 @@ eLearnVideoJS.createGeneralUserNoteMenu = function() {
     });
 
     dropDown.find('.note_remove_all').on('click', function() {
-        if(confirm("Sollen wirklich alle Notizen dieses Videos dauerhaft gelöscht werden?")
+        if(confirm(eLearnVideoJS.getLocalizationFor("alert.removeall"))
             && eLearnVideoJS.userNoteMenuNode.is('.user_notes')) {
             eLearnVideoJS.userNoteMenuNode.find('.user_note').remove();
             eLearnVideoJS.updateUserNotes(eLearnVideoJS.userNoteMenuNode.closest('.video-container'));
@@ -1995,13 +2194,14 @@ eLearnVideoJS.createGeneralUserNoteMenu = function() {
 * This element will be displayed and positioned on click of the menu button.
 */
 eLearnVideoJS.createUserNoteMenu = function() {
-    var dropDownCode = '<div class="user_note_dropdown">'
-        + '<div class="dropdown_element edit">Bearbeiten</div>'
-        + '<div class="dropdown_element delete">Löschen</div>'
-        + '<div class="dropdown_element move_up">Nach oben bewegen</div>'
-        + '<div class="dropdown_element move_down">Nach unten bewegen</div>'
-        + '</div>';
+    var dropDownCode = $('<div class="user_note_dropdown">'
+        + '<div class="dropdown_element edit" lang-code="dropdown.edit"></div>'
+        + '<div class="dropdown_element delete" lang-code="dropdown.remove"></div>'
+        + '<div class="dropdown_element move_up" lang-code="dropdown.moveup"></div>'
+        + '<div class="dropdown_element move_down" lang-code="dropdown.movedown"></div>'
+        + '</div>');
     $('body').append(dropDownCode);
+    eLearnVideoJS.localizeChildren(dropDownCode);
 
     var dropDown = $('.user_note_dropdown').not('.general');
 
@@ -2097,7 +2297,7 @@ eLearnVideoJS.userNoteMenuDelete = function() {
     var backup_note = eLearnVideoJS.userNoteMenuNode.siblings('#' + eLearnVideoJS.userNoteMenuNode.attr("id") + ".backup");
     var videoContainer = backup_note.closest('.video-container');
 
-    if(confirm("Soll diese Notiz wirklich dauerhaft gelöscht werden?")) {
+    if(confirm(eLearnVideoJS.getLocalizationFor("alert.remove"))) {
         eLearnVideoJS.deleteNote(videoContainer, backup_note);
     }
 };
@@ -2109,8 +2309,6 @@ eLearnVideoJS.userNoteMenuDelete = function() {
 eLearnVideoJS.userNoteMenuMove = function(direction) {
     var backup_note = eLearnVideoJS.userNoteMenuNode.siblings('#' + eLearnVideoJS.userNoteMenuNode.attr("id") + ".backup");
     var videoContainer = backup_note.closest('.video-container');
-
-    console.log(videoContainer, eLearnVideoJS.userNoteMenuNode, backup_note, direction);
 
     eLearnVideoJS.moveNote(videoContainer, eLearnVideoJS.userNoteMenuNode, backup_note, direction);
 };
@@ -2273,13 +2471,14 @@ eLearnVideoJS.initiateTabbedBox = function(box) {
 */
 eLearnVideoJS.selectTab = function(element) {
     var e = $(element);
-    var div = e.parent().nextAll().first('.tabbed-box');
+    var index = e.parent().children().index(e);
+    var div = e.parent().nextAll('.tabbed-box').first();
 
     var tabbefore = div.find('.tab:visible').attr("name");
 
     // show only new
     div.find('.tab').hide();
-    div.find('.tab').filter('[name="' + e.html() + '"]').show();
+    div.find('.tab').eq(index).show();
     e.parent().find('.tab-select').removeClass("act");
     e.addClass("act");
 
