@@ -11,7 +11,7 @@ var sectionRegExp = /(\|{3,5})(?!\|)((?:\\\||(?!\1).)*?)\1(.*)\n/g;
 var firstSectionRegExp = new RegExp(sectionRegExp, "");
 var imprintRegExp = /(?:(?:^|\n)(```+|~~~+)imprint\s*?\n([\s\S]*?)\n\1|(?:^|\n)(<!--+)imprint\s*?\n([\s\S]*?)\n--+>)/;
 var metaBlockRegExp = /(?:(?:^|\n)(---+)\n([\s\S]*?)\n\1|(?:^|\n)(<!--+)meta\n([\s\S]*?)\n--+>)/;
-var metaBlockElementsRegExp = /(?:(?:^|\n)(\w+)\s*:\s*(["'`])((?:\\\2|(?!\2)[\s\S])*?)\2|(?:^|\n)(\w+)\s*:\s*([^\n]*))/g;
+var metaBlockElementsRegExp = /(?:(?:^|\n)[ \t]*(\w+)\s*:\s*(["'`])((?:\\\2|(?!\2)[\s\S])*?)\2|(?:^|\n)[ \t]*(\w+)\s*:\s*([^\n]*))/g;
 
 // elearn.js additional comments
 var hideInOverviewRegExp = /\s*<!--hide-in-overview-->/g;
