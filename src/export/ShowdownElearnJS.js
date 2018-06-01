@@ -3,6 +3,8 @@
 const Showdown = require('showdown');
 
 // regular expressions
+var indentionRegExp = /(?:^|\n)([ \t]*)(?!(?:\n|$))/g;
+
 // original markdown
 var inlineHeadingRegExp = /^(#{1,6})(?!#)(?!<!--no-section-->)[ \t]*(.+?)[ \t]*#*$/gm;
 
@@ -163,9 +165,18 @@ const parseImprint = {
         text = text.replace(/\r/g, "");
         var imprint = text;
         text.replace(imprintRegExp, function (wholeMatch, delim1, codeblock1, delim2, codeblock2) {
-            if(delim1) imprint = converter.makeHtml(codeblock1);
-            else if(delim2) imprint = converter.makeHtml(codeblock2);
+            var code = delim1 ? codeblock1 : (delim2 ? codeblock2 : undefined);
+            if(!code) return null;
 
+            // remove indention up to 4 spaces (1 tab)
+            var shortestIndention = code.replace(/(^|\n)\t/g, "$1    ")
+                .match(indentionRegExp)
+                .reduce((minIndent, match) => {
+                    return Math.min(minIndent, match.replace(/\n/g, "").length)
+                }, 4);
+            code = removeIndention(code, shortestIndention, 4);
+
+            imprint = converter.makeHtml(code);
             return null;
         });
         return imprint;
@@ -344,6 +355,21 @@ var createMeta = (tag, value, valueSurrounding) => {
     else {
         return `<meta name="${tag.toLowerCase()}" content="${escapeHTMLQuotes(value)}"/>`
     }
+}
+
+/**
+* Removes up to @param indentionSize spaces (or tabs if tabsize <= indentionSize)
+* from the beginning of each line.
+*/
+var removeIndention = (block, indentionSize, tabSize) => {
+    if(indentionSize === 0) return block;
+    if(indentionSize === undefined) indentionSize = 4;
+    if(tabSize === undefined) tabSize = 4;
+    var tabsRemoved = parseInt(indentionSize / tabSize);
+    var spaceRegExp = new RegExp(`(^|\n)([ ]{1,${indentionSize}}${tabsRemoved > 0 ? `|\\t{1,${tabsRemoved}}` : ""})`, "g");
+    return block.replace(spaceRegExp, (wholeMatch, lineBreak, indention) => {
+        return lineBreak;
+    });
 }
 
 module.exports.elearnHtmlBody = elearnHtmlBody;
