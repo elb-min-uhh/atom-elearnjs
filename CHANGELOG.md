@@ -1,8 +1,10 @@
-## 0.3.3
+## 0.4.0
 * General:
     * Fixed indention problems with imprint and meta blocks
         * both can now be indented up to 4 spaces or 1 tab
     * Updated _elearn.js_ to include image gallery fixes
+    * Extracted conversion code into `markdown-elearnjs` npm package
+        * Use this package for conversion
 ## 0.3.2
 * General:
     * Updated _elearn.js_ to v1.0.3, _quiz.js_ to v0.4.2 and _elearnvideo.js_
