@@ -4,19 +4,12 @@
 const {dialog} = require('electron').remote;
 var path = require('path');
 var fs = require('fs');
-var ncp = require('ncp').ncp;
-ncp.limit = 16;
 
 const EXTRACT_NOTHING = 0;
 const EXTRACT_ELEARNJS = 1;
 const EXTRACT_ALL_LINKED_FILES = 2;
 
-const Showdown = require('showdown');
-const PDF = require('html-pdf');
-const FileExtractor = require('./FileExtractor.js');
-const FileExtractorObject = require('./FileExtractorObject.js');
-const ExtensionManager = require('./ExtensionManager.js');
-const elearnExtension = require('./ShowdownElearnJS.js');
+const MarkdownElearnJS = require('markdown-elearnjs');
 const OptionMenuManager = require('../ui/OptionMenuManager.js');
 const ExportOptionManager = require('../ui/ExportOptionManager.js');
 
@@ -31,27 +24,8 @@ class FileWriter {
 
         this.saveLocations = {};
 
-        this.bodyConverter = new Showdown.Converter({
-            simplifiedAutoLink: true,
-            excludeTrailingPunctuationFromURLs: true,
-            strikethrough: true,
-            tables: true,
-            extensions: elearnExtension.elearnHtmlBody(),
-        });
-        this.pdfBodyConverter = new Showdown.Converter({
-            simplifiedAutoLink: true,
-            excludeTrailingPunctuationFromURLs: true,
-            strikethrough: true,
-            tables: true,
-            extensions: elearnExtension.elearnPdfBody(),
-        });
-        this.imprintConverter = new Showdown.Converter({
-            simplifiedAutoLink: true,
-            excludeTrailingPunctuationFromURLs: true,
-            strikethrough: true,
-            tables: true,
-            extensions: elearnExtension.elearnImprint(),
-        });
+        this.htmlConverter = new MarkdownElearnJS.HtmlConverter();
+        this.pdfConverter = new MarkdownElearnJS.PdfConverter();
     }
 
     /**
@@ -133,57 +107,65 @@ class FileWriter {
             return;
         }
 
+        self.htmlConverter.setOptions(self.getHtmlConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        var html = self.bodyConverter.makeHtml(text);
+        self.htmlConverter.toHtml(text, {"bodyOnly": true}).then((html) => {
+            self.exportOptionManager.openHTMLExportOptions(
+                    self.exportOptionManager.getHTMLExportOptionDefaults(html),
+                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+                    (val, opts) => {
+                if(!val) {
+                    if(callback) callback();
+                    return;
+                }
 
-        self.exportOptionManager.openHTMLExportOptions(
-                self.exportOptionManager.getHTMLExportOptionDefaults(html),
-                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                (val, opts) => {
-            if(!val) {
-                if(callback) callback();
-                return;
-            }
+                var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
 
-            var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
+                // define finishing functions
+                var resolve = () => {
+                    if(notification) notification.dismiss();
+                    atom.notifications.addSuccess("File saved successfully.");
+                    if(callback) callback();
+                };
+                var reject = (err) => {
+                    if(notification) notification.dismiss();
+                    if(callback) callback(err);
+                    else throw err;
+                };
 
-            // define finishing functions
-            var resolve = () => {
-                if(notification) notification.dismiss();
-                atom.notifications.addSuccess("File saved successfully.");
-                if(callback) callback();
-            };
-            var reject = (err) => {
-                if(notification) notification.dismiss();
-                if(callback) callback(err);
-                else throw err;not
-            };
+                // conversion
+                self.htmlConverter.toHtml(text, opts).then((html) => {
+                    var filesToExport = [];
+                    // find files to export and change links
+                    if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
+                        var fileExtractorObject;
 
-            // conversion
-            var meta = elearnExtension.parseMetaData(text);
-            var imprint = "";
+                        fileExtractorObject = MarkdownElearnJS.FileExtractor.replaceAllLinks(html);
+                        html = fileExtractorObject.html;
+                        filesToExport = filesToExport.concat(fileExtractorObject.files);
+                    }
 
-            if(text.match(/(?:(?:^|\n)(```+|~~~+)imprint\s*?\n([\s\S]*?)\n\1|(?:^|\n)(<!--+)imprint\s*?\n([\s\S]*?)\n-->)/g)) {
-                imprint = self.imprintConverter.makeHtml(text);
-            }
-
-            var filesToExport = [];
-            // find files to export and change links
-            if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                var fileExtractorObject;
-
-                fileExtractorObject = FileExtractor.replaceAllLinks(html);
-                html = fileExtractorObject.html;
-                filesToExport = filesToExport.concat(fileExtractorObject.files);
-
-                fileExtractorObject = FileExtractor.replaceAllLinks(meta);
-                meta = fileExtractorObject.html;
-                filesToExport = filesToExport.concat(fileExtractorObject.files);
-            }
-
-            // write to file
-            self.exportHTML(filePath, html, meta, imprint, opts, filesToExport, resolve, reject);
+                    // write to file
+                    self.exportHTML(filePath, html, opts, filesToExport, resolve, reject);
+                });
+            });
+        }, (err) => {
+            if(callback) callback(err);
+            else throw err;
         });
+    }
+
+    /**
+    * Creates an HTML Converter with current settings.
+    */
+    getHtmlConverterOptions() {
+        return {
+            "newSectionOnHeading" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
+            "headingDepth" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
+            "useSubSections" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
+            "subSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
+            "subsubSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
+        };
     }
 
     /**
@@ -194,70 +176,27 @@ class FileWriter {
     * @param filePath: the path where the .html output file is stored (including name)
     * @param html: the converted HTML content, not the whole file, ohne what is
     *              within the elearn.js div.page (check the template)
-    * @param meta: the converted meta part. HTML <scripts> and other added to
-    *              the html <head>
-    * @param imprint: HTML to be inserted into the elearn.js imprint
     * @param opts: the ExportOptions from the ExportOptionManager
     * @param filesToExport: list of file infos for export.
     *                       Check FileExtractorObject for more info
     * @param resolve: function() to be called when resolved correctly
     * @param reject: function(error) to be called on error
     */
-    exportHTML(filePath, html, meta, imprint, opts, filesToExport, resolve, reject) {
+    exportHTML(filePath, html, opts, filesToExport, resolve, reject) {
         const self = this;
 
-        FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template.html`), (data) => {
-            // data => template.html
-            var fileContent = self.getHTMLFileContent(data, html, meta, imprint, opts);
-
-            var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
-            self.saveToFilePath(fileContent, filePath, extractFiles, opts)
-                .then(() => {
-                    // export linked files
-                    if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                        var pathIn = self.getFileDir();
-                        var pathOut = self.getFileDir(filePath);
-                        FileExtractor.extractAll(filesToExport, pathIn, pathOut, 30000)
-                            .then(resolve, reject);
-                    }
-                    else resolve();
-                }, reject);
-        }, reject);
-    }
-
-    /**
-    * Inserts necessary elements into the PDF Template to create the
-    * final fileContent.
-    *
-    * @param data: the content of the template_pdf.html as string
-    * @param html: the converted HTML content, not the whole file, ohne what is
-    *              within the elearn.js div.page (check the template)
-    * @param meta: the converted meta part. HTML <scripts> and other added to
-    *              the html <head>
-    * @param imprint: HTML to be inserted into the elearn.js imprint
-    * @param opts: the ExportOptions from the ExportOptionManager
-    */
-    getHTMLFileContent(data, html, meta, imprint, opts) {
-        return data.replace(/\$\$meta\$\$/, () => {return meta})
-            .replace(/\$\$extensions\$\$/, () => {
-                return ExtensionManager.getHTMLAssetStrings(
-                    opts.includeQuiz,
-                    opts.includeElearnVideo,
-                    opts.includeClickImage,
-                    opts.includeTimeSlider);
-            })
-            .replace(/\$\$imprint\$\$/, () => {return imprint})
-            .replace(/\$\$body\$\$/, () => {return html})
-            .replace(/\$\$language\$\$/, () => {
-                if(opts.language !== "de") {
-                    return `<script>
-                                eLearnJS.setLanguage("${opts.language}");
-                                try { eLearnVideoJS.setLanguage("${opts.language}") } catch(e){ console.log(e) };
-                                try { quizJS.setLanguage("${opts.language}") } catch(e){ console.log(e) };
-                            </script>`;
+        var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
+        self.saveToFilePath(html, filePath, extractFiles, opts)
+            .then(() => {
+                // export linked files
+                if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
+                    var pathIn = self.getFileDir();
+                    var pathOut = self.getFileDir(filePath);
+                    MarkdownElearnJS.FileExtractor.extractAll(filesToExport, pathIn, pathOut, 30000)
+                        .then(resolve, reject);
                 }
-                return "";
-            });
+                else resolve();
+            }, reject);
     }
 
     /**
@@ -275,36 +214,59 @@ class FileWriter {
             return;
         }
 
+        self.pdfConverter.setOptions(self.getPdfConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        var html = self.pdfBodyConverter.makeHtml(text);
+        var html = self.pdfConverter.toPdfHtml(text, {"bodyOnly": true}).then((html) => {
+            self.exportOptionManager.openPDFExportOptions(
+                    self.exportOptionManager.getPDFExportOptionDefaults(html),
+                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+                    (val, opts) => {
+                if(!val) {
+                    if(callback) callback();
+                    return;
+                }
 
-        self.exportOptionManager.openPDFExportOptions(
-                self.exportOptionManager.getPDFExportOptionDefaults(html),
-                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                (val, opts) => {
-            if(!val) {
-                if(callback) callback();
-                return;
-            }
+                var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
 
-            var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
+                // define finishing functions
+                var resolve = () => {
+                    if(notification) notification.dismiss();
+                    atom.notifications.addSuccess("File saved successfully.");
+                    if(callback) callback();
+                };
+                var reject = (err) => {
+                    if(notification) notification.dismiss();
+                    if(callback) callback(err);
+                    else throw err;not
+                };
 
-            // define finishing functions
-            var resolve = () => {
-                if(notification) notification.dismiss();
-                atom.notifications.addSuccess("File saved successfully.");
-                if(callback) callback();
-            };
-            var reject = (err) => {
-                if(notification) notification.dismiss();
-                if(callback) callback(err);
-                else throw err;not
-            };
-
-            var meta = elearnExtension.parseMetaData(text);
-
-            self.exportPDF(filePath, html, meta, opts, resolve, reject);
+                // conversion
+                self.exportPDF(filePath, text, opts, resolve, reject);
+            });
+        }, (err) => {
+            if(callback) callback(err);
+            else throw err;
         });
+    }
+
+    /**
+    * Creates an PDF Converter with current settings.
+    */
+    getPdfConverterOptions() {
+        return {
+            "newSectionOnHeading" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
+            "headingDepth" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
+            "useSubSections" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
+            "subSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
+            "subsubSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
+            "newPageOnSection": atom.config.get('atom-elearnjs.pdfConfig.newPageOnSection'),
+            "contentZoom": atom.config.get('atom-elearnjs.pdfConfig.zoom'),
+            "customHeader": atom.config.get('atom-elearnjs.pdfConfig.header'),
+            "headerHeight": atom.config.get('atom-elearnjs.pdfConfig.headerHeight'),
+            "customFooter": atom.config.get('atom-elearnjs.pdfConfig.footer'),
+            "footerHeight": atom.config.get('atom-elearnjs.pdfConfig.footerHeight'),
+            "customStyleFile": atom.config.get('atom-elearnjs.pdfConfig.customStyle'),
+        };
     }
 
     /**
@@ -313,128 +275,21 @@ class FileWriter {
     * files.
     *
     * @param filePath: the path where the .html output file is stored (including name)
-    * @param html: the converted HTML content, not the whole file, ohne what is
-    *              within the elearn.js div.page (check the template)
-    * @param meta: the converted meta part. HTML <scripts> and other added to
-    *              the html <head>
+    * @param text: the markdown source code
     * @param opts: the ExportOptions from the ExportOptionManager
     * @param resolve: function() to be called when resolved correctly
     * @param reject: function(error) to be called on error
     */
-    exportPDF(filePath, html, meta, opts, resolve, reject) {
+    exportPDF(filePath, text, opts, resolve, reject) {
         const self = this;
 
-        FileWriter.readFile(path.resolve(`${__dirname}/${assetsPath}/elearnjs/template_pdf.html`), (data) => {
-            // data => template.html
-            var fileContent = self.getPDFFileContent(data, html, meta, opts);
-
-            // For debugging only
-            //self.saveToFilePath(fileContent, filePath + ".html", EXTRACT_NOTHING);
-
-            const renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
-
-            // generate pdf content
-            var pdf = PDF.create(fileContent, self.getPdfOutputOptions(renderDelay))
-                    .toFile(filePath, (err, res) => {
-                if(err) reject(err);
-
-                console.log("File saved at:", res);
-                resolve();
-            });
-        }, reject);
-    }
-
-    /**
-    * Inserts necessary elements into the PDF Template to create the
-    * final fileContent.
-    *
-    * @param data: the content of the template_pdf.html as string
-    * @param html: the base HTML as generated HTML Body of the file
-    * @param meta: additional header elements for the HTML file
-    * @param opts: the ExportOptions from the ExportOptionManager
-    */
-    getPDFFileContent(data, html, meta, opts) {
-        const self = this;
-
-        var zoom = `<style>html {zoom: ${atom.config.get('atom-elearnjs.pdfConfig.zoom')}}</style>`;
-        // header and footer
-        var header = atom.config.get('atom-elearnjs.pdfConfig.header');
-        if(!header) header = self.getDefaultHeader();
-        var footer = atom.config.get('atom-elearnjs.pdfConfig.footer');
-        if(!footer) footer = self.getDefaultFooter();
-
-        var customStyleFile = atom.config.get('atom-elearnjs.pdfConfig.customStyle');
-        var customStyle = "";
-        if(customStyleFile && fs.existsSync(path.resolve(customStyleFile))) {
-            customStyleFile = "file:///" + path.resolve(customStyleFile).replace(/\\/g, "/");
-            customStyle = `<link rel="stylesheet" type="text/css" href="${customStyleFile}">`;
-        }
-
-        return data.replace(/\$\$meta\$\$/, () => {return meta})
-            .replace(/\$\$extensions\$\$/, () => {
-                return ExtensionManager.getPDFAssetStrings(
-                    opts.includeQuiz,
-                    opts.includeElearnVideo,
-                    opts.includeClickImage,
-                    opts.includeTimeSlider);
-            })
-            .replace(/\$\$zoom\$\$/, () => {return zoom})
-            .replace(/\$\$custom_style\$\$/, () => {return customStyle})
-            .replace(/\$\$header\$\$/, () => {return header})
-            .replace(/\$\$footer\$\$/, () => {return footer})
-            .replace(/\$\$body\$\$/, () => {return html})
-            .replace(/\$\$assetspath\$\$/g, () => {return "file:///" + path.resolve(`${__dirname}/${assetsPath}/elearnjs/`).replace(/\\/g, "/")});
-    }
-
-    /**
-    * The default PDF Header HTML elements
-    */
-    getDefaultHeader() {
-        return ``;
-    }
-
-    /**
-    * The default PDF Footer HTML elements
-    */
-    getDefaultFooter() {
-        return `<div id="pageFooter" style="font-family: Arial, Verdana, sans-serif; color: #666; position: absolute; height: 100%; width: 100%;">
-                    <span style="position: absolute; bottom: 0; right: 0">{{page}}</span>
-                </div>`; // {{pages}} := maximale Anzahl
-    }
-
-    /**
-    * Generates the PDF output options for the used node-html-pdf package.
-    * @param filePath path to the currently opened file, necessary to link
-    *                 included assets.
-    * @param renderDelay (optional) delay of rendering by the package in ms.
-    */
-    getPdfOutputOptions(renderDelay) {
-        const self = this;
-
-        if(!renderDelay) renderDelay = 0;
-
-        var opts = {
-            // USE OPTIONS HERE
-            "format": "A4",
-            "border": {
-                "top": "18mm",            // default is 0, units: mm, cm, in, px
-                "right": "23mm",
-                "bottom": "18mm",
-                "left": "23mm"
-            },
-            "header": {
-                "height": atom.config.get('atom-elearnjs.pdfConfig.headerHeight'),
-            },
-            "footer": {
-                "height": atom.config.get('atom-elearnjs.pdfConfig.footerHeight'),
-            },
-            "renderDelay": renderDelay,
-        };
-
-        if(self.getFileDir() !== undefined)
-            opts.base = "file:///" + self.getFileDir().replace(/\\/g, "/") + "/";
-
-        return opts;
+        opts.renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
+        self.pdfConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
+            console.log("File saved at:", res);
+            resolve();
+        }, (err) => {
+            reject(err);
+        });
     }
 
     /**
@@ -581,7 +436,7 @@ class FileWriter {
             else if(extractFiles === EXTRACT_ELEARNJS) {
                 var pathOut = self.getFileDir(fileOut);
 
-                FileWriter.writeAssets(pathOut, extractOpts, () => {
+                MarkdownElearnJS.ExtensionManager.exportAssets(pathOut, extractOpts).then(() => {
                     writeFile();
                 }, (err) => {
                     if(reject) reject(err);
@@ -616,16 +471,6 @@ class FileWriter {
     }
 
     /**
-    * Reads in a given file.
-    */
-    static readFile(filePath, callback, error) {
-        fs.readFile(filePath, 'utf8', (err, data) => {
-            if(err) return error(err);
-            if(callback) callback(data);
-        });
-    }
-
-    /**
     * Writes the content to a given file.
     */
     static writeFile(filePath, content, callback, error) {
@@ -635,41 +480,6 @@ class FileWriter {
                 return;
             }
             if(callback) callback();
-        });
-    }
-
-    /**
-    * Writes the elearn.js assets to the given path.
-    */
-    static writeAssets(dirPath, opts, callback, error) {
-        var outPath = path.resolve(dirPath + "/assets/");
-        var folders = [path.resolve(`${__dirname}/${assetsPath}/elearnjs/assets/`)];
-
-        if(opts.includeQuiz) folders.push(ExtensionManager.getQuizAssetDir());
-        if(opts.includeElearnVideo) folders.push(ExtensionManager.getElearnVideoAssetDir());
-        if(opts.includeClickImage) folders.push(ExtensionManager.getClickImageAssetDir());
-        if(opts.includeTimeSlider) folders.push(ExtensionManager.getTimeSliderAssetDir());
-
-        FileWriter.writeFolders(folders, outPath, callback, error);
-    }
-
-    /**
-    * Copies/writes a list of folders by their absolute paths to the outPath
-    */
-    static writeFolders(folders, outPath, callback, error) {
-        if(!folders || !folders.length) {
-            if(callback) callback();
-            return;
-        }
-        // get first folder + remove from array
-        var inPath = folders.shift();
-        ncp(inPath, outPath, function(err) {
-            if(err) {
-                if(error) error(err);
-                return;
-            }
-
-            FileWriter.writeFolders(folders, outPath, callback, error);
         });
     }
 };

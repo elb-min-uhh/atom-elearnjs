@@ -1,7 +1,7 @@
 "use strict";
 
 const OptionMenuManager = require('./OptionMenuManager.js');
-const ExtensionManager = require('../export/ExtensionManager.js');
+const ExtensionManager = require('markdown-elearnjs').ExtensionManager;
 
 class ExportOptionManager {
     constructor(optionMenuManager) {

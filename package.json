@@ -10,9 +10,7 @@
     "atom": ">=1.25.0 <2.0.0"
   },
   "dependencies": {
-    "html-pdf": "^2.2.0",
-    "ncp": "^2.0.0",
-    "path": "^0.12.7",
-    "showdown": "^1.8.6"
+    "markdown-elearnjs": "^1.0.2",
+    "path": "^0.12.7"
   }
 }
