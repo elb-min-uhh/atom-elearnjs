@@ -36,7 +36,8 @@ var processSourceReplacement = function(wholeMatch, tag, before, wrapBefore, wra
 
         file.relativeOutputPath = val;
 
-        files.push(file);
+        if(file.relativeInputPath !== file.relativeOutputPath)
+            files.push(file);
 
         switch(tag.toLowerCase()) {
             case "img":
@@ -62,7 +63,12 @@ function copyFile(source, target, ignoreNotExistent) {
 
         // nonexistent source
         if(!fs.existsSync(source)) {
-            if(!ignoreNotExistent) reject(`File does not exist ${source}`);
+            if(!ignoreNotExistent) {
+                reject(`File does not exist ${source}`);
+            }
+            else {
+                resolve();
+            }
             return;
         }
 

@@ -29,7 +29,6 @@ class FileWriter {
     constructor(optionMenuManager) {
         this.exportOptionManager = new ExportOptionManager(optionMenuManager);
 
-        this.working = false;
         this.saveLocations = {};
 
         this.bodyConverter = new Showdown.Converter({
