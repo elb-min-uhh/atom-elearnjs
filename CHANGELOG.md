@@ -1,3 +1,7 @@
+## 0.4.1
+* General:
+    * Updated `markdown-elearnjs` to v1.1.1
+    * Removed assets from the repo (in `markdown-elearnjs` now)
 ## 0.4.0
 * General:
     * Fixed indention problems with imprint and meta blocks
