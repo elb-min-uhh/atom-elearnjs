@@ -1,7 +1,7 @@
 "use babel";
 "use strict";
 
-const {dialog} = require('electron').remote;
+const { dialog } = require('electron').remote;
 var path = require('path');
 var fs = require('fs');
 
@@ -74,12 +74,12 @@ class FileWriter {
             var fileType = self.getFileType(filePath);
 
             switch(fileType.toLowerCase()) {
-                case ".html" :
+                case ".html":
                     self.saveHTML(filePath, (err) => {
                         if(err) throw err;
                     });
                     break;
-                case ".pdf" :
+                case ".pdf":
                     self.savePDF(filePath, (err) => {
                         if(err) throw err;
                     });
@@ -109,46 +109,46 @@ class FileWriter {
 
         self.htmlConverter.setOptions(self.getHtmlConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        self.htmlConverter.toHtml(text, {"bodyOnly": true}).then((html) => {
+        self.htmlConverter.toHtml(text, { "bodyOnly": true }).then((html) => {
             self.exportOptionManager.openHTMLExportOptions(
-                    self.exportOptionManager.getHTMLExportOptionDefaults(html),
-                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                    (val, opts) => {
-                if(!val) {
-                    if(callback) callback();
-                    return;
-                }
-
-                var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
-
-                // define finishing functions
-                var resolve = () => {
-                    if(notification) notification.dismiss();
-                    atom.notifications.addSuccess("File saved successfully.");
-                    if(callback) callback();
-                };
-                var reject = (err) => {
-                    if(notification) notification.dismiss();
-                    if(callback) callback(err);
-                    else throw err;
-                };
-
-                // conversion
-                self.htmlConverter.toHtml(text, opts).then((html) => {
-                    var filesToExport = [];
-                    // find files to export and change links
-                    if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                        var fileExtractorObject;
-
-                        fileExtractorObject = MarkdownElearnJS.FileExtractor.replaceAllLinks(html);
-                        html = fileExtractorObject.html;
-                        filesToExport = filesToExport.concat(fileExtractorObject.files);
+                self.exportOptionManager.getHTMLExportOptionDefaults(html),
+                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+                (val, opts) => {
+                    if(!val) {
+                        if(callback) callback();
+                        return;
                     }
 
-                    // write to file
-                    self.exportHTML(filePath, html, opts, filesToExport, resolve, reject);
+                    var notification = atom.notifications.addInfo("Converting...", { dismissable: true });
+
+                    // define finishing functions
+                    var resolve = () => {
+                        if(notification) notification.dismiss();
+                        atom.notifications.addSuccess("File saved successfully.");
+                        if(callback) callback();
+                    };
+                    var reject = (err) => {
+                        if(notification) notification.dismiss();
+                        if(callback) callback(err);
+                        else throw err;
+                    };
+
+                    // conversion
+                    self.htmlConverter.toHtml(text, opts).then((html) => {
+                        var filesToExport = [];
+                        // find files to export and change links
+                        if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
+                            var fileExtractorObject;
+
+                            fileExtractorObject = MarkdownElearnJS.FileExtractor.replaceAllLinks(html);
+                            html = fileExtractorObject.html;
+                            filesToExport = filesToExport.concat(fileExtractorObject.files);
+                        }
+
+                        // write to file
+                        self.exportHTML(filePath, html, opts, filesToExport, resolve, reject);
+                    });
                 });
-            });
         }, (err) => {
             if(callback) callback(err);
             else throw err;
@@ -160,11 +160,11 @@ class FileWriter {
     */
     getHtmlConverterOptions() {
         return {
-            "newSectionOnHeading" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
-            "headingDepth" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
-            "useSubSections" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
-            "subSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
-            "subsubSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
+            "newSectionOnHeading": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
+            "headingDepth": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
+            "useSubSections": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
+            "subSectionLevel": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
+            "subsubSectionLevel": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
         };
     }
 
@@ -216,33 +216,33 @@ class FileWriter {
 
         self.pdfConverter.setOptions(self.getPdfConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        var html = self.pdfConverter.toPdfHtml(text, {"bodyOnly": true}).then((html) => {
+        var html = self.pdfConverter.toPdfHtml(text, { "bodyOnly": true }).then((html) => {
             self.exportOptionManager.openPDFExportOptions(
-                    self.exportOptionManager.getPDFExportOptionDefaults(html),
-                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                    (val, opts) => {
-                if(!val) {
-                    if(callback) callback();
-                    return;
-                }
+                self.exportOptionManager.getPDFExportOptionDefaults(html),
+                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+                (val, opts) => {
+                    if(!val) {
+                        if(callback) callback();
+                        return;
+                    }
 
-                var notification = atom.notifications.addInfo("Converting...", {dismissable: true});
+                    var notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
-                // define finishing functions
-                var resolve = () => {
-                    if(notification) notification.dismiss();
-                    atom.notifications.addSuccess("File saved successfully.");
-                    if(callback) callback();
-                };
-                var reject = (err) => {
-                    if(notification) notification.dismiss();
-                    if(callback) callback(err);
-                    else throw err;not
-                };
+                    // define finishing functions
+                    var resolve = () => {
+                        if(notification) notification.dismiss();
+                        atom.notifications.addSuccess("File saved successfully.");
+                        if(callback) callback();
+                    };
+                    var reject = (err) => {
+                        if(notification) notification.dismiss();
+                        if(callback) callback(err);
+                        else throw err; not
+                    };
 
-                // conversion
-                self.exportPDF(filePath, text, opts, resolve, reject);
-            });
+                    // conversion
+                    self.exportPDF(filePath, text, opts, resolve, reject);
+                });
         }, (err) => {
             if(callback) callback(err);
             else throw err;
@@ -254,11 +254,11 @@ class FileWriter {
     */
     getPdfConverterOptions() {
         return {
-            "newSectionOnHeading" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
-            "headingDepth" : atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
-            "useSubSections" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
-            "subSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
-            "subsubSectionLevel" : atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
+            "newSectionOnHeading": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
+            "headingDepth": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
+            "useSubSections": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
+            "subSectionLevel": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.sub'),
+            "subsubSectionLevel": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.subsub'),
             "newPageOnSection": atom.config.get('atom-elearnjs.pdfConfig.newPageOnSection'),
             "contentZoom": atom.config.get('atom-elearnjs.pdfConfig.zoom'),
             "customHeader": atom.config.get('atom-elearnjs.pdfConfig.header'),
@@ -309,7 +309,7 @@ class FileWriter {
 
         var fileType = "";
         var defaultPath = "";
-        var filters = [{name: "All Files", extensions: ["*"]}];
+        var filters = [{ name: "All Files", extensions: ["*"] }];
 
         // array of filetypes
         if(Object.prototype.toString.call(fileTypes) === '[object Array]') {
@@ -318,7 +318,7 @@ class FileWriter {
 
             var newFilters = [];
             for(var type of fileTypes) {
-                newFilters.push({name: type.substr(1), extensions: [type.toLowerCase().substr(1)]});
+                newFilters.push({ name: type.substr(1), extensions: [type.toLowerCase().substr(1)] });
             }
             newFilters.push(filters[0]);
             filters = newFilters;
@@ -327,15 +327,15 @@ class FileWriter {
         else {
             fileType = fileTypes.toLowerCase();
             defaultPath = self.getFilePath(fileType.toLowerCase());
-            filters.unshift({name: fileTypes.substr(1), extensions: [fileTypes.substr(1).toLowerCase()]});
+            filters.unshift({ name: fileTypes.substr(1), extensions: [fileTypes.substr(1).toLowerCase()] });
         }
 
         var curPath = self.getFilePath();
 
         if(allowQuickSave
-                && curPath !== undefined
-                && self.saveLocations[curPath]
-                && self.saveLocations[curPath][fileType]) {
+            && curPath !== undefined
+            && self.saveLocations[curPath]
+            && self.saveLocations[curPath][fileType]) {
             callback(self.saveLocations[curPath][fileType]);
         }
         else {
@@ -350,8 +350,8 @@ class FileWriter {
                         self.saveLocations[curPath][fileType] = filePath;
                     }
                     console.log("File Save Location set", "type:", fileType,
-                                "of:", curPath,
-                                "to:", filePath);
+                        "of:", curPath,
+                        "to:", filePath);
                 }
                 callback(filePath);
             });
@@ -454,8 +454,8 @@ class FileWriter {
     */
     serialize() {
         return {
-            "saveLocations" : this.saveLocations,
-            "exportOptionManager" : this.exportOptionManager.serialize(),
+            "saveLocations": this.saveLocations,
+            "exportOptionManager": this.exportOptionManager.serialize(),
         };
     }
 

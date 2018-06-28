@@ -1,6 +1,6 @@
 "use strict";
 
-const {dialog} = require('electron').remote;
+const { dialog } = require('electron').remote;
 
 const OptionMenu = require("./OptionMenu.js");
 

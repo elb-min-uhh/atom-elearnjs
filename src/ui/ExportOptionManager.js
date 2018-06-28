@@ -41,7 +41,7 @@ class ExportOptionManager {
             if(val) {
                 self.lastHTMLExportOptions = exportOptions;
                 if(exportOptions.displayExportOptions
-                        !== atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
+                    !== atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                     atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
                         exportOptions.displayExportOptions);
                 }
@@ -121,8 +121,8 @@ class ExportOptionManager {
         content.appendChild(OptionMenuManager.getHeading('Language'));
         var language = OptionMenuManager.getSelectLabel("",
             [
-                {"text": "German", value: "de"},
-                {"text": "English", value:"en"}
+                { "text": "German", value: "de" },
+                { "text": "English", value: "en" }
             ],
             defaults.language);
         content.appendChild(language);
@@ -141,8 +141,8 @@ class ExportOptionManager {
         content.appendChild(OptionMenuManager.getHeading('Extensions'));
         content.appendChild(OptionMenuManager.getDescription(
             `Values defined by Method <em>'${
-                self.getExtensionDetectionMethodName(
-                    atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
+            self.getExtensionDetectionMethodName(
+                atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
             }'</em>. Check settings to change method.`, true));
         var includeQuiz = OptionMenuManager.getCheckBoxLabel(
             "Include quiz.js", defaults.includeQuiz);
@@ -229,7 +229,7 @@ class ExportOptionManager {
             if(val) {
                 self.lastPDFExportOptions = exportOptions;
                 if(exportOptions.displayExportOptions
-                        !== atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
+                    !== atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                     atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
                         exportOptions.displayExportOptions);
                 }
@@ -294,8 +294,8 @@ class ExportOptionManager {
         content.appendChild(OptionMenuManager.getHeading('Extensions'));
         content.appendChild(OptionMenuManager.getDescription(
             `Values defined by Method <em>'${
-                self.getExtensionDetectionMethodName(
-                    atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
+            self.getExtensionDetectionMethodName(
+                atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
             }'</em>. Check settings to change method.`, true));
         var includeQuiz = OptionMenuManager.getCheckBoxLabel(
             "Include quiz.js", defaults.includeQuiz);

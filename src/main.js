@@ -10,8 +10,8 @@ var config = require('../spec/config.js');
 // The whole state of your package will be stored and managed here.
 const Main = {
     commandListener: null,
-    config : config,
-    activate (state) {
+    config: config,
+    activate(state) {
         if(!this.optionMenuManager) {
             this.optionMenuManager = new OptionMenuManager();
         }
@@ -29,10 +29,10 @@ const Main = {
             if(state["FileWriter"]) this.fileWriter.deserialize(state["FileWriter"]);
         }
     },
-    deactivate () {
+    deactivate() {
         // When the user or Atom itself kills a window, this method is called.
     },
-    serialize () {
+    serialize() {
         // To save the current package's state, this method should return
         // an object containing all required data.
         return {

@@ -78,7 +78,7 @@ class OptionMenu {
         var buttonGroup = document.createElement('div');
         buttonGroup.classList.add('btn-group');
 
-        for(var i=buttons.length - 1; i >= 0; i--) {
+        for(var i = buttons.length - 1; i >= 0; i--) {
             const idx = i;
             var button = document.createElement('button');
 
@@ -87,8 +87,8 @@ class OptionMenu {
             if(i === buttons.length - 1) button.classList.add('btn-primary');
 
             button.textContent = buttons[i];
-            button.addEventListener("click", () => {self.close(idx)});
-            button.addEventListener("keyup", (e) => {if(e.keyCode === 13) self.close(idx)});
+            button.addEventListener("click", () => { self.close(idx) });
+            button.addEventListener("keyup", (e) => { if(e.keyCode === 13) self.close(idx) });
             buttonGroup.appendChild(button);
 
             if(!this.defaultButton) this.defaultButton = button;
