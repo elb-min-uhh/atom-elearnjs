@@ -3,17 +3,12 @@
 
 const { dialog } = require('electron').remote;
 var path = require('path');
-var fs = require('fs');
 
 const EXTRACT_NOTHING = 0;
 const EXTRACT_ELEARNJS = 1;
-const EXTRACT_ALL_LINKED_FILES = 2;
 
 const MarkdownElearnJS = require('markdown-elearnjs');
-const OptionMenuManager = require('../ui/OptionMenuManager.js');
 const ExportOptionManager = require('../ui/ExportOptionManager.js');
-
-const assetsPath = '../../assets';
 
 /**
 * Manages the markdown conversion and file export.
@@ -109,9 +104,9 @@ class FileWriter {
 
         self.htmlConverter.setOptions(self.getHtmlConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        self.htmlConverter.toHtml(text, { "bodyOnly": true }).then((html) => {
+        MarkdownElearnJS.ExtensionManager.scanMarkdownForAll(text, self.htmlConverter).then((extensionObject) => {
             self.exportOptionManager.openHTMLExportOptions(
-                self.exportOptionManager.getHTMLExportOptionDefaults(html),
+                self.exportOptionManager.getHTMLExportOptionDefaults(extensionObject),
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
                 (val, opts) => {
                     if(!val) {
@@ -133,21 +128,8 @@ class FileWriter {
                         else throw err;
                     };
 
-                    // conversion
-                    self.htmlConverter.toHtml(text, opts).then((html) => {
-                        var filesToExport = [];
-                        // find files to export and change links
-                        if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                            var fileExtractorObject;
-
-                            fileExtractorObject = MarkdownElearnJS.FileExtractor.replaceAllLinks(html);
-                            html = fileExtractorObject.html;
-                            filesToExport = filesToExport.concat(fileExtractorObject.files);
-                        }
-
-                        // write to file
-                        self.exportHTML(filePath, html, opts, filesToExport, resolve, reject);
-                    });
+                    // write to file
+                    self.exportHTML(filePath, text, opts, resolve, reject);
                 });
         }, (err) => {
             if(callback) callback(err);
@@ -174,29 +156,21 @@ class FileWriter {
     * files.
     *
     * @param filePath: the path where the .html output file is stored (including name)
-    * @param html: the converted HTML content, not the whole file, ohne what is
-    *              within the elearn.js div.page (check the template)
+    * @param text: the markdown source code
     * @param opts: the ExportOptions from the ExportOptionManager
-    * @param filesToExport: list of file infos for export.
-    *                       Check FileExtractorObject for more info
     * @param resolve: function() to be called when resolved correctly
     * @param reject: function(error) to be called on error
     */
-    exportHTML(filePath, html, opts, filesToExport, resolve, reject) {
+    exportHTML(filePath, text, opts, resolve, reject) {
         const self = this;
 
         var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
-        self.saveToFilePath(html, filePath, extractFiles, opts)
-            .then(() => {
-                // export linked files
-                if(opts.exportLinkedFiles && self.getFileDir() !== undefined) {
-                    var pathIn = self.getFileDir();
-                    var pathOut = self.getFileDir(filePath);
-                    MarkdownElearnJS.FileExtractor.extractAll(filesToExport, pathIn, pathOut, 30000)
-                        .then(resolve, reject);
-                }
-                else resolve();
-            }, reject);
+        self.htmlConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
+            console.log("File saved at:", res);
+            resolve();
+        }, (err) => {
+            reject(err);
+        });
     }
 
     /**
@@ -216,9 +190,9 @@ class FileWriter {
 
         self.pdfConverter.setOptions(self.getPdfConverterOptions());
         var text = atom.workspace.getActiveTextEditor().getText();
-        var html = self.pdfConverter.toPdfHtml(text, { "bodyOnly": true }).then((html) => {
+        MarkdownElearnJS.ExtensionManager.scanMarkdownForAll(text, self.pdfConverter).then((extensionObject) => {
             self.exportOptionManager.openPDFExportOptions(
-                self.exportOptionManager.getPDFExportOptionDefaults(html),
+                self.exportOptionManager.getPDFExportOptionDefaults(extensionObject),
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
                 (val, opts) => {
                     if(!val) {
@@ -411,44 +385,6 @@ class FileWriter {
     }
 
     /**
-    * Writes a string into a file of given fileType.
-    * @param content the string to write as text into the file.
-    * @param filePath the path including the file name and type to write to.
-    * @param extractFiles (optional) int: EXTRACT_NOTHING, EXTRACT_ELEARNJS
-    * @param notification (optional) a notification to dismiss when done
-    *
-    * @return Promise to be solved when done
-    */
-    saveToFilePath(content, filePath, extractFiles, extractOpts) {
-        const self = this;
-        const fileOut = filePath;
-        var promise = new Promise((resolve, reject) => {
-            var writeFile = () => {
-                FileWriter.writeFile(fileOut, content, () => {
-                    console.log("File saved at:", fileOut);
-                    if(resolve) resolve();
-                });
-            };
-
-            if(extractFiles === EXTRACT_NOTHING) {
-                writeFile();
-            }
-            else if(extractFiles === EXTRACT_ELEARNJS) {
-                var pathOut = self.getFileDir(fileOut);
-
-                MarkdownElearnJS.ExtensionManager.exportAssets(pathOut, extractOpts).then(() => {
-                    writeFile();
-                }, (err) => {
-                    if(reject) reject(err);
-                    else throw err;
-                });
-            }
-        });
-
-        return promise;
-    }
-
-    /**
     * Returns a serialized JSON Object containing necessary information
     * for deserialization.
     */
@@ -468,19 +404,6 @@ class FileWriter {
             && state.saveLocations) this.saveLocations = state.saveLocations;
         if(state.exportOptionManager)
             this.exportOptionManager.deserialize(state.exportOptionManager);
-    }
-
-    /**
-    * Writes the content to a given file.
-    */
-    static writeFile(filePath, content, callback, error) {
-        fs.writeFile(filePath, content, function(err) {
-            if(err) {
-                if(error) error(err);
-                return;
-            }
-            if(callback) callback();
-        });
     }
 };
 

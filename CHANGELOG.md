@@ -1,3 +1,8 @@
+## 0.4.3
+* General:
+    * Updated `markdown-elearnjs` to v1.2.3
+        * adjust to interface changes
+        * possible performance improvements for file export
 ## 0.4.2
 * General:
     * Updated `markdown-elearnjs` to v1.1.2

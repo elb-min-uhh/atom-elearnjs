@@ -1,7 +1,6 @@
 "use strict";
 
 const OptionMenuManager = require('./OptionMenuManager.js');
-const ExtensionManager = require('markdown-elearnjs').ExtensionManager;
 
 class ExportOptionManager {
     constructor(optionMenuManager) {
@@ -54,14 +53,14 @@ class ExportOptionManager {
     * Will return an object containing all default values for the
     * options displayed.
     */
-    getHTMLExportOptionDefaults(html) {
+    getHTMLExportOptionDefaults(extensionObject) {
         const self = this;
 
         var language = (self.lastHTMLExportOptions
             && self.lastHTMLExportOptions.language !== undefined)
             ? self.lastHTMLExportOptions.language : "de";
 
-        var exportElearnjs = (self.lastHTMLExportOptions
+        var exportAssets = (self.lastHTMLExportOptions
             && self.lastHTMLExportOptions.exportAssets !== undefined)
             ? self.lastHTMLExportOptions.exportAssets : true;
 
@@ -89,16 +88,16 @@ class ExportOptionManager {
                 includeTimeSlider = self.lastHTMLExportOptions.includeTimeSlider;
         }
         else if(detectionMethod === "auto") {
-            includeQuiz = ExtensionManager.scanForQuiz(html);
-            includeElearnVideo = ExtensionManager.scanForVideo(html);
-            includeClickImage = ExtensionManager.scanForClickImage(html);
-            includeTimeSlider = ExtensionManager.scanForTimeSlider(html);
+            includeQuiz = extensionObject.includeQuiz;
+            includeElearnVideo = extensionObject.includeElearnVideo;
+            includeClickImage = extensionObject.includeClickImage;
+            includeTimeSlider = extensionObject.includeTimeSlider;
         }
 
         // return
         return {
             language: language,
-            exportElearnjs: exportElearnjs,
+            exportAssets: exportAssets,
             exportLinkedFiles: exportLinkedFiles,
             includeQuiz: includeQuiz,
             includeElearnVideo: includeElearnVideo,
@@ -129,9 +128,9 @@ class ExportOptionManager {
 
         // Assets export
         content.appendChild(OptionMenuManager.getHeading('Asset exports'));
-        var exportElearnjs = OptionMenuManager.getCheckBoxLabel(
-            "Export elearn.js assets", defaults.exportElearnjs);
-        content.appendChild(exportElearnjs);
+        var exportAssets = OptionMenuManager.getCheckBoxLabel(
+            "Export elearn.js assets", defaults.exportAssets);
+        content.appendChild(exportAssets);
         var exportLinkedFiles = OptionMenuManager.getCheckBoxLabel(
             "Export linked files into asset folder (only <img>, <source>, <script>, <link>)",
             defaults.exportLinkedFiles);
@@ -167,7 +166,7 @@ class ExportOptionManager {
         return {
             content: content,
             language: language.select,
-            exportElearnjs: exportElearnjs.checkbox,
+            exportAssets: exportAssets.checkbox,
             exportLinkedFiles: exportLinkedFiles.checkbox,
             includeQuiz: includeQuiz.checkbox,
             includeElearnVideo: includeElearnVideo.checkbox,
@@ -186,7 +185,7 @@ class ExportOptionManager {
     parseHTMLExportOptions(contentObj) {
         return {
             language: contentObj.language.value,
-            exportAssets: contentObj.exportElearnjs.checked,
+            exportAssets: contentObj.exportAssets.checked,
             exportLinkedFiles: contentObj.exportLinkedFiles.checked,
             includeQuiz: contentObj.includeQuiz.checked,
             includeElearnVideo: contentObj.includeElearnVideo.checked,
@@ -242,7 +241,7 @@ class ExportOptionManager {
     * Will return an object containing all default values for the
     * options displayed.
     */
-    getPDFExportOptionDefaults(html) {
+    getPDFExportOptionDefaults(extensionObject) {
         const self = this;
 
         // Extension Defaults
@@ -265,10 +264,10 @@ class ExportOptionManager {
                 includeTimeSlider = self.lastPDFExportOptions.includeTimeSlider;
         }
         else if(detectionMethod === "auto") {
-            includeQuiz = ExtensionManager.scanForQuiz(html);
-            includeElearnVideo = ExtensionManager.scanForVideo(html);
-            includeClickImage = ExtensionManager.scanForClickImage(html);
-            includeTimeSlider = ExtensionManager.scanForTimeSlider(html);
+            includeQuiz = extensionObject.includeQuiz;
+            includeElearnVideo = extensionObject.includeElearnVideo;
+            includeClickImage = extensionObject.includeClickImage;
+            includeTimeSlider = extensionObject.includeTimeSlider;
         }
 
         // return

@@ -10,7 +10,7 @@
     "atom": ">=1.25.0 <2.0.0"
   },
   "dependencies": {
-    "markdown-elearnjs": "^1.1.2",
+    "markdown-elearnjs": "^1.2.3",
     "path": "^0.12.7"
   }
 }
