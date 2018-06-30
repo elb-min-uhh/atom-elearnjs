@@ -1,14 +1,16 @@
 "use babel";
 "use strict";
 
-const { dialog } = require('electron').remote;
-var path = require('path');
+import { remote } from 'electron';
+import path from 'path';
+
+import { HtmlConverter, PdfConverter, ExtensionManager } from 'markdown-elearnjs';
+import ExportOptionManager from '../ui/ExportOptionManager.js';
+
+const dialog = remote.dialog;
 
 const EXTRACT_NOTHING = 0;
 const EXTRACT_ELEARNJS = 1;
-
-const MarkdownElearnJS = require('markdown-elearnjs');
-const ExportOptionManager = require('../ui/ExportOptionManager.js');
 
 /**
 * Manages the markdown conversion and file export.
@@ -19,8 +21,8 @@ class FileWriter {
 
         this.saveLocations = {};
 
-        this.htmlConverter = new MarkdownElearnJS.HtmlConverter();
-        this.pdfConverter = new MarkdownElearnJS.PdfConverter();
+        this.htmlConverter = new HtmlConverter();
+        this.pdfConverter = new PdfConverter();
     }
 
     /**
@@ -66,7 +68,7 @@ class FileWriter {
                 return;
             }
 
-            var fileType = self.getFileType(filePath);
+            let fileType = self.getFileType(filePath);
 
             switch(fileType.toLowerCase()) {
                 case ".html":
@@ -103,8 +105,8 @@ class FileWriter {
         }
 
         self.htmlConverter.setOptions(self.getHtmlConverterOptions());
-        var text = atom.workspace.getActiveTextEditor().getText();
-        MarkdownElearnJS.ExtensionManager.scanMarkdownForAll(text, self.htmlConverter).then((extensionObject) => {
+        let text = atom.workspace.getActiveTextEditor().getText();
+        ExtensionManager.scanMarkdownForAll(text, self.htmlConverter).then((extensionObject) => {
             self.exportOptionManager.openHTMLExportOptions(
                 self.exportOptionManager.getHTMLExportOptionDefaults(extensionObject),
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
@@ -114,15 +116,15 @@ class FileWriter {
                         return;
                     }
 
-                    var notification = atom.notifications.addInfo("Converting...", { dismissable: true });
+                    let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
                     // define finishing functions
-                    var resolve = () => {
+                    let resolve = () => {
                         if(notification) notification.dismiss();
                         atom.notifications.addSuccess("File saved successfully.");
                         if(callback) callback();
                     };
-                    var reject = (err) => {
+                    let reject = (err) => {
                         if(notification) notification.dismiss();
                         if(callback) callback(err);
                         else throw err;
@@ -164,7 +166,7 @@ class FileWriter {
     exportHTML(filePath, text, opts, resolve, reject) {
         const self = this;
 
-        var extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
+        let extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
         self.htmlConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
             console.log("File saved at:", res);
             resolve();
@@ -189,8 +191,8 @@ class FileWriter {
         }
 
         self.pdfConverter.setOptions(self.getPdfConverterOptions());
-        var text = atom.workspace.getActiveTextEditor().getText();
-        MarkdownElearnJS.ExtensionManager.scanMarkdownForAll(text, self.pdfConverter).then((extensionObject) => {
+        let text = atom.workspace.getActiveTextEditor().getText();
+        ExtensionManager.scanMarkdownForAll(text, self.pdfConverter).then((extensionObject) => {
             self.exportOptionManager.openPDFExportOptions(
                 self.exportOptionManager.getPDFExportOptionDefaults(extensionObject),
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
@@ -200,18 +202,18 @@ class FileWriter {
                         return;
                     }
 
-                    var notification = atom.notifications.addInfo("Converting...", { dismissable: true });
+                    let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
                     // define finishing functions
-                    var resolve = () => {
+                    let resolve = () => {
                         if(notification) notification.dismiss();
                         atom.notifications.addSuccess("File saved successfully.");
                         if(callback) callback();
                     };
-                    var reject = (err) => {
+                    let reject = (err) => {
                         if(notification) notification.dismiss();
                         if(callback) callback(err);
-                        else throw err; not
+                        else throw err;
                     };
 
                     // conversion
@@ -281,17 +283,17 @@ class FileWriter {
 
         if(!callback) return;
 
-        var fileType = "";
-        var defaultPath = "";
-        var filters = [{ name: "All Files", extensions: ["*"] }];
+        let fileType = "";
+        let defaultPath = "";
+        let filters = [{ name: "All Files", extensions: ["*"] }];
 
         // array of filetypes
         if(Object.prototype.toString.call(fileTypes) === '[object Array]') {
             allowQuickSave = false;
             defaultPath = self.getFilePath(fileTypes[0].toLowerCase());
 
-            var newFilters = [];
-            for(var type of fileTypes) {
+            let newFilters = [];
+            for(let type of fileTypes) {
                 newFilters.push({ name: type.substr(1), extensions: [type.toLowerCase().substr(1)] });
             }
             newFilters.push(filters[0]);
@@ -304,12 +306,12 @@ class FileWriter {
             filters.unshift({ name: fileTypes.substr(1), extensions: [fileTypes.substr(1).toLowerCase()] });
         }
 
-        var curPath = self.getFilePath();
+        let curPath = self.getFilePath();
 
-        if(allowQuickSave
-            && curPath !== undefined
-            && self.saveLocations[curPath]
-            && self.saveLocations[curPath][fileType]) {
+        if(allowQuickSave &&
+            curPath !== undefined &&
+            self.saveLocations[curPath] &&
+            self.saveLocations[curPath][fileType]) {
             callback(self.saveLocations[curPath][fileType]);
         }
         else {
@@ -318,7 +320,7 @@ class FileWriter {
                 filters: filters,
             }, (filePath) => {
                 if(filePath) {
-                    var fileType = self.getFileType(filePath).toLowerCase();
+                    let fileType = self.getFileType(filePath).toLowerCase();
                     if(curPath !== undefined) {
                         if(!self.saveLocations[curPath]) self.saveLocations[curPath] = {};
                         self.saveLocations[curPath][fileType] = filePath;
@@ -339,11 +341,11 @@ class FileWriter {
     *                 calculated path.
     */
     getFilePath(fileType) {
-        var editor = atom.workspace.getActiveTextEditor();
-        var file = editor ? editor.buffer.file : undefined;
+        let editor = atom.workspace.getActiveTextEditor();
+        let file = editor ? editor.buffer.file : undefined;
         if(!file) return undefined;
-        var filepath = file.path;
-        var split = filepath.split(".");
+        let filepath = file.path;
+        let split = filepath.split(".");
 
         if(fileType) {
             split[split.length - 1] = fileType.substr(1);
@@ -360,8 +362,8 @@ class FileWriter {
     */
     getFileType(filepath) {
         if(!filepath) {
-            var editor = atom.workspace.getActiveTextEditor();
-            var file = editor ? editor.buffer.file : undefined;
+            let editor = atom.workspace.getActiveTextEditor();
+            let file = editor ? editor.buffer.file : undefined;
             if(!file) return undefined;
             filepath = file.path;
         }
@@ -376,8 +378,8 @@ class FileWriter {
     */
     getFileDir(filepath) {
         if(!filepath) {
-            var editor = atom.workspace.getActiveTextEditor();
-            var file = editor ? editor.buffer.file : undefined;
+            let editor = atom.workspace.getActiveTextEditor();
+            let file = editor ? editor.buffer.file : undefined;
             if(!file) return undefined;
             filepath = file.path;
         }
@@ -396,15 +398,15 @@ class FileWriter {
     }
 
     /**
-    * Deserializes a given object and restoring previously set variables.
+    * Deserializes a given object and restoring previously set letiables.
     * @param state a state generated by `FileWriter::serialize()`
     */
     deserialize(state) {
-        if(atom.config.get('atom-elearnjs.generalConfig.keepSaveLocations')
-            && state.saveLocations) this.saveLocations = state.saveLocations;
+        if(atom.config.get('atom-elearnjs.generalConfig.keepSaveLocations') &&
+            state.saveLocations) this.saveLocations = state.saveLocations;
         if(state.exportOptionManager)
             this.exportOptionManager.deserialize(state.exportOptionManager);
     }
-};
+}
 
 export default FileWriter;

@@ -1,3 +1,4 @@
+"use babel";
 "use strict";
 
 class ElearnJSMenuManager {
@@ -17,10 +18,10 @@ class ElearnJSMenuManager {
     }
 
     getPackageSubmenu() {
-        var submenu = null;
-        for(var menu of atom.menu.template) {
+        let submenu = null;
+        for(let menu of atom.menu.template) {
             if(menu.label === 'Packages' || menu.label === '&Packages') {
-                for(var sub of menu.submenu) {
+                for(let sub of menu.submenu) {
                     if(sub.label === 'elearn.js') {
                         submenu = sub.submenu;
                         break;
@@ -45,4 +46,4 @@ class ElearnJSMenuManager {
     }
 }
 
-module.exports = ElearnJSMenuManager;
+export default ElearnJSMenuManager;

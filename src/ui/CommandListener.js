@@ -49,6 +49,6 @@ class CommandListener {
         atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
             !atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'));
     }
-};
+}
 
 export default CommandListener;

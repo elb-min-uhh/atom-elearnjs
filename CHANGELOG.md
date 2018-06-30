@@ -1,3 +1,6 @@
+## 0.4.4
+* Internal:
+    * Code clean up, refactoring
 ## 0.4.3
 * General:
     * Updated `markdown-elearnjs` to v1.2.3

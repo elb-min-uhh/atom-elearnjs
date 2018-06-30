@@ -1,6 +1,7 @@
+"use babel";
 "use strict";
 
-const OptionMenu = require("./OptionMenu.js");
+import OptionMenu from "./OptionMenu";
 
 class OptionMenuManager {
     constructor() {
@@ -66,14 +67,14 @@ class OptionMenuManager {
     }
 
     static getHeading(text, containsHTML) {
-        var heading = document.createElement('h3');
+        let heading = document.createElement('h3');
         if(!containsHTML) heading.textContent = text;
         else heading.innerHTML = text;
         return heading;
     }
 
     static getDescription(text, containsHTML) {
-        var desc = document.createElement('span');
+        let desc = document.createElement('span');
         desc.classList.add('description');
         if(!containsHTML) desc.textContent = text;
         else desc.innerHTML = text;
@@ -81,15 +82,15 @@ class OptionMenuManager {
     }
 
     static getCheckBoxLabel(text, checked, containsHTML) {
-        var label = document.createElement('label');
+        let label = document.createElement('label');
 
-        var checkbox = document.createElement('input');
+        let checkbox = document.createElement('input');
         checkbox.classList.add('input-checkbox');
         checkbox.type = "checkbox";
         checkbox.checked = checked;
         label.appendChild(checkbox);
 
-        var span = document.createElement('span');
+        let span = document.createElement('span');
         if(!containsHTML) span.textContent = text;
         else span.innerHTML = text;
         label.appendChild(span);
@@ -100,17 +101,17 @@ class OptionMenuManager {
     }
 
     static getSelectLabel(text, options, selected, containsHTML) {
-        var label = document.createElement('label');
+        let label = document.createElement('label');
 
-        var span = document.createElement('span');
+        let span = document.createElement('span');
         if(!containsHTML) span.textContent = text;
         else span.innerHTML = text;
         label.appendChild(span);
 
-        var select = document.createElement('select');
+        let select = document.createElement('select');
         select.classList.add('form-control');
-        for(var opt of options) {
-            var o = document.createElement('option');
+        for(let opt of options) {
+            let o = document.createElement('option');
             o.value = opt.value;
             o.textContent = opt.text;
             select.appendChild(o);
@@ -124,4 +125,4 @@ class OptionMenuManager {
     }
 }
 
-module.exports = OptionMenuManager;
+export default OptionMenuManager;

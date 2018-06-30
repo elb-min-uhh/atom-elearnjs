@@ -1,3 +1,4 @@
+"use babel";
 "use strict";
 
 class OptionMenu {
@@ -65,7 +66,7 @@ class OptionMenu {
     initHeader(header) {
         if(!header) return;
 
-        var heading = document.createElement('h2');
+        let heading = document.createElement('h2');
         heading.classList.add('panel-heading');
         heading.textContent = header;
 
@@ -75,20 +76,20 @@ class OptionMenu {
     initButtons(buttons) {
         const self = this;
 
-        var buttonGroup = document.createElement('div');
+        let buttonGroup = document.createElement('div');
         buttonGroup.classList.add('btn-group');
 
-        for(var i = buttons.length - 1; i >= 0; i--) {
+        for(let i = buttons.length - 1; i >= 0; i--) {
             const idx = i;
-            var button = document.createElement('button');
+            let button = document.createElement('button');
 
             button.classList.add('atom-elearnjs-option-menu-button');
             button.classList.add('btn');
             if(i === buttons.length - 1) button.classList.add('btn-primary');
 
             button.textContent = buttons[i];
-            button.addEventListener("click", () => { self.close(idx) });
-            button.addEventListener("keyup", (e) => { if(e.keyCode === 13) self.close(idx) });
+            button.addEventListener("click", () => { self.close(idx); });
+            button.addEventListener("keyup", (e) => { if(e.keyCode === 13) self.close(idx); });
             buttonGroup.appendChild(button);
 
             if(!this.defaultButton) this.defaultButton = button;
@@ -102,4 +103,4 @@ class OptionMenu {
     }
 }
 
-module.exports = OptionMenu;
+export default OptionMenu;

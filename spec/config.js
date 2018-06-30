@@ -1,4 +1,7 @@
-var generalConfig = {
+"use babel";
+"use strict";
+
+let generalConfig = {
     keepSaveLocations: {
         title: 'Keep export locations after exit',
         description: 'When exporting a file for the first time, you are prompted with an export location. When checked, this will be kept after an atom restart.',
@@ -99,10 +102,10 @@ var generalConfig = {
     },
 };
 
-var htmlConfig = {
+let htmlConfig = {
 };
 
-var pdfConfig = {
+let pdfConfig = {
     newPageOnSection: {
         title: 'Start a new page at a section start',
         type: 'boolean',
@@ -160,7 +163,7 @@ var pdfConfig = {
     },
 };
 
-var config = {
+let config = {
     generalConfig: {
         title: 'General Settings',
         type: 'object',
@@ -181,6 +184,6 @@ var config = {
         properties: pdfConfig,
         order: 20,
     },
-}
+};
 
-module.exports = config;
+export default config;

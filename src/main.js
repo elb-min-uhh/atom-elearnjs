@@ -1,10 +1,11 @@
 "use babel";
+"use strict";
 
-const OptionMenuManager = require('./ui/OptionMenuManager.js');
-const ElearnJSMenuManager = require('./ui/ElearnJSMenuManager.js');
-const CommandListener = require('./ui/CommandListener.js');
-const FileWriter = require('./export/FileWriter.js');
-var config = require('../spec/config.js');
+import OptionMenuManager from './ui/OptionMenuManager';
+import ElearnJSMenuManager from './ui/ElearnJSMenuManager';
+import CommandListener from './ui/CommandListener';
+import FileWriter from './export/FileWriter';
+import config from '../spec/config';
 
 // This is your main singleton.
 // The whole state of your package will be stored and managed here.
@@ -26,7 +27,7 @@ const Main = {
         }
 
         if(state) {
-            if(state["FileWriter"]) this.fileWriter.deserialize(state["FileWriter"]);
+            if(state.FileWriter) this.fileWriter.deserialize(state.FileWriter);
         }
     },
     deactivate() {
@@ -37,7 +38,7 @@ const Main = {
         // an object containing all required data.
         return {
             "FileWriter": this.fileWriter.serialize(),
-        }
+        };
     },
 };
 
