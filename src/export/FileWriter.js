@@ -166,7 +166,6 @@ class FileWriter {
     exportHTML(filePath, text, opts, resolve, reject) {
         const self = this;
 
-        let extractFiles = opts.exportAssets ? EXTRACT_ELEARNJS : EXTRACT_NOTHING;
         self.htmlConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
             console.log("File saved at:", res);
             resolve();
