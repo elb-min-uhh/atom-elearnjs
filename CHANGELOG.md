@@ -1,3 +1,6 @@
+## 0.4.5
+* General:
+    * Updated `markdown-elearnjs` to v1.2.11
 ## 0.4.4
 * General:
     * Updated `markdown-elearnjs` to v1.2.7
