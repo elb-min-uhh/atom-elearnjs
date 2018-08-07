@@ -1,3 +1,7 @@
+## 0.4.6
+* General:
+    * Updated `markdown-elearnjs` to v1.2.12
+        * Fixing compatibility with Internet Explorer
 ## 0.4.5
 * General:
     * Updated `markdown-elearnjs` to v1.2.11
