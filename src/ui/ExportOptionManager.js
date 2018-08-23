@@ -245,6 +245,10 @@ class ExportOptionManager {
     getPDFExportOptionDefaults(extensionObject) {
         const self = this;
 
+        let language = (self.lastPDFExportOptions &&
+            self.lastPDFExportOptions.language !== undefined) ?
+            self.lastPDFExportOptions.language : "de";
+
         // Extension Defaults
         let detectionMethod = atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod');
         let includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider;
@@ -273,6 +277,7 @@ class ExportOptionManager {
 
         // return
         return {
+            language: language,
             includeQuiz: includeQuiz,
             includeElearnVideo: includeElearnVideo,
             includeClickImage: includeClickImage,
@@ -289,6 +294,16 @@ class ExportOptionManager {
         const self = this;
 
         let content = document.createElement('div');
+
+        // Language
+        content.appendChild(OptionMenuManager.getHeading('Language'));
+        let language = OptionMenuManager.getSelectLabel("",
+            [
+                { "text": "German", value: "de" },
+                { "text": "English", value: "en" }
+            ],
+            defaults.language);
+        content.appendChild(language);
 
         // Extension Options
         content.appendChild(OptionMenuManager.getHeading('Extensions'));
@@ -319,6 +334,7 @@ class ExportOptionManager {
         // return necessary elements
         return {
             content: content,
+            language: language.select,
             includeQuiz: includeQuiz.checkbox,
             includeElearnVideo: includeElearnVideo.checkbox,
             includeClickImage: includeClickImage.checkbox,
@@ -335,6 +351,7 @@ class ExportOptionManager {
     */
     parsePDFExportOptions(contentObj) {
         return {
+            language: contentObj.language.value,
             includeQuiz: contentObj.includeQuiz.checked,
             includeElearnVideo: contentObj.includeElearnVideo.checked,
             includeClickImage: contentObj.includeClickImage.checked,

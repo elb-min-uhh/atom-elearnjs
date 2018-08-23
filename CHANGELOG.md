@@ -1,3 +1,10 @@
+## 0.4.7
+* General:
+    * Allow language selection for PDF export
+        * this will only change the language of customized translation elements
+        * elearn.js elements which could be translated are not visible in a PDF
+        document
+    * Updated `markdown-elearnjs` to v1.3.2
 ## 0.4.6
 * General:
     * Updated `markdown-elearnjs` to v1.2.12
