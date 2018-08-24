@@ -1,3 +1,7 @@
+## 0.4.8
+* General:
+    * Updated `markdown-elearnjs` to v1.3.3
+        * Updated `clickimage.js` to support `data-pins` syntax
 ## 0.4.7
 * General:
     * Allow language selection for PDF export
