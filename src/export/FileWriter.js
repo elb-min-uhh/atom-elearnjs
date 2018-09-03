@@ -35,7 +35,7 @@ class FileWriter {
 
         self.openFileChooser(".HTML", (filePath) => {
             self.saveHTML(filePath, (err) => {
-                if(err) throw err;
+                if(err) this.notifyError(err);
             });
         }, true);
     }
@@ -50,7 +50,7 @@ class FileWriter {
 
         self.openFileChooser(".PDF", (filePath) => {
             self.savePDF(filePath, (err) => {
-                if(err) throw err;
+                if(err) this.notifyError(err);
             });
         }, true);
     }
@@ -73,16 +73,16 @@ class FileWriter {
             switch(fileType.toLowerCase()) {
                 case ".html":
                     self.saveHTML(filePath, (err) => {
-                        if(err) throw err;
+                        if(err) this.notifyError(err);
                     });
                     break;
                 case ".pdf":
                     self.savePDF(filePath, (err) => {
-                        if(err) throw err;
+                        if(err) this.notifyError(err);
                     });
                     break;
                 default:
-                    atom.notifications.addError("Unsupported file type");
+                    atom.notifications.addError("Unsupported file type.");
                     break;
             }
         });
@@ -383,6 +383,23 @@ class FileWriter {
             filepath = file.path;
         }
         return path.dirname(filepath);
+    }
+
+    /**
+     * Notifies the errors if known.
+     * @param {*} error
+     */
+    notifyError(error) {
+        let options = {
+            detail: error.toString(),
+            dismissable: true,
+        };
+
+        if(error.code === "EBUSY") {
+            options.description = "The file could not be saved. It seems to be opened by another process.";
+        }
+
+        atom.notifications.addError("Could not save the file", options);
     }
 
     /**

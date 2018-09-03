@@ -1,3 +1,8 @@
+## 0.4.9
+* PDF:
+    * Added an error message, when the pdf file is locked and can not
+    be overwritten
+
 ## 0.4.8
 * General:
     * Updated `markdown-elearnjs` to v1.3.3
