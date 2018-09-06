@@ -1,3 +1,9 @@
+## 0.4.10
+* General:
+    * Updated `markdown-elearnjs` to v1.3.7
+        * Updated PDF Output
+        * Updated print css in HTML output
+        * Fixing minor issues
 ## 0.4.9
 * PDF:
     * Added an error message, when the pdf file is locked and can not
