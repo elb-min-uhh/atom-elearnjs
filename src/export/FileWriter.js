@@ -228,7 +228,7 @@ class FileWriter {
     * Creates an PDF Converter with current settings.
     */
     getPdfConverterOptions() {
-        return {
+        let options = {
             "newSectionOnHeading": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeading'),
             "headingDepth": atom.config.get('atom-elearnjs.generalConfig.newSectionOnHeadingDepth'),
             "useSubSections": atom.config.get('atom-elearnjs.generalConfig.sectionOrder.useSectionLevel'),
@@ -241,7 +241,12 @@ class FileWriter {
             "customFooter": atom.config.get('atom-elearnjs.pdfConfig.footer'),
             "footerHeight": atom.config.get('atom-elearnjs.pdfConfig.footerHeight'),
             "customStyleFile": atom.config.get('atom-elearnjs.pdfConfig.customStyle'),
+            "chromePath": atom.config.get('atom-elearnjs.pdfConfig.chromePath'),
         };
+
+        if(options.chromePath === '') options.chromePath = undefined;
+
+        return options;
     }
 
     /**

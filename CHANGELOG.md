@@ -1,3 +1,8 @@
+## 0.5.0
+* General:
+    * Updated `markdown-elearnjs` to v1.4.1
+        * Use `Puppeteer` instead of `html-pdf`
+        * Different `customHeader`/`customFooter` syntax
 ## 0.4.10
 * General:
     * Updated `markdown-elearnjs` to v1.3.7

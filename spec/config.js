@@ -128,28 +128,28 @@ let pdfConfig = {
     },
     header: {
         title: 'Custom header text',
-        description: 'HTML to be set as header. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be pasted into the `<body>` directly. Make sure to use it correctly.',
+        description: 'HTML to be set as header. Check `customHeader/customFooter` on https://github.com/elb-min-uhh/markdown-elearnjs/wiki/Conversion#pdf-converter-settings.',
         type: 'string',
         default: '',
         order: 30,
     },
     headerHeight: {
         title: 'Header height',
-        description: 'Check https://github.com/marcbachmann/node-html-pdf#options for more information on supported values.',
+        description: 'Units `px, cm, mm, in`. Check `headerHeight/footerHeight` on https://github.com/elb-min-uhh/markdown-elearnjs/wiki/Conversion#pdf-converter-settings for more information on supported values.',
         type: 'string',
         default: '0',
         order: 40,
     },
     footer: {
         title: 'Custom footer text',
-        description: 'HTML to be set as footer. The footer dimensions are set to a height of 17mm by default. If you want to overwrite the origin footer use `<div id="pageFooter">YOUR CONTENT</div>`. For more information visit https://github.com/marcbachmann/node-html-pdf#footers-and-headers. This will be pasted into the `<body>` directly. Make sure to use it correctly.',
+        description: 'HTML to be set as footer. Check `customHeader/customFooter` on https://github.com/elb-min-uhh/markdown-elearnjs/wiki/Conversion#pdf-converter-settings.',
         type: 'string',
         default: '',
         order: 50,
     },
     footerHeight: {
         title: 'Footer height',
-        description: 'Check https://github.com/marcbachmann/node-html-pdf#options for more information on supported values.',
+        description: 'Units `px, cm, mm, in`. Check `headerHeight/footerHeight` on https://github.com/elb-min-uhh/markdown-elearnjs/wiki/Conversion#pdf-converter-settings for more information on supported values.',
         type: 'string',
         default: '17mm',
         order: 60,
@@ -160,6 +160,13 @@ let pdfConfig = {
         type: 'string',
         default: '',
         order: 70,
+    },
+    chromePath: {
+        title: 'Custom Chrome Path',
+        description: 'If you do not want or are not able to use the bundled chrome, you can set an absolute path to the chrome/chromium executable. You need to use a chrome executable compatible with `Puppeteer` in headless version.',
+        type: 'string',
+        default: '',
+        order: 80,
     },
 };
 
