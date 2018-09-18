@@ -53,17 +53,9 @@ for beginners or troubleshooting.
 ## Known Issues
 
 * All platforms:
-    * PDF output might break elements at page end (e.g. lines might be broken
-        horizontally)
-        * Workaround: add forced page break
-            `<div style="page-break-before: always;"></div>`
-* Windows:
-    * _.woff_ fonts are not supported by _phantom.js_, which is used
-    in the _.pdf_ conversion process. Fonts might appear differently.
-    Consider using a _.ttf_ in the PDF specific CSS file (check the settings)
-* Linux/Mac OS:
-    * PDF output is zoomed
-        * Workaround: zoom factor of ~0.7
+    * PDF output might be slow
+        * Chrome/Chromium is being started for each conversion process
+        * For multiple PDF exports it might get faster
 
 ## Credits
 
