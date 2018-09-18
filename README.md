@@ -62,7 +62,7 @@ for beginners or troubleshooting.
 * [Atom](https://atom.io) the editor you need!
 * [elearn.js](https://github.com/elb-min-uhh/elearn.js) based for output scripts and styles.
 * [Showdown](http://showdownjs.com/) used for Markdown to HTML conversion.
-* [marcbachmann/node-html-pdf](https://github.com/marcbachmann/node-html-pdf)
+* [Puppeteer](https://github.com/GoogleChrome/puppeteer)
 used for HTML to PDF conversion.
 
 ## License
