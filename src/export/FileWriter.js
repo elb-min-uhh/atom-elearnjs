@@ -22,7 +22,17 @@ class FileWriter {
         this.saveLocations = {};
 
         this.htmlConverter = new HtmlConverter();
-        this.pdfConverter = new PdfConverter();
+        this.pdfConverter = new PdfConverter({
+            keepChromeAlive: atom.config.get('atom-elearnjs.pdfConfig.keepChromeAlive'),
+        });
+
+        this.initializeConfigObservers();
+    }
+
+    initializeConfigObservers() {
+        atom.config.observe('atom-elearnjs.pdfConfig.keepChromeAlive', (val) => {
+            this.pdfConverter.setOption("keepChromeAlive", val);
+        });
     }
 
     /**

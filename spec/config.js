@@ -161,6 +161,13 @@ let pdfConfig = {
         default: '',
         order: 70,
     },
+    keepChromeAlive: {
+        title: 'Keep Chrome Running',
+        description: 'This will reduce the PDF conversion time after the first startup if set to true. Will increase Atom\'s memory usage slightly.',
+        type: 'boolean',
+        default: true,
+        order: 75,
+    },
     chromePath: {
         title: 'Custom Chrome Path',
         description: 'If you do not want or are not able to use the bundled chrome, you can set an absolute path to the chrome/chromium executable. You need to use a chrome executable compatible with `Puppeteer` in headless version.',

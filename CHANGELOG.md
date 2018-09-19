@@ -1,3 +1,7 @@
+## 0.5.1
+* General:
+    * Updated `markdown-elearnjs` to v1.4.2
+        * Chrome can be kept alive, to reduce conversion time
 ## 0.5.0
 * General:
     * Updated `markdown-elearnjs` to v1.4.1
