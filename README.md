@@ -54,8 +54,7 @@ for beginners or troubleshooting.
 
 * All platforms:
     * PDF output might be slow
-        * Chrome/Chromium is being started for each conversion process
-        * For multiple PDF exports it might get faster
+        * consider keeping Chrome alive after the first export (check settings)
 
 ## Credits
 
