@@ -1,3 +1,7 @@
+## 0.5.2
+* General:
+    * Updated `markdown-elearnjs` to v1.4.6
+        * handling of parallel pdf conversions improved
 ## 0.5.1
 * General:
     * Updated `markdown-elearnjs` to v1.4.2
