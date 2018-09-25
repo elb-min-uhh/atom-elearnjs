@@ -1,7 +1,12 @@
+## 0.5.4
+* General:
+    * Updated `markdown-elearnjs` to v1.4.9
+        * better PDF Conversion of specific `elearn.js` block elements
+        * fixing a bug with language loading of exported `elearn.js` documents
 ## 0.5.3
 * General:
     * Updated `markdown-elearnjs` to v1.4.8
-        * fixing back-button problems in exported elearn.js
+        * fixing back-button problems in exported `elearn.js`
 ## 0.5.2
 * General:
     * Updated `markdown-elearnjs` to v1.4.6
