@@ -1,3 +1,7 @@
+## 0.5.3
+* General:
+    * Updated `markdown-elearnjs` to v1.4.8
+        * fixing back-button problems in exported elearn.js
 ## 0.5.2
 * General:
     * Updated `markdown-elearnjs` to v1.4.6
