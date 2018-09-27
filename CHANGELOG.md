@@ -1,3 +1,8 @@
+## 0.5.5
+* General:
+    * Updated `markdown-elearnjs` to v1.5.0
+        * Export option for removing comments in output
+        * Syntax for always hidden comments (`<!--hide ...-->)
 ## 0.5.4
 * General:
     * Updated `markdown-elearnjs` to v1.4.9

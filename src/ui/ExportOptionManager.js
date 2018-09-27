@@ -61,6 +61,10 @@ class ExportOptionManager {
             self.lastHTMLExportOptions.language !== undefined) ?
             self.lastHTMLExportOptions.language : "de";
 
+        let removeComments = (self.lastHTMLExportOptions &&
+            self.lastHTMLExportOptions.removeComments !== undefined) ?
+            self.lastHTMLExportOptions.removeComments : false;
+
         let exportAssets = (self.lastHTMLExportOptions &&
             self.lastHTMLExportOptions.exportAssets !== undefined) ?
             self.lastHTMLExportOptions.exportAssets : true;
@@ -98,6 +102,7 @@ class ExportOptionManager {
         // return
         return {
             language: language,
+            removeComments: removeComments,
             exportAssets: exportAssets,
             exportLinkedFiles: exportLinkedFiles,
             includeQuiz: includeQuiz,
@@ -126,6 +131,12 @@ class ExportOptionManager {
             ],
             defaults.language);
         content.appendChild(language);
+
+        // Conversion
+        content.appendChild(OptionMenuManager.getHeading('Conversion'));
+        let removeComments = OptionMenuManager.getCheckBoxLabel(
+            "Remove Html Comments", defaults.removeComments);
+        content.appendChild(removeComments);
 
         // Assets export
         content.appendChild(OptionMenuManager.getHeading('Asset exports'));
@@ -167,6 +178,7 @@ class ExportOptionManager {
         return {
             content: content,
             language: language.select,
+            removeComments: removeComments.checkbox,
             exportAssets: exportAssets.checkbox,
             exportLinkedFiles: exportLinkedFiles.checkbox,
             includeQuiz: includeQuiz.checkbox,
@@ -187,6 +199,7 @@ class ExportOptionManager {
         return {
             language: contentObj.language.value,
             exportAssets: contentObj.exportAssets.checked,
+            removeComments: contentObj.removeComments.checked,
             exportLinkedFiles: contentObj.exportLinkedFiles.checked,
             includeQuiz: contentObj.includeQuiz.checked,
             includeElearnVideo: contentObj.includeElearnVideo.checked,
@@ -249,6 +262,10 @@ class ExportOptionManager {
             self.lastPDFExportOptions.language !== undefined) ?
             self.lastPDFExportOptions.language : "de";
 
+        let removeComments = (self.lastPDFExportOptions &&
+            self.lastPDFExportOptions.removeComments !== undefined) ?
+            self.lastPDFExportOptions.removeComments : false;
+
         // Extension Defaults
         let detectionMethod = atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod');
         let includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider;
@@ -278,6 +295,7 @@ class ExportOptionManager {
         // return
         return {
             language: language,
+            removeComments: removeComments,
             includeQuiz: includeQuiz,
             includeElearnVideo: includeElearnVideo,
             includeClickImage: includeClickImage,
@@ -304,6 +322,12 @@ class ExportOptionManager {
             ],
             defaults.language);
         content.appendChild(language);
+
+        // Conversion
+        content.appendChild(OptionMenuManager.getHeading('Conversion'));
+        let removeComments = OptionMenuManager.getCheckBoxLabel(
+            "Remove Html Comments", defaults.removeComments);
+        content.appendChild(removeComments);
 
         // Extension Options
         content.appendChild(OptionMenuManager.getHeading('Extensions'));
@@ -335,6 +359,7 @@ class ExportOptionManager {
         return {
             content: content,
             language: language.select,
+            removeComments: removeComments.checkbox,
             includeQuiz: includeQuiz.checkbox,
             includeElearnVideo: includeElearnVideo.checkbox,
             includeClickImage: includeClickImage.checkbox,
@@ -352,6 +377,7 @@ class ExportOptionManager {
     parsePDFExportOptions(contentObj) {
         return {
             language: contentObj.language.value,
+            removeComments: contentObj.removeComments.checked,
             includeQuiz: contentObj.includeQuiz.checked,
             includeElearnVideo: contentObj.includeElearnVideo.checked,
             includeClickImage: contentObj.includeClickImage.checked,
