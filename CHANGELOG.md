@@ -1,3 +1,7 @@
+## 0.5.6
+* General:
+    * Updated `markdown-elearnjs` to v1.5.1
+        * Changed overlay positions in `elearn.js` html output
 ## 0.5.5
 * General:
     * Updated `markdown-elearnjs` to v1.5.0
