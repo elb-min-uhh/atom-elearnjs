@@ -1,3 +1,7 @@
+## 0.5.7
+* General:
+    * Updated `markdown-elearnjs` to v1.5.2
+        * Updated elearn.js, puppeteer
 ## 0.5.6
 * General:
     * Updated `markdown-elearnjs` to v1.5.1
