@@ -1,4 +1,4 @@
-## 0.5.8
+## 0.5.9
 * General:
     * Updated `markdown-elearnjs` to v1.5.4
         * Including a elearn.js hot-fix
