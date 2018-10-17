@@ -1,3 +1,7 @@
+## 0.5.8
+* General:
+    * Updated `markdown-elearnjs` to v1.5.3
+        * Updated elearn.js, showdown.js
 ## 0.5.7
 * General:
     * Updated `markdown-elearnjs` to v1.5.2
