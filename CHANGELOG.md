@@ -1,3 +1,6 @@
+## 0.5.10
+* Fixes:
+    * Export Option heading background color fixed
 ## 0.5.9
 * General:
     * Updated `markdown-elearnjs` to v1.5.4
