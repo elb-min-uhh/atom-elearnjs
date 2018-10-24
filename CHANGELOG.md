@@ -1,4 +1,7 @@
 ## 0.6.0
+* PDF:
+    * Added `renderDelay` to the export option menu
+        * the default value will be defined by the setting
 * General:
     * Updated `markdown-elearnjs` to v1.6.1
 * Internal:
