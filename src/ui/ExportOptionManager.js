@@ -14,17 +14,12 @@ class ExportOptionManager {
     *                 `getHTMLExportOptionDefaults` will return this object.
     * @param forcePrompt bool: if true it will always prompt, even when there
     *                    are cached options available
-    * @param callback fnc(val, exportOptions): will be called with the submit
-    *                 value (0: cancel, 1: export) and the export options
     */
-    openHTMLExportOptions(defaults, forcePrompt, callback) {
+    async openHTMLExportOptions(defaults, forcePrompt) {
         const self = this;
 
-        if(!callback) return;
-
         if(!forcePrompt && self.lastHTMLExportOptions) {
-            callback(1, self.lastHTMLExportOptions);
-            return;
+            return { values: self.lastHTMLExportOptions, returnValue: 1 };
         }
 
         // file selected
@@ -32,22 +27,21 @@ class ExportOptionManager {
         let contentObj = self.getHTMLExportOptionsContent(defaults);
 
         // open export options
-        self.optionMenuManager.open({
+        let val = await self.optionMenuManager.open({
             content: contentObj.content,
             header: "HTML Export Options",
             buttons: ["Cancel", "Export"],
-        }, (val) => {
-            let exportOptions = self.parseHTMLExportOptions(contentObj);
-            if(val) {
-                self.lastHTMLExportOptions = exportOptions;
-                if(exportOptions.displayExportOptions !==
-                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
-                    atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
-                        exportOptions.displayExportOptions);
-                }
-            }
-            callback(val, exportOptions);
         });
+        let exportOptions = self.parseHTMLExportOptions(contentObj);
+        if(val) {
+            self.lastHTMLExportOptions = exportOptions;
+            if(exportOptions.displayExportOptions !==
+                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
+                atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
+                    exportOptions.displayExportOptions);
+            }
+        }
+        return ({ values: exportOptions, returnValue: val });
     }
 
     /**
@@ -215,17 +209,12 @@ class ExportOptionManager {
     *                 `getPDFExportOptionDefaults` will return this object.
     * @param forcePrompt bool: if true it will always prompt, even when there
     *                    are cached options available
-    * @param callback fnc(val, exportOptions): will be called with the submit
-    *                 value (0: cancel, 1: export) and the export options
     */
-    openPDFExportOptions(defaults, forcePrompt, callback) {
+    async openPDFExportOptions(defaults, forcePrompt) {
         const self = this;
 
-        if(!callback) return;
-
         if(!forcePrompt && self.lastPDFExportOptions) {
-            callback(1, self.lastPDFExportOptions);
-            return;
+            return { values: self.lastPDFExportOptions, returnValue: 1 };
         }
 
         // file selected
@@ -233,22 +222,21 @@ class ExportOptionManager {
         let contentObj = self.getPDFExportOptionsContent(defaults);
 
         // open export options
-        self.optionMenuManager.open({
+        let val = await self.optionMenuManager.open({
             content: contentObj.content,
             header: "PDF Export Options",
             buttons: ["Cancel", "Export"],
-        }, (val) => {
-            let exportOptions = self.parsePDFExportOptions(contentObj);
-            if(val) {
-                self.lastPDFExportOptions = exportOptions;
-                if(exportOptions.displayExportOptions !==
-                    atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
-                    atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
-                        exportOptions.displayExportOptions);
-                }
-            }
-            callback(val, exportOptions);
         });
+        let exportOptions = self.parsePDFExportOptions(contentObj);
+        if(val) {
+            self.lastPDFExportOptions = exportOptions;
+            if(exportOptions.displayExportOptions !==
+                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
+                atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
+                    exportOptions.displayExportOptions);
+            }
+        }
+        return { values: exportOptions, returnValue: val };
     }
 
     /**

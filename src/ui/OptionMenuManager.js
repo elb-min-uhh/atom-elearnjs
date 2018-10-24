@@ -14,12 +14,10 @@ class OptionMenuManager {
     *           Optional:
     *           - content: optional dom elements to add to the menu
     *           - buttons: String[]: array of elements. Defaults to ["Cancel", "Ok"];
-    *                      these will result in a return value of their index for
-    *                      the callback function
+    *                      these will result in a return value of their index
     *           - header: String: Header text
-    * @param callback fnc(val): function that will be called on Close
     */
-    open(opts, callback) {
+    open(opts) {
         const self = this;
 
         if(self.openMenu && !self.openMenu.isVisible) {
@@ -27,28 +25,25 @@ class OptionMenuManager {
         }
 
         if(self.openMenu) throw "Menu already open";
-        else if(!callback || typeof callback !== "function") throw "No callback function given";
 
-        const originalCallback = callback;
-        // overwrite callback
-        const onClose = function() {
-            originalCallback.apply(null, arguments);
-            self.destroyMenu();
-        };
-
-        // display
-        self.openMenu = new OptionMenu(opts, onClose);
-        self.modalPanel = atom.workspace.addModalPanel({
-            item: self.openMenu.getElement(),
-            visible: true
+        return new Promise((res) => {
+            // display
+            self.openMenu = new OptionMenu(opts, function() {
+                self.destroyMenu();
+                res.apply(null, arguments);
+            });
+            self.modalPanel = atom.workspace.addModalPanel({
+                item: self.openMenu.getElement(),
+                visible: true
+            });
+            self.modalPanel.getItem().addEventListener("keyup", (e) => {
+                // ESC
+                if(e.keyCode === 27) {
+                    self.close();
+                }
+            });
+            self.openMenu.selectDefaultButton();
         });
-        self.modalPanel.getItem().addEventListener("keyup", (e) => {
-            // ESC
-            if(e.keyCode === 27) {
-                self.close();
-            }
-        });
-        self.openMenu.selectDefaultButton();
     }
 
     close() {

@@ -9,9 +9,6 @@ import ExportOptionManager from '../ui/ExportOptionManager.js';
 
 const dialog = remote.dialog;
 
-const EXTRACT_NOTHING = 0;
-const EXTRACT_ELEARNJS = 1;
-
 /**
 * Manages the markdown conversion and file export.
 */
@@ -40,14 +37,16 @@ class FileWriter {
     * Will be started on "to HTML".
     * Asks for a save location if none is stored.
     */
-    writeHTML() {
+    async writeHTML() {
         const self = this;
 
-        self.openFileChooser(".HTML", (filePath) => {
-            self.saveHTML(filePath, (err) => {
-                if(err) this.notifyError(err);
-            });
-        }, true);
+        let filePath = await self.openFileChooser(".HTML", true);
+        try {
+            await self.saveHTML(filePath);
+        }
+        catch(err) {
+            this.notifyError(err);
+        }
     }
 
     /**
@@ -55,14 +54,16 @@ class FileWriter {
     * Will be started on "to PDF".
     * Asks for a save location if none is stored.
     */
-    writePDF() {
+    async writePDF() {
         const self = this;
 
-        self.openFileChooser(".PDF", (filePath) => {
-            self.savePDF(filePath, (err) => {
-                if(err) this.notifyError(err);
-            });
-        }, true);
+        let filePath = await self.openFileChooser(".PDF", true);
+        try {
+            await self.savePDF(filePath);
+        }
+        catch(err) {
+            this.notifyError(err);
+        }
     }
 
     /**
@@ -70,83 +71,71 @@ class FileWriter {
     * Will be started on atom-elearnjs' "Save as..."
     * Always asks for a save location.
     */
-    saveAs() {
+    async saveAs() {
         const self = this;
 
-        self.openFileChooser([".HTML", ".PDF"], (filePath) => {
-            if(!filePath) {
-                return;
-            }
+        let filePath = await self.openFileChooser([".HTML", ".PDF"]);
+        if(!filePath) {
+            return;
+        }
 
-            let fileType = self.getFileType(filePath);
+        let fileType = self.getFileType(filePath);
 
-            switch(fileType.toLowerCase()) {
-                case ".html":
-                    self.saveHTML(filePath, (err) => {
-                        if(err) this.notifyError(err);
-                    });
-                    break;
-                case ".pdf":
-                    self.savePDF(filePath, (err) => {
-                        if(err) this.notifyError(err);
-                    });
-                    break;
-                default:
-                    atom.notifications.addError("Unsupported file type.");
-                    break;
-            }
-        });
+        switch(fileType.toLowerCase()) {
+            case ".html":
+                self.saveHTML(filePath).then().catch((err) => {
+                    if(err) this.notifyError(err);
+                });
+                break;
+            case ".pdf":
+                self.savePDF(filePath).then().catch((err) => {
+                    if(err) this.notifyError(err);
+                });
+                break;
+            default:
+                atom.notifications.addError("Unsupported file type.");
+                break;
+        }
     }
 
     /**
     * Will convert the currently opened file to HTML and store it in the
     * given path.
     * @param filePath string of a filePath including the file name and type.
-    * @param callback fnc(error) will be called when the function is done.
-    *                 error might be set if an error was thrown.
     */
-    saveHTML(filePath, callback) {
+    async saveHTML(filePath) {
         const self = this;
 
         // no output path -> cancel
         if(!filePath) {
-            if(callback) callback();
             return;
         }
 
         self.htmlConverter.setOptions(self.getHtmlConverterOptions());
+
         let text = atom.workspace.getActiveTextEditor().getText();
-        ExtensionManager.scanMarkdownForAll(text, self.htmlConverter).then((extensionObject) => {
-            self.exportOptionManager.openHTMLExportOptions(
-                self.exportOptionManager.getHTMLExportOptionDefaults(extensionObject),
-                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                (val, opts) => {
-                    if(!val) {
-                        if(callback) callback();
-                        return;
-                    }
+        // scan for extensions
+        let extensionObject = await ExtensionManager.scanMarkdownForAll(text, self.htmlConverter);
+        // prompt export options
+        let { values, returnValue } = await self.exportOptionManager.openHTMLExportOptions(
+            self.exportOptionManager.getHTMLExportOptionDefaults(extensionObject),
+            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'));
 
-                    let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
+        if(!returnValue) {
+            return;
+        }
 
-                    // define finishing functions
-                    let resolve = () => {
-                        if(notification) notification.dismiss();
-                        atom.notifications.addSuccess("File saved successfully.");
-                        if(callback) callback();
-                    };
-                    let reject = (err) => {
-                        if(notification) notification.dismiss();
-                        if(callback) callback(err);
-                        else throw err;
-                    };
+        let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
-                    // write to file
-                    self.exportHTML(filePath, text, opts, resolve, reject);
-                });
-        }, (err) => {
-            if(callback) callback(err);
-            else throw err;
-        });
+        try {
+            let file = await self.htmlConverter.toFile(text, filePath, self.getFileDir(), values, true);
+            console.log(`Saved at ${file}`);
+            if(notification) notification.dismiss();
+            atom.notifications.addSuccess("File saved successfully.");
+        } catch(err) {
+            if(notification) notification.dismiss();
+            throw err;
+        }
     }
 
     /**
@@ -163,75 +152,44 @@ class FileWriter {
     }
 
     /**
-    * Exports the converted content into a file.
-    * Based on options and filesToExport it will also export/copy additional
-    * files.
-    *
-    * @param filePath: the path where the .html output file is stored (including name)
-    * @param text: the markdown source code
-    * @param opts: the ExportOptions from the ExportOptionManager
-    * @param resolve: function() to be called when resolved correctly
-    * @param reject: function(error) to be called on error
-    */
-    exportHTML(filePath, text, opts, resolve, reject) {
-        const self = this;
-
-        self.htmlConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
-            console.log("File saved at:", res);
-            resolve();
-        }, (err) => {
-            reject(err);
-        });
-    }
-
-    /**
     * Will convert the currently opened file to PDF and store it in the
     * given path.
     * @param filePath string of a filePath including the file name and type.
-    * @param callback fnc(error) will be called when the function is done.
-    *                 error might be set if an error was thrown.
     */
-    savePDF(filePath, callback) {
+    async savePDF(filePath) {
         const self = this;
 
         if(!filePath) {
-            if(callback) callback();
             return;
         }
 
         self.pdfConverter.setOptions(self.getPdfConverterOptions());
+
         let text = atom.workspace.getActiveTextEditor().getText();
-        ExtensionManager.scanMarkdownForAll(text, self.pdfConverter).then((extensionObject) => {
-            self.exportOptionManager.openPDFExportOptions(
-                self.exportOptionManager.getPDFExportOptionDefaults(extensionObject),
-                atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
-                (val, opts) => {
-                    if(!val) {
-                        if(callback) callback();
-                        return;
-                    }
+        // scan for extensions
+        let extensionObject = await ExtensionManager.scanMarkdownForAll(text, self.pdfConverter);
+        // prompt export options
+        let { values, returnValue } = await self.exportOptionManager.openPDFExportOptions(
+            self.exportOptionManager.getPDFExportOptionDefaults(extensionObject),
+            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'));
 
-                    let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
+        if(!returnValue) {
+            return;
+        }
 
-                    // define finishing functions
-                    let resolve = () => {
-                        if(notification) notification.dismiss();
-                        atom.notifications.addSuccess("File saved successfully.");
-                        if(callback) callback();
-                    };
-                    let reject = (err) => {
-                        if(notification) notification.dismiss();
-                        if(callback) callback(err);
-                        else throw err;
-                    };
+        let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
-                    // conversion
-                    self.exportPDF(filePath, text, opts, resolve, reject);
-                });
-        }, (err) => {
-            if(callback) callback(err);
-            else throw err;
-        });
+        // conversion
+        try {
+            values.renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
+            let file = await self.pdfConverter.toFile(text, filePath, self.getFileDir(), values, true);
+            console.log(`Saved at ${file}`);
+            if(notification) notification.dismiss();
+            atom.notifications.addSuccess("File saved successfully.");
+        } catch(err) {
+            if(notification) notification.dismiss();
+            throw err;
+        }
     }
 
     /**
@@ -260,42 +218,15 @@ class FileWriter {
     }
 
     /**
-    * Exports the converted content into a file.
-    * Based on options and filesToExport it will also export/copy additional
-    * files.
-    *
-    * @param filePath: the path where the .html output file is stored (including name)
-    * @param text: the markdown source code
-    * @param opts: the ExportOptions from the ExportOptionManager
-    * @param resolve: function() to be called when resolved correctly
-    * @param reject: function(error) to be called on error
-    */
-    exportPDF(filePath, text, opts, resolve, reject) {
-        const self = this;
-
-        opts.renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
-        self.pdfConverter.toFile(text, filePath, self.getFileDir(), opts, true).then((res) => {
-            console.log("File saved at:", res);
-            resolve();
-        }, (err) => {
-            reject(err);
-        });
-    }
-
-    /**
-    * Opens a filechooser. Might callback with a cached filePath if allowed.
+    * Opens a filechooser. Might return a cached filePath if allowed.
     * @param fileTypes of Type String[] or String. Allowed filetypes. e.g
     *                  "HTML" or ["HTML", "PDF"]
-    * @param callback fnc(filePath) called when a file was selected
-    *                 (or from cache if `allowQuickSave` is set to true)
     * @param allowQuickSave (optional) can only be set if `fileTypes` is of
     *                       type String because this will only be done if only
     *                       one type is given.
     */
-    openFileChooser(fileTypes, callback, allowQuickSave) {
+    async openFileChooser(fileTypes, allowQuickSave) {
         const self = this;
-
-        if(!callback) return;
 
         let fileType = "";
         let defaultPath = "";
@@ -326,25 +257,25 @@ class FileWriter {
             curPath !== undefined &&
             self.saveLocations[curPath] &&
             self.saveLocations[curPath][fileType]) {
-            callback(self.saveLocations[curPath][fileType]);
+            return self.saveLocations[curPath][fileType];
         }
         else {
-            dialog.showSaveDialog({
-                defaultPath: defaultPath,
-                filters: filters,
-            }, (filePath) => {
-                if(filePath) {
-                    let fileType = self.getFileType(filePath).toLowerCase();
-                    if(curPath !== undefined) {
-                        if(!self.saveLocations[curPath]) self.saveLocations[curPath] = {};
-                        self.saveLocations[curPath][fileType] = filePath;
-                    }
-                    console.log("File Save Location set", "type:", fileType,
-                        "of:", curPath,
-                        "to:", filePath);
-                }
-                callback(filePath);
+            let filePath = await new Promise((res) => {
+                dialog.showSaveDialog({
+                    defaultPath: defaultPath,
+                    filters: filters,
+                }, res);
             });
+            let fileType = self.getFileType(filePath).toLowerCase();
+            if(curPath !== undefined) {
+                if(!self.saveLocations[curPath]) self.saveLocations[curPath] = {};
+                self.saveLocations[curPath][fileType] = filePath;
+            }
+            console.log("File Save Location set", "type:", fileType,
+                "of:", curPath,
+                "to:", filePath);
+
+            return filePath;
         }
     }
 
