@@ -1,3 +1,9 @@
+## 0.6.0
+* General:
+    * Updated `markdown-elearnjs` to v1.6.1
+* Internal:
+    * Refactored a lot of code, should have no influence on the functionality
+    * Use async JavaScript functions to shorten and clean code
 ## 0.5.10
 * General:
     * Updated `markdown-elearnjs` to v1.6.0
