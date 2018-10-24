@@ -24,24 +24,23 @@ class ExportOptionManager {
 
         // file selected
         // continue with export options
-        let contentObj = self.getHTMLExportOptionsContent(defaults);
+        let content = self.getHTMLExportOptionsContent(defaults);
 
         // open export options
-        let val = await self.optionMenuManager.open({
-            content: contentObj.content,
+        let { values, returnValue } = await self.optionMenuManager.open({
+            content: content,
             header: "HTML Export Options",
             buttons: ["Cancel", "Export"],
         });
-        let exportOptions = self.parseHTMLExportOptions(contentObj);
-        if(val) {
-            self.lastHTMLExportOptions = exportOptions;
-            if(exportOptions.displayExportOptions !==
+        if(returnValue) {
+            self.lastHTMLExportOptions = values;
+            if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
-                    exportOptions.displayExportOptions);
+                    values.displayExportOptions);
             }
         }
-        return ({ values: exportOptions, returnValue: val });
+        return ({ values, returnValue });
     }
 
     /**
@@ -51,47 +50,27 @@ class ExportOptionManager {
     getHTMLExportOptionDefaults(extensionObject) {
         const self = this;
 
+        // Language
         let language = (self.lastHTMLExportOptions &&
             self.lastHTMLExportOptions.language !== undefined) ?
             self.lastHTMLExportOptions.language : "de";
 
+        // Conversion
         let removeComments = (self.lastHTMLExportOptions &&
             self.lastHTMLExportOptions.removeComments !== undefined) ?
             self.lastHTMLExportOptions.removeComments : false;
 
+        // Asset Export
         let exportAssets = (self.lastHTMLExportOptions &&
             self.lastHTMLExportOptions.exportAssets !== undefined) ?
             self.lastHTMLExportOptions.exportAssets : true;
-
         let exportLinkedFiles = (self.lastHTMLExportOptions &&
             self.lastHTMLExportOptions.exportLinkedFiles !== undefined) ?
             self.lastHTMLExportOptions.exportLinkedFiles : true;
 
         // Extension Defaults
         let detectionMethod = atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod');
-        let includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider;
-        if(detectionMethod === "on") {
-            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = true;
-        }
-        else if(detectionMethod === "off") {
-            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = false;
-        }
-        else if(detectionMethod === "last" && self.lastHTMLExportOptions) {
-            if(self.lastHTMLExportOptions.includeQuiz)
-                includeQuiz = self.lastHTMLExportOptions.includeQuiz;
-            if(self.lastHTMLExportOptions.includeElearnVideo)
-                includeElearnVideo = self.lastHTMLExportOptions.includeElearnVideo;
-            if(self.lastHTMLExportOptions.includeClickImage)
-                includeClickImage = self.lastHTMLExportOptions.includeClickImage;
-            if(self.lastHTMLExportOptions.includeTimeSlider)
-                includeTimeSlider = self.lastHTMLExportOptions.includeTimeSlider;
-        }
-        else if(detectionMethod === "auto") {
-            includeQuiz = extensionObject.includeQuiz;
-            includeElearnVideo = extensionObject.includeElearnVideo;
-            includeClickImage = extensionObject.includeClickImage;
-            includeTimeSlider = extensionObject.includeTimeSlider;
-        }
+        let extensionDefaults = this.getExtensionDefaults(detectionMethod, self.lastHTMLExportOptions, extensionObject);
 
         // return
         return {
@@ -99,10 +78,10 @@ class ExportOptionManager {
             removeComments: removeComments,
             exportAssets: exportAssets,
             exportLinkedFiles: exportLinkedFiles,
-            includeQuiz: includeQuiz,
-            includeElearnVideo: includeElearnVideo,
-            includeClickImage: includeClickImage,
-            includeTimeSlider: includeTimeSlider,
+            includeQuiz: extensionDefaults.includeQuiz,
+            includeElearnVideo: extensionDefaults.includeElearnVideo,
+            includeClickImage: extensionDefaults.includeClickImage,
+            includeTimeSlider: extensionDefaults.includeTimeSlider,
             displayExportOptions: atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
         };
     }
@@ -112,95 +91,23 @@ class ExportOptionManager {
     * (as dom element) and all specific inputs.
     */
     getHTMLExportOptionsContent(defaults) {
-        const self = this;
-
         let content = document.createElement('div');
 
-        // Language
-        content.appendChild(OptionMenuManager.getHeading('Language'));
-        let language = OptionMenuManager.getSelectLabel("",
-            [
-                { "text": "German", value: "de" },
-                { "text": "English", value: "en" }
-            ],
-            defaults.language);
-        content.appendChild(language);
-
-        // Conversion
-        content.appendChild(OptionMenuManager.getHeading('Conversion'));
-        let removeComments = OptionMenuManager.getCheckBoxLabel(
-            "Remove Html Comments", defaults.removeComments);
-        content.appendChild(removeComments);
-
-        // Assets export
-        content.appendChild(OptionMenuManager.getHeading('Asset exports'));
-        let exportAssets = OptionMenuManager.getCheckBoxLabel(
-            "Export elearn.js assets", defaults.exportAssets);
-        content.appendChild(exportAssets);
-        let exportLinkedFiles = OptionMenuManager.getCheckBoxLabel(
-            "Export linked files into asset folder (only <img>, <source>, <script>, <link>)",
+        let body = "";
+        body += this.getLanguageBlock(defaults.language);
+        body += this.getConversionBlock(defaults.removeComments);
+        body += this.getAssetsExportBlock(
+            defaults.exportAssets,
             defaults.exportLinkedFiles);
-        content.appendChild(exportLinkedFiles);
+        body += this.getExtensionsBlock(atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'),
+            defaults.includeQuiz,
+            defaults.includeElearnVideo,
+            defaults.includeClickImage,
+            defaults.includeTimeSlider);
+        body += this.getGeneralsBlock(defaults.displayExportOptions);
 
-        // Extension Options
-        content.appendChild(OptionMenuManager.getHeading('Extensions'));
-        content.appendChild(OptionMenuManager.getDescription(
-            `Values defined by Method <em>'${
-            self.getExtensionDetectionMethodName(
-                atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
-            }'</em>. Check settings to change method.`, true));
-        let includeQuiz = OptionMenuManager.getCheckBoxLabel(
-            "Include quiz.js", defaults.includeQuiz);
-        content.appendChild(includeQuiz);
-        let includeElearnVideo = OptionMenuManager.getCheckBoxLabel(
-            "Include elearnvideo.js", defaults.includeElearnVideo);
-        content.appendChild(includeElearnVideo);
-        let includeClickImage = OptionMenuManager.getCheckBoxLabel(
-            "Include clickimage.js", defaults.includeClickImage);
-        content.appendChild(includeClickImage);
-        let includeTimeSlider = OptionMenuManager.getCheckBoxLabel(
-            "Include timeslider.js", defaults.includeTimeSlider);
-        content.appendChild(includeTimeSlider);
-
-        // General
-        content.appendChild(OptionMenuManager.getHeading('General'));
-        let displayExportOptions = OptionMenuManager.getCheckBoxLabel(
-            "Always display export options", defaults.displayExportOptions);
-        content.appendChild(displayExportOptions);
-
-        // return necessary elements
-        return {
-            content: content,
-            language: language.select,
-            removeComments: removeComments.checkbox,
-            exportAssets: exportAssets.checkbox,
-            exportLinkedFiles: exportLinkedFiles.checkbox,
-            includeQuiz: includeQuiz.checkbox,
-            includeElearnVideo: includeElearnVideo.checkbox,
-            includeClickImage: includeClickImage.checkbox,
-            includeTimeSlider: includeTimeSlider.checkbox,
-            displayExportOptions: displayExportOptions.checkbox,
-        };
-    }
-
-    /**
-    * Will parse the selected values in all defined inputs from
-    * `getHTMLExportOptionsContent` contentObj.
-    *
-    * @param contentObj the return value of `getHTMLExportOptionsContent`
-    */
-    parseHTMLExportOptions(contentObj) {
-        return {
-            language: contentObj.language.value,
-            exportAssets: contentObj.exportAssets.checked,
-            removeComments: contentObj.removeComments.checked,
-            exportLinkedFiles: contentObj.exportLinkedFiles.checked,
-            includeQuiz: contentObj.includeQuiz.checked,
-            includeElearnVideo: contentObj.includeElearnVideo.checked,
-            includeClickImage: contentObj.includeClickImage.checked,
-            includeTimeSlider: contentObj.includeTimeSlider.checked,
-            displayExportOptions: contentObj.displayExportOptions.checked,
-        };
+        content.innerHTML = body;
+        return content;
     }
 
     /**
@@ -219,24 +126,23 @@ class ExportOptionManager {
 
         // file selected
         // continue with export options
-        let contentObj = self.getPDFExportOptionsContent(defaults);
+        let content = self.getPDFExportOptionsContent(defaults);
 
-        // open export options
-        let val = await self.optionMenuManager.open({
-            content: contentObj.content,
+        let { values, returnValue } = await self.optionMenuManager.open({
+            content: content,
             header: "PDF Export Options",
             buttons: ["Cancel", "Export"],
         });
-        let exportOptions = self.parsePDFExportOptions(contentObj);
-        if(val) {
-            self.lastPDFExportOptions = exportOptions;
-            if(exportOptions.displayExportOptions !==
+        if(values.renderDelay) values.renderDelay *= 1000;
+        if(returnValue) {
+            self.lastPDFExportOptions = values;
+            if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
-                    exportOptions.displayExportOptions);
+                    values.displayExportOptions);
             }
         }
-        return { values: exportOptions, returnValue: val };
+        return ({ values, returnValue });
     }
 
     /**
@@ -246,48 +152,32 @@ class ExportOptionManager {
     getPDFExportOptionDefaults(extensionObject) {
         const self = this;
 
+        // Language
         let language = (self.lastPDFExportOptions &&
             self.lastPDFExportOptions.language !== undefined) ?
             self.lastPDFExportOptions.language : "de";
 
+        // Conversion
         let removeComments = (self.lastPDFExportOptions &&
             self.lastPDFExportOptions.removeComments !== undefined) ?
             self.lastPDFExportOptions.removeComments : false;
 
+        // PDF Conversion
+        let renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay');
+
         // Extension Defaults
         let detectionMethod = atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod');
-        let includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider;
-        if(detectionMethod === "on") {
-            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = true;
-        }
-        else if(detectionMethod === "off") {
-            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = false;
-        }
-        else if(detectionMethod === "last" && self.lastPDFExportOptions) {
-            if(self.lastPDFExportOptions.includeQuiz)
-                includeQuiz = self.lastPDFExportOptions.includeQuiz;
-            if(self.lastPDFExportOptions.includeElearnVideo)
-                includeElearnVideo = self.lastPDFExportOptions.includeElearnVideo;
-            if(self.lastPDFExportOptions.includeClickImage)
-                includeClickImage = self.lastPDFExportOptions.includeClickImage;
-            if(self.lastPDFExportOptions.includeTimeSlider)
-                includeTimeSlider = self.lastPDFExportOptions.includeTimeSlider;
-        }
-        else if(detectionMethod === "auto") {
-            includeQuiz = extensionObject.includeQuiz;
-            includeElearnVideo = extensionObject.includeElearnVideo;
-            includeClickImage = extensionObject.includeClickImage;
-            includeTimeSlider = extensionObject.includeTimeSlider;
-        }
+        let extensionDefaults = this.getExtensionDefaults(detectionMethod, self.lastPDFExportOptions, extensionObject);
 
         // return
         return {
             language: language,
             removeComments: removeComments,
-            includeQuiz: includeQuiz,
-            includeElearnVideo: includeElearnVideo,
-            includeClickImage: includeClickImage,
-            includeTimeSlider: includeTimeSlider,
+            renderDelay: renderDelay,
+            includeQuiz: extensionDefaults.includeQuiz,
+            includeElearnVideo: extensionDefaults.includeElearnVideo,
+            includeClickImage: extensionDefaults.includeClickImage,
+            includeTimeSlider: extensionDefaults.includeTimeSlider,
             displayExportOptions: atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
         };
     }
@@ -297,80 +187,178 @@ class ExportOptionManager {
     * (as dom element) and all specific inputs.
     */
     getPDFExportOptionsContent(defaults) {
-        const self = this;
-
         let content = document.createElement('div');
 
-        // Language
-        content.appendChild(OptionMenuManager.getHeading('Language'));
-        let language = OptionMenuManager.getSelectLabel("",
-            [
-                { "text": "German", value: "de" },
-                { "text": "English", value: "en" }
-            ],
-            defaults.language);
-        content.appendChild(language);
+        let body = "";
+        body += this.getLanguageBlock(defaults.language);
+        body += this.getConversionBlock(defaults.removeComments);
+        body += this.getPdfConversionBlock(defaults.renderDelay);
+        body += this.getExtensionsBlock(atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'),
+            defaults.includeQuiz,
+            defaults.includeElearnVideo,
+            defaults.includeClickImage,
+            defaults.includeTimeSlider);
+        body += this.getGeneralsBlock(defaults.displayExportOptions);
 
-        // Conversion
-        content.appendChild(OptionMenuManager.getHeading('Conversion'));
-        let removeComments = OptionMenuManager.getCheckBoxLabel(
-            "Remove Html Comments", defaults.removeComments);
-        content.appendChild(removeComments);
-
-        // Extension Options
-        content.appendChild(OptionMenuManager.getHeading('Extensions'));
-        content.appendChild(OptionMenuManager.getDescription(
-            `Values defined by Method <em>'${
-            self.getExtensionDetectionMethodName(
-                atom.config.get('atom-elearnjs.generalConfig.detectExtensionsMethod'))
-            }'</em>. Check settings to change method.`, true));
-        let includeQuiz = OptionMenuManager.getCheckBoxLabel(
-            "Include quiz.js", defaults.includeQuiz);
-        content.appendChild(includeQuiz);
-        let includeElearnVideo = OptionMenuManager.getCheckBoxLabel(
-            "Include elearnvideo.js", defaults.includeElearnVideo);
-        content.appendChild(includeElearnVideo);
-        let includeClickImage = OptionMenuManager.getCheckBoxLabel(
-            "Include clickimage.js", defaults.includeClickImage);
-        content.appendChild(includeClickImage);
-        let includeTimeSlider = OptionMenuManager.getCheckBoxLabel(
-            "Include timeslider.js", defaults.includeTimeSlider);
-        content.appendChild(includeTimeSlider);
-
-        // General
-        content.appendChild(OptionMenuManager.getHeading('General'));
-        let displayExportOptions = OptionMenuManager.getCheckBoxLabel(
-            "Always display export options", defaults.displayExportOptions);
-        content.appendChild(displayExportOptions);
-
-        // return necessary elements
-        return {
-            content: content,
-            language: language.select,
-            removeComments: removeComments.checkbox,
-            includeQuiz: includeQuiz.checkbox,
-            includeElearnVideo: includeElearnVideo.checkbox,
-            includeClickImage: includeClickImage.checkbox,
-            includeTimeSlider: includeTimeSlider.checkbox,
-            displayExportOptions: displayExportOptions.checkbox,
-        };
+        content.innerHTML = body;
+        return content;
     }
 
     /**
-    * Will parse the selected values in all defined inputs from
-    * `getPDFExportOptionsContent` contentObj.
-    *
-    * @param contentObj the return value of `getPDFExportOptionsContent`
-    */
-    parsePDFExportOptions(contentObj) {
+     * Creates the language block.
+     * @param defaultLanguage the default value of the language selection
+     */
+    getLanguageBlock(defaultLanguage) {
+        let content = "";
+
+        content += OptionMenuManager.createSelectLabel(
+            "language",
+            [
+                { text: "German", value: "de" },
+                { text: "English", value: "en" },
+            ],
+            defaultLanguage);
+
+        return OptionMenuManager.createBlock("Language", content);
+    }
+
+    /**
+     *  Creates the conversion block.
+     * @param defaultRemoveComments the default value of the removeComments checkbox
+     */
+    getConversionBlock(defaultRemoveComments) {
+        let content = "";
+
+        content += OptionMenuManager.createCheckBoxLabel(
+            "removeComments",
+            "Remove Html Comments",
+            defaultRemoveComments);
+
+        return OptionMenuManager.createBlock("Conversion", content);
+    }
+
+    /**
+     *  Creates the asset export block.
+     * @param defaultExportAssets the default value of the exportAssets checkbox
+     * @param defaultExportLinkedFiles the default value of the exportLinkedFiles checkbox
+     */
+    getAssetsExportBlock(defaultExportAssets, defaultExportLinkedFiles) {
+        let content = "";
+
+        content += OptionMenuManager.createCheckBoxLabel(
+            "exportAssets",
+            "Export elearn.js assets",
+            defaultExportAssets);
+        content += OptionMenuManager.createCheckBoxLabel(
+            "exportLinkedFiles",
+            "Export linked files into asset folder (only &lt;img&gt;, &lt;source&gt;, &lt;script&gt;, &lt;link&gt;)",
+            defaultExportLinkedFiles);
+
+        return OptionMenuManager.createBlock("Asset exports", content);
+    }
+
+    /**
+     * Creates the PDF Conversion Block
+     * @param defaultRenderDelay the default value of the renderDelay input
+     */
+    getPdfConversionBlock(defaultRenderDelay) {
+        let content = "";
+
+        content += OptionMenuManager.createInputNumberLabel(
+            "renderDelay",
+            "Render Delay (in seconds)",
+            defaultRenderDelay.toString());
+
+        return OptionMenuManager.createBlock("PDF Conversion", content);
+    }
+
+    /**
+     *  Creates the extension block.
+     * @param defaultQuiz the default value of the includeQuiz checkbox
+     * @param defaultVideo the default value of the includeElearnVideo checkbox
+     * @param defaultClickImage the default value of the includeClickImage checkbox
+     * @param defaultTimeslider the default value of the includeTimeSlider checkbox
+     */
+    getExtensionsBlock(
+        method,
+        defaultQuiz, defaultVideo,
+        defaultClickImage, defaultTimeslider) {
+        let content = "";
+
+        content += OptionMenuManager.createDescription(
+            `Values defined by Method <em>'${method}'</em>. Check settings to change method.`);
+        content += OptionMenuManager.createCheckBoxLabel(
+            "includeQuiz",
+            "Include quiz.js",
+            defaultQuiz);
+        content += OptionMenuManager.createCheckBoxLabel(
+            "includeElearnVideo",
+            "Include elearnvideo.js",
+            defaultVideo);
+        content += OptionMenuManager.createCheckBoxLabel(
+            "includeClickImage",
+            "Include clickimage.js",
+            defaultClickImage);
+        content += OptionMenuManager.createCheckBoxLabel(
+            "includeTimeSlider",
+            "Include timeslider.js",
+            defaultTimeslider);
+
+        return OptionMenuManager.createBlock("Extensions", content);
+    }
+
+    /**
+     *  Creates the generals block.
+     * @param defaultDisplayOptions the default value of the displayExportOptions checkbox
+     */
+    getGeneralsBlock(defaultDisplayOptions) {
+        let content = "";
+
+        content += OptionMenuManager.createCheckBoxLabel(
+            "displayExportOptions",
+            "Always display export options",
+            defaultDisplayOptions);
+
+        return OptionMenuManager.createBlock("General", content);
+    }
+
+    /**
+     * Calculates wether a extension should be selected for export by default
+     * or not, based on the given method. A given set of a previously calculated
+     * selection might be given to use if method `auto` is selected.
+     * @param method the method name used to detect the extension defaults
+     * @param extensions an optional set of extension default values used only
+     * if `auto` is selected. If not given and `auto` is used, the values of
+     * all extensions will be undefined in the object.
+     */
+    getExtensionDefaults(detectionMethod, lastValues, extensionObject) {
+        let includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider;
+
+        if(detectionMethod === "on") {
+            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = true;
+        }
+        else if(detectionMethod === "off") {
+            includeQuiz = includeElearnVideo = includeClickImage = includeTimeSlider = false;
+        }
+        else if(detectionMethod === "last" && lastValues) {
+            if(lastValues.includeQuiz)
+                includeQuiz = lastValues.includeQuiz;
+            if(lastValues.includeElearnVideo)
+                includeElearnVideo = lastValues.includeElearnVideo;
+            if(lastValues.includeClickImage)
+                includeClickImage = lastValues.includeClickImage;
+            if(lastValues.includeTimeSlider)
+                includeTimeSlider = lastValues.includeTimeSlider;
+        }
+        else if(detectionMethod === "auto" && extensionObject !== undefined) {
+            includeQuiz = extensionObject.includeQuiz;
+            includeElearnVideo = extensionObject.includeElearnVideo;
+            includeClickImage = extensionObject.includeClickImage;
+            includeTimeSlider = extensionObject.includeTimeSlider;
+        }
+
         return {
-            language: contentObj.language.value,
-            removeComments: contentObj.removeComments.checked,
-            includeQuiz: contentObj.includeQuiz.checked,
-            includeElearnVideo: contentObj.includeElearnVideo.checked,
-            includeClickImage: contentObj.includeClickImage.checked,
-            includeTimeSlider: contentObj.includeTimeSlider.checked,
-            displayExportOptions: contentObj.displayExportOptions.checked,
+            includeQuiz, includeElearnVideo, includeClickImage, includeTimeSlider
         };
     }
 

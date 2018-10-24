@@ -181,7 +181,6 @@ class FileWriter {
 
         // conversion
         try {
-            values.renderDelay = atom.config.get('atom-elearnjs.pdfConfig.renderDelay') * 1000;
             let file = await self.pdfConverter.toFile(text, filePath, self.getFileDir(), values, true);
             console.log(`Saved at ${file}`);
             if(notification) notification.dismiss();

@@ -28,26 +28,68 @@ class OptionMenuManager {
 
         return new Promise((res) => {
             // display
-            self.openMenu = new OptionMenu(opts, function() {
+            self.openMenu = new OptionMenu(opts, function(val) {
+                res({
+                    values: self.parseValues(self.modalPanel.getItem()),
+                    returnValue: val,
+                });
                 self.destroyMenu();
-                res.apply(null, arguments);
             });
             self.modalPanel = atom.workspace.addModalPanel({
                 item: self.openMenu.getElement(),
                 visible: true
             });
-            self.modalPanel.getItem().addEventListener("keyup", (e) => {
-                // ESC
-                if(e.keyCode === 27) {
-                    self.close();
+
+            const onKeyUp = (e) => {
+                switch(e.keyCode) {
+                    // Enter
+                    case 13: self.close(1); break;
+                    // Esc
+                    case 27: self.close(); break;
                 }
-            });
+            };
+            self.modalPanel.getItem().addEventListener("keyup", onKeyUp);
+            let inputs = self.modalPanel.getItem().querySelectorAll('input');
+            for(let input of inputs) {
+                input.addEventListener("keyup", onKeyUp);
+            }
+
             self.openMenu.selectDefaultButton();
         });
     }
 
-    close() {
-        this.openMenu.close();
+    close(val) {
+        if(this.openMenu) this.openMenu.close(val);
+    }
+
+    parseValues(body) {
+        let inputs = body.querySelectorAll('input,select');
+
+        // create submit function
+        // parse all values
+        let values = {};
+        for(let input of inputs) {
+            switch(input.type) {
+                case "checkbox":
+                case "radio":
+                    values[input.name] = input.checked;
+                    break;
+                default:
+                    values[input.name] = input.value;
+                    break;
+            }
+
+            if(input.type === "number") {
+                try {
+                    values[input.name] = parseFloat(input.value);
+                }
+                catch(err) {
+                    // ignore
+                }
+            }
+        }
+
+        return values;
     }
 
     destroyMenu() {
@@ -61,62 +103,63 @@ class OptionMenuManager {
         }
     }
 
-    static getHeading(text, containsHTML) {
-        let heading = document.createElement('h3');
-        if(!containsHTML) heading.textContent = text;
-        else heading.innerHTML = text;
-        return heading;
+    /**
+     * Creates an option block.
+     * @param heading The blocks heading.
+     * @param content The blocks content.
+     */
+    static createBlock(heading, content) {
+        return `<h3>${heading}</h3>${content}`;
     }
 
-    static getDescription(text, containsHTML) {
-        let desc = document.createElement('span');
-        desc.classList.add('description');
-        if(!containsHTML) desc.textContent = text;
-        else desc.innerHTML = text;
-        return desc;
+    /**
+     * Create a description element.
+     * @param content the elements content as HTML.
+     */
+    static createDescription(content) {
+        return `<span class="description">${content}</span>`;
     }
 
-    static getCheckBoxLabel(text, checked, containsHTML) {
-        let label = document.createElement('label');
-
-        let checkbox = document.createElement('input');
-        checkbox.classList.add('input-checkbox');
-        checkbox.type = "checkbox";
-        checkbox.checked = checked;
-        label.appendChild(checkbox);
-
-        let span = document.createElement('span');
-        if(!containsHTML) span.textContent = text;
-        else span.innerHTML = text;
-        label.appendChild(span);
-
-        label.checkbox = checkbox;
-
-        return label;
+    /**
+     * Create a checkbox label element.
+     * @param name the name of the input element.
+     *  This will be used in the `OptionMenuResult.values` as the key
+     * @param text the elements text as HTML.
+     * @param checked whether the checkbox is checked by default or not
+     */
+    static createCheckBoxLabel(name, text, checked) {
+        let input = `<input type="checkbox" class="input-checkbox" name="${name}" ${checked ? "checked" : ""}/>`;
+        return `<label>${input} <span>${text}</span></label>`;
     }
 
-    static getSelectLabel(text, options, selected, containsHTML) {
-        let label = document.createElement('label');
+    /**
+     * Create a input text label element.
+     * @param name the name of the input element.
+     *  This will be used in the `OptionMenuResult.values` as the key
+     * @param text the describing text for the input
+     * @param defaultVal the default text
+     */
+    static createInputNumberLabel(name, text, defaultVal) {
+        let input = `<input class="input-text native-key-bindings" type="number" step="any" name="${name}" value="${defaultVal}" />`;
+        return `<label><span>${text}</span>${input}</label>`;
+    }
 
-        let span = document.createElement('span');
-        if(!containsHTML) span.textContent = text;
-        else span.innerHTML = text;
-        label.appendChild(span);
-
-        let select = document.createElement('select');
-        select.classList.add('form-control');
+    /**
+     * Create a checkbox label element.
+     * @param name the name of the input element.
+     *  This will be used in the `OptionMenuResult.values` as the key
+     * @param options all selectable options
+     * @param selectedValue the SelectOption.value of the selected option
+     * @param description a description text
+     */
+    static createSelectLabel(name, options, selectedValue, description) {
+        let optionsHtml = "";
         for(let opt of options) {
-            let o = document.createElement('option');
-            o.value = opt.value;
-            o.textContent = opt.text;
-            select.appendChild(o);
+            optionsHtml += `<option value="${opt.value}" ${opt.value === selectedValue ? "selected" : ""}>${opt.text}</option>`;
         }
-        select.value = selected;
-        label.appendChild(select);
-
-        label.select = select;
-
-        return label;
+        return `<label>${description ? OptionMenuManager.createDescription(description) : ""}
+                    <select class="form-control" name="${name}" value="${selectedValue}">${optionsHtml}</select>
+                </label>`;
     }
 }
 

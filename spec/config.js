@@ -102,8 +102,8 @@ let generalConfig = {
     },
 };
 
-let htmlConfig = {
-};
+// eslint-disable-next-line
+let htmlConfig = {};
 
 let pdfConfig = {
     newPageOnSection: {
