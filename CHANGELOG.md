@@ -1,3 +1,8 @@
+## 0.6.1
+* General:
+    * Updated export option menu
+        * hover indicator for labels
+        * inline number input
 ## 0.6.0
 * PDF:
     * Added `renderDelay` to the export option menu
