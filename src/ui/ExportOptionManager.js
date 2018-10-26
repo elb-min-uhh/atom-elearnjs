@@ -1,6 +1,7 @@
 "use babel";
 "use strict";
 
+import { PdfExportOptionObject } from 'markdown-elearnjs';
 import OptionMenuManager from './OptionMenuManager';
 
 class ExportOptionManager {
@@ -267,7 +268,8 @@ class ExportOptionManager {
         content += OptionMenuManager.createInputNumberLabel(
             "renderDelay",
             "Render Delay (in seconds)",
-            defaultRenderDelay.toString());
+            defaultRenderDelay.toString(),
+            new PdfExportOptionObject().renderDelay);
 
         return OptionMenuManager.createBlock("PDF Conversion", content);
     }

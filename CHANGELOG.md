@@ -3,6 +3,7 @@
     * Updated export option menu
         * hover indicator for labels
         * inline number input
+        * placeholder for renderDelay (PDF)
 ## 0.6.0
 * PDF:
     * Added `renderDelay` to the export option menu

@@ -139,8 +139,8 @@ class OptionMenuManager {
      * @param text the describing text for the input
      * @param defaultVal the default text
      */
-    static createInputNumberLabel(name, text, defaultVal) {
-        let input = `<input class="input-text native-key-bindings" type="number" step="any" name="${name}" value="${defaultVal}" />`;
+    static createInputNumberLabel(name, text, defaultVal, placeholder) {
+        let input = `<input class="input-text native-key-bindings" type="number" step="any" name="${name}" value="${defaultVal}" placeholder="${placeholder ? placeholder : 0}" />`;
         return `<label><span>${text}</span>${input}</label>`;
     }
 
