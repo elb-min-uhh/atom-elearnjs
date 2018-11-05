@@ -1,8 +1,10 @@
 "use babel";
-"use strict";
 
 import OptionMenu from "./OptionMenu";
 
+/**
+ * Manages the OptionMenus.
+ */
 class OptionMenuManager {
     constructor() {
         this.openMenu = null;

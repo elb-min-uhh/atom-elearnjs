@@ -1,9 +1,11 @@
 "use babel";
-"use strict";
 
 import { PdfExportOptionObject } from 'markdown-elearnjs';
 import OptionMenuManager from './OptionMenuManager';
 
+/**
+ * Manages the export options, displaying specific menus to the user.
+ */
 class ExportOptionManager {
     constructor(optionMenuManager) {
         this.optionMenuManager = optionMenuManager;

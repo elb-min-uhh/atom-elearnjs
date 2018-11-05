@@ -1,3 +1,7 @@
+## 0.6.2
+* Internal:
+    * removed `use strict` due to modul type
+    * added class comments
 ## 0.6.1
 * General:
     * Updated export option menu

@@ -1,6 +1,8 @@
 "use babel";
-"use strict";
 
+/**
+ * Manages the Packages > elearn.js sub menu.
+ */
 class ElearnJSMenuManager {
     constructor() {
         this.submenu = this.getPackageSubmenu();

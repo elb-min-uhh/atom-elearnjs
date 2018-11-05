@@ -1,6 +1,8 @@
 "use babel";
-"use strict";
 
+/**
+ * A general OptionMenu. This can be used to prompt some options.
+ */
 class OptionMenu {
     /**
     * Creates an option menu.

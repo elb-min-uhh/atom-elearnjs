@@ -1,8 +1,10 @@
 "use babel";
-"use strict";
 
 import { CompositeDisposable } from 'atom';
 
+/**
+ * Listener for atom commands. Manages the command handling on the given elements.
+ */
 class CommandListener {
     constructor(fileWriter, elearnJSMenuManager) {
         this.fileWriter = fileWriter;

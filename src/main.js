@@ -1,5 +1,4 @@
 "use babel";
-"use strict";
 
 import OptionMenuManager from './ui/OptionMenuManager';
 import ElearnJSMenuManager from './ui/ElearnJSMenuManager';

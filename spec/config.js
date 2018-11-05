@@ -1,5 +1,4 @@
 "use babel";
-"use strict";
 
 let generalConfig = {
     keepSaveLocations: {
