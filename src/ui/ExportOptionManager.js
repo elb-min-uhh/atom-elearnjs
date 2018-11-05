@@ -17,8 +17,9 @@ class ExportOptionManager {
     *                 `getHTMLExportOptionDefaults` will return this object.
     * @param forcePrompt bool: if true it will always prompt, even when there
     *                    are cached options available
+    * @param outputFile the path to the selected output location, including file name
     */
-    async openHTMLExportOptions(defaults, forcePrompt) {
+    async openHTMLExportOptions(defaults, forcePrompt, outputFile) {
         const self = this;
 
         if(!forcePrompt && self.lastHTMLExportOptions) {
@@ -27,7 +28,7 @@ class ExportOptionManager {
 
         // file selected
         // continue with export options
-        let content = self.getHTMLExportOptionsContent(defaults);
+        let content = self.getHTMLExportOptionsContent(defaults, outputFile);
 
         // open export options
         let { values, returnValue } = await self.optionMenuManager.open({
@@ -37,6 +38,7 @@ class ExportOptionManager {
         });
         if(returnValue) {
             self.lastHTMLExportOptions = values;
+            delete self.lastHTMLExportOptions.outputFile;
             if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
@@ -93,10 +95,11 @@ class ExportOptionManager {
     * Will return an object with obj.content being the full HTML content
     * (as dom element) and all specific inputs.
     */
-    getHTMLExportOptionsContent(defaults) {
+    getHTMLExportOptionsContent(defaults, outputFile) {
         let content = document.createElement('div');
 
         let body = "";
+        body += this.getSaveLocationBlock([".HTML"], outputFile);
         body += this.getLanguageBlock(defaults.language);
         body += this.getConversionBlock(defaults.removeComments);
         body += this.getAssetsExportBlock(
@@ -119,8 +122,9 @@ class ExportOptionManager {
     *                 `getPDFExportOptionDefaults` will return this object.
     * @param forcePrompt bool: if true it will always prompt, even when there
     *                    are cached options available
+    * @param outputFile the path to the selected output location, including file name
     */
-    async openPDFExportOptions(defaults, forcePrompt) {
+    async openPDFExportOptions(defaults, forcePrompt, outputFile) {
         const self = this;
 
         if(!forcePrompt && self.lastPDFExportOptions) {
@@ -129,7 +133,7 @@ class ExportOptionManager {
 
         // file selected
         // continue with export options
-        let content = self.getPDFExportOptionsContent(defaults);
+        let content = self.getPDFExportOptionsContent(defaults, outputFile);
 
         let { values, returnValue } = await self.optionMenuManager.open({
             content: content,
@@ -139,6 +143,7 @@ class ExportOptionManager {
         if(values.renderDelay) values.renderDelay *= 1000;
         if(returnValue) {
             self.lastPDFExportOptions = values;
+            delete self.lastPDFExportOptions.outputFile;
             if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
@@ -189,10 +194,11 @@ class ExportOptionManager {
     * Will return an object with obj.content being the full HTML content
     * (as dom element) and all specific inputs.
     */
-    getPDFExportOptionsContent(defaults) {
+    getPDFExportOptionsContent(defaults, outputFile) {
         let content = document.createElement('div');
 
         let body = "";
+        body += this.getSaveLocationBlock([".PDF"], outputFile);
         body += this.getLanguageBlock(defaults.language);
         body += this.getConversionBlock(defaults.removeComments);
         body += this.getPdfConversionBlock(defaults.renderDelay);
@@ -205,6 +211,22 @@ class ExportOptionManager {
 
         content.innerHTML = body;
         return content;
+    }
+
+    /**
+     *  Creates the generals block.
+     * @param defaultDisplayOptions the default value of the displayExportOptions checkbox
+     */
+    getSaveLocationBlock(fileTypes, defaultOutputFile) {
+        let content = "";
+
+        content += OptionMenuManager.createFileChooserLabel(
+            "outputFile",
+            "",
+            fileTypes,
+            defaultOutputFile);
+
+        return OptionMenuManager.createBlock("Save Location", content);
     }
 
     /**

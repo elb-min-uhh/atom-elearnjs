@@ -1,6 +1,7 @@
 "use babel";
 
 import OptionMenu from "./OptionMenu";
+import Util from "../Util";
 
 /**
  * Manages the OptionMenus.
@@ -54,6 +55,18 @@ class OptionMenuManager {
             let inputs = self.modalPanel.getItem().querySelectorAll('input');
             for(let input of inputs) {
                 input.addEventListener("keyup", onKeyUp);
+            }
+
+            // add file chooser listener
+            let fileSelects = self.modalPanel.getItem().querySelectorAll('.file-select');
+            for(let button of fileSelects) {
+                const extensions = JSON.parse(button.dataset.extensions);
+                const fileInput = button.parentElement.querySelector('input.file-input');
+                button.addEventListener('click', () => {
+                    Util.openFileChooser(extensions, fileInput.value).then((filePath) => {
+                        if(filePath) fileInput.value = filePath;
+                    });
+                });
             }
 
             self.openMenu.selectDefaultButton();
@@ -162,6 +175,21 @@ class OptionMenuManager {
         return `<label>${description ? OptionMenuManager.createDescription(description) : ""}
                     <select class="form-control" name="${name}" value="${selectedValue}">${optionsHtml}</select>
                 </label>`;
+    }
+
+    /**
+     * Create a file choose input
+     * @param name the name of the input element.
+     *  This will be used in the `OptionMenuResult.values` as the key
+     * @param text the describing text for the input
+     * @param fileTypes a string array of allowed file types (allowed "html", "pdf")
+     * @param defaultVal the placeholder and default text
+     * @param placeholder the placeholder value
+     */
+    static createFileChooserLabel(name, text, fileTypes, defaultVal, placeholder) {
+        let fileInput = `<input type="text" class="input-text native-key-bindings file-input" name="${name}" value="${defaultVal.toString()}" placeholder="${placeholder ? placeholder : ""}" />`;
+        let fileButton = `<button class="btn file-select" data-extensions='${JSON.stringify(fileTypes)}'>Select File</button>`;
+        return `${text ? OptionMenuManager.createDescription(text) : ""}<label class="file-label">${fileInput}${fileButton}</label>`;
     }
 }
 

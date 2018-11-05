@@ -129,11 +129,15 @@ class FileWriter {
         // prompt export options
         let { values, returnValue } = await self.exportOptionManager.openHTMLExportOptions(
             self.exportOptionManager.getHTMLExportOptionDefaults(extensionObject),
-            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'));
+            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+            filePath);
 
         if(!returnValue) {
             return;
         }
+
+        // overwrite with new output file, not present if not prompted
+        if(values.outputFile) filePath = values.outputFile;
 
         let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
@@ -183,11 +187,15 @@ class FileWriter {
         // prompt export options
         let { values, returnValue } = await self.exportOptionManager.openPDFExportOptions(
             self.exportOptionManager.getPDFExportOptionDefaults(extensionObject),
-            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'));
+            atom.config.get('atom-elearnjs.generalConfig.displayExportOptions'),
+            filePath);
 
         if(!returnValue) {
             return;
         }
+
+        // overwrite with new output file, not present if not prompted
+        if(values.outputFile) filePath = values.outputFile;
 
         let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 

@@ -62,3 +62,35 @@
     appearance: none;
     margin: 0;
 }
+
+/* File Path Input */
+
+.atom-elearnjs-option-menu label.file-label {
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-flow: row;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.atom-elearnjs-option-menu label.file-label>* {
+    flex: 0 0 auto;
+}
+
+.atom-elearnjs-option-menu label>span+input.file-input {
+    margin-left: .5em;
+}
+
+.atom-elearnjs-option-menu input.file-input {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 0 auto;
+    flex: 1 0 auto;
+    width: auto;
+}
+
+.atom-elearnjs-option-menu input.file-input+button.btn {
+    margin-left: .5em;
+    vertical-align: middle;
+}
