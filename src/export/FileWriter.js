@@ -1,12 +1,10 @@
 "use babel";
 
-import { remote } from 'electron';
 import path from 'path';
 
 import { HtmlConverter, PdfConverter, ExtensionManager } from 'markdown-elearnjs';
 import ExportOptionManager from '../ui/ExportOptionManager.js';
-
-const dialog = remote.dialog;
+import Util from '../Util.js';
 
 /**
 * Manages the markdown conversion and file export.
@@ -15,7 +13,10 @@ class FileWriter {
     constructor(optionMenuManager) {
         this.exportOptionManager = new ExportOptionManager(optionMenuManager);
 
-        this.saveLocations = {};
+        this.saveLocations = {
+            html: {},
+            pdf: {},
+        };
 
         this.htmlConverter = new HtmlConverter();
         this.pdfConverter = new PdfConverter({
@@ -32,40 +33,6 @@ class FileWriter {
     }
 
     /**
-    * Starts the conversion process of an HTML conversion.
-    * Will be started on "to HTML".
-    * Asks for a save location if none is stored.
-    */
-    async writeHTML() {
-        const self = this;
-
-        let filePath = await self.openFileChooser(".HTML", true);
-        try {
-            await self.saveHTML(filePath);
-        }
-        catch(err) {
-            this.notifyError(err);
-        }
-    }
-
-    /**
-    * Starts the conversion process of an PDF conversion.
-    * Will be started on "to PDF".
-    * Asks for a save location if none is stored.
-    */
-    async writePDF() {
-        const self = this;
-
-        let filePath = await self.openFileChooser(".PDF", true);
-        try {
-            await self.savePDF(filePath);
-        }
-        catch(err) {
-            this.notifyError(err);
-        }
-    }
-
-    /**
     * Starts the conversion process of a selected conversion.
     * Will be started on atom-elearnjs' "Save as..."
     * Always asks for a save location.
@@ -73,7 +40,7 @@ class FileWriter {
     async saveAs() {
         const self = this;
 
-        let filePath = await self.openFileChooser([".HTML", ".PDF"]);
+        let filePath = await Util.openFileChooser([".HTML", ".PDF"], self.getFilePath(".html"));
         if(!filePath) {
             return;
         }
@@ -98,6 +65,49 @@ class FileWriter {
     }
 
     /**
+    * Starts the conversion process of an HTML conversion.
+    * Will be started on "to HTML".
+    * Asks for a save location if none is stored.
+    */
+    async writeHTML() {
+        const self = this;
+
+        let curPath = self.getFilePath();
+
+        let filePath;
+        if(self.saveLocations.html[curPath]) filePath = self.saveLocations.html[curPath];
+        else filePath = await Util.openFileChooser(".HTML", self.getFilePath(".html"));
+
+        try {
+            await self.saveHTML(filePath);
+        }
+        catch(err) {
+            this.notifyError(err);
+        }
+    }
+
+    /**
+    * Starts the conversion process of an PDF conversion.
+    * Will be started on "to PDF".
+    * Asks for a save location if none is stored.
+    */
+    async writePDF() {
+        const self = this;
+
+        let curPath = self.getFilePath();
+
+        let filePath;
+        if(self.saveLocations.pdf[curPath]) filePath = self.saveLocations.pdf[curPath];
+        else filePath = await Util.openFileChooser(".PDF", self.getFilePath(".pdf"));
+        try {
+            await self.savePDF(filePath);
+        }
+        catch(err) {
+            this.notifyError(err);
+        }
+    }
+
+    /**
     * Will convert the currently opened file to HTML and store it in the
     * given path.
     * @param filePath string of a filePath including the file name and type.
@@ -109,6 +119,7 @@ class FileWriter {
         if(!filePath) {
             return;
         }
+        let curPath = self.getFilePath();
 
         self.htmlConverter.setOptions(self.getHtmlConverterOptions());
 
@@ -128,6 +139,7 @@ class FileWriter {
 
         try {
             let file = await self.htmlConverter.toFile(text, filePath, self.getFileDir(), values, true);
+            self.saveLocations.html[curPath] = file;
             console.log(`Saved at ${file}`);
             if(notification) notification.dismiss();
             atom.notifications.addSuccess("File saved successfully.");
@@ -161,6 +173,7 @@ class FileWriter {
         if(!filePath) {
             return;
         }
+        let curPath = self.getFilePath();
 
         self.pdfConverter.setOptions(self.getPdfConverterOptions());
 
@@ -181,6 +194,7 @@ class FileWriter {
         // conversion
         try {
             let file = await self.pdfConverter.toFile(text, filePath, self.getFileDir(), values, true);
+            self.saveLocations.pdf[curPath] = file;
             console.log(`Saved at ${file}`);
             if(notification) notification.dismiss();
             atom.notifications.addSuccess("File saved successfully.");
@@ -213,68 +227,6 @@ class FileWriter {
         if(options.chromePath === '') options.chromePath = undefined;
 
         return options;
-    }
-
-    /**
-    * Opens a filechooser. Might return a cached filePath if allowed.
-    * @param fileTypes of Type String[] or String. Allowed filetypes. e.g
-    *                  "HTML" or ["HTML", "PDF"]
-    * @param allowQuickSave (optional) can only be set if `fileTypes` is of
-    *                       type String because this will only be done if only
-    *                       one type is given.
-    */
-    async openFileChooser(fileTypes, allowQuickSave) {
-        const self = this;
-
-        let fileType = "";
-        let defaultPath = "";
-        let filters = [{ name: "All Files", extensions: ["*"] }];
-
-        // array of filetypes
-        if(Object.prototype.toString.call(fileTypes) === '[object Array]') {
-            allowQuickSave = false;
-            defaultPath = self.getFilePath(fileTypes[0].toLowerCase());
-
-            let newFilters = [];
-            for(let type of fileTypes) {
-                newFilters.push({ name: type.substr(1), extensions: [type.toLowerCase().substr(1)] });
-            }
-            newFilters.push(filters[0]);
-            filters = newFilters;
-        }
-        // single filetype as string
-        else {
-            fileType = fileTypes.toLowerCase();
-            defaultPath = self.getFilePath(fileType.toLowerCase());
-            filters.unshift({ name: fileTypes.substr(1), extensions: [fileTypes.substr(1).toLowerCase()] });
-        }
-
-        let curPath = self.getFilePath();
-
-        if(allowQuickSave &&
-            curPath !== undefined &&
-            self.saveLocations[curPath] &&
-            self.saveLocations[curPath][fileType]) {
-            return self.saveLocations[curPath][fileType];
-        }
-        else {
-            let filePath = await new Promise((res) => {
-                dialog.showSaveDialog({
-                    defaultPath: defaultPath,
-                    filters: filters,
-                }, res);
-            });
-            let fileType = self.getFileType(filePath).toLowerCase();
-            if(curPath !== undefined) {
-                if(!self.saveLocations[curPath]) self.saveLocations[curPath] = {};
-                self.saveLocations[curPath][fileType] = filePath;
-            }
-            console.log("File Save Location set", "type:", fileType,
-                "of:", curPath,
-                "to:", filePath);
-
-            return filePath;
-        }
     }
 
     /**
