@@ -1,6 +1,7 @@
 ## 0.6.2
 * General:
     * Additional output file selection in Export Option Menu
+    * Make Option Menu Modal scrollable
 * Internal:
     * removed `use strict` due to modul type
     * added class comments

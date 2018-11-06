@@ -43,6 +43,15 @@ class OptionMenuManager {
                 visible: true
             });
 
+            try {
+                self.modalPanel.getItem().parentElement.parentElement.classList.add("scrollable-modal-container");
+                setTimeout(() => {
+                    self.modalPanel.getItem().parentElement.parentElement.scrollTo(0, 0);
+                }, 0);
+            } catch(e) {
+                // ignore
+            }
+
             const onKeyUp = (e) => {
                 switch(e.keyCode) {
                     // Enter
@@ -115,6 +124,10 @@ class OptionMenuManager {
         if(this.openMenu) {
             this.openMenu.destroy();
             this.openMenu = null;
+        }
+        let scrollables = document.querySelectorAll('.scrollable-modal-container');
+        for(let scrollable of scrollables) {
+            scrollable.classList.remove('scrollable-modal-container');
         }
     }
 
