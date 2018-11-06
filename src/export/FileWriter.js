@@ -141,13 +141,18 @@ class FileWriter {
 
         let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
+        let oldLocation = self.saveLocations.html[curPath];
+        self.saveLocations.html[curPath] = filePath;
+
         try {
             let file = await self.htmlConverter.toFile(text, filePath, self.getFileDir(), values, true);
-            self.saveLocations.html[curPath] = file;
             console.log(`Saved at ${file}`);
             if(notification) notification.dismiss();
             atom.notifications.addSuccess("File saved successfully.");
         } catch(err) {
+            if(self.saveLocations.html[curPath] === filePath)
+                self.saveLocations.html[curPath] = oldLocation;
+
             if(notification) notification.dismiss();
             throw err;
         }
@@ -199,14 +204,19 @@ class FileWriter {
 
         let notification = atom.notifications.addInfo("Converting...", { dismissable: true });
 
+        let oldLocation = self.saveLocations.pdf[curPath];
+        self.saveLocations.pdf[curPath] = filePath;
+
         // conversion
         try {
             let file = await self.pdfConverter.toFile(text, filePath, self.getFileDir(), values, true);
-            self.saveLocations.pdf[curPath] = file;
             console.log(`Saved at ${file}`);
             if(notification) notification.dismiss();
             atom.notifications.addSuccess("File saved successfully.");
         } catch(err) {
+            if(self.saveLocations.pdf[curPath] === filePath)
+                self.saveLocations.pdf[curPath] = oldLocation;
+
             if(notification) notification.dismiss();
             throw err;
         }
