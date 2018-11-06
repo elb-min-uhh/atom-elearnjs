@@ -1,6 +1,6 @@
 "use babel";
 
-import { PdfExportOptionObject } from 'markdown-elearnjs';
+import { PdfExportOptionObject, HtmlExportOptionObject } from 'markdown-elearnjs';
 import OptionMenuManager from './OptionMenuManager';
 
 /**
@@ -23,7 +23,10 @@ class ExportOptionManager {
         const self = this;
 
         if(!forcePrompt && self.lastHTMLExportOptions) {
-            return { values: self.lastHTMLExportOptions, returnValue: 1 };
+            return {
+                values: Object.assign(self.lastHTMLExportOptions, { outputFile }),
+                returnValue: 1
+            };
         }
 
         // file selected
@@ -37,8 +40,7 @@ class ExportOptionManager {
             buttons: ["Cancel", "Export"],
         });
         if(returnValue) {
-            self.lastHTMLExportOptions = values;
-            delete self.lastHTMLExportOptions.outputFile;
+            self.lastHTMLExportOptions = new HtmlExportOptionObject(values);
             if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',
@@ -128,7 +130,10 @@ class ExportOptionManager {
         const self = this;
 
         if(!forcePrompt && self.lastPDFExportOptions) {
-            return { values: self.lastPDFExportOptions, returnValue: 1 };
+            return {
+                values: Object.assign(self.lastPDFExportOptions, { outputFile }),
+                returnValue: 1
+            };
         }
 
         // file selected
@@ -142,8 +147,7 @@ class ExportOptionManager {
         });
         if(values.renderDelay) values.renderDelay *= 1000;
         if(returnValue) {
-            self.lastPDFExportOptions = values;
-            delete self.lastPDFExportOptions.outputFile;
+            self.lastPDFExportOptions = new PdfExportOptionObject(values);
             if(values.displayExportOptions !==
                 atom.config.get('atom-elearnjs.generalConfig.displayExportOptions')) {
                 atom.config.set('atom-elearnjs.generalConfig.displayExportOptions',

@@ -248,7 +248,7 @@ class FileWriter {
     }
 
     /**
-    * Calculates the full file path of the currenlty opened file.
+    * Calculates the full file path of the currently opened file.
     * Optionally the type can be changed by using `fileType`
     * @param fileType (optional) String will change the file type in the
     *                 calculated path.
