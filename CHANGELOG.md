@@ -1,5 +1,6 @@
 ## 0.6.2
 * General:
+    * Updated `markdown-elearnjs` to v1.6.2
     * Additional output file selection in Export Option Menu
     * Make Option Menu Modal scrollable
 * Internal:
