@@ -42,14 +42,6 @@ There are also
 [useful hints](https://github.com/elb-min-uhh/atom-elearnjs/wiki/Useful-Hints)
 for beginners or troubleshooting.
 
-## Planned Features
-* _General_:
-    * Syntax extensions for elearn.js elements
-    * Snippets for elearn.js elements
-    * Live preview
-* _HTML and PDF_:
-    * Optional (automated) MathJax integration
-
 ## Known Issues
 
 * All platforms:
