@@ -1,7 +1,12 @@
+## 0.6.4
+* General:
+    * Updated `markdown-elearnjs` to v1.7.3
+
 ## 0.6.3
 * General:
     * Updated `markdown-elearnjs` to v1.7.2
         * support of `<!--markdown-disable-->...<!--markdown-enable-->`
+
 ## 0.6.2
 * General:
     * Updated `markdown-elearnjs` to v1.6.2
