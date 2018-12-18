@@ -1,3 +1,6 @@
+## 0.6.5
+* Fix:
+    * do not read and load outdated `saveLocations`
 ## 0.6.4
 * General:
     * Updated `markdown-elearnjs` to v1.7.3

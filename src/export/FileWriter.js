@@ -333,9 +333,13 @@ class FileWriter {
     */
     deserialize(state) {
         if(atom.config.get('atom-elearnjs.generalConfig.keepSaveLocations') &&
-            state.saveLocations) this.saveLocations = state.saveLocations;
-        if(state.exportOptionManager)
+            state.saveLocations) {
+            if(state.saveLocations.html !== undefined && state.saveLocations.pdf !== undefined)
+                this.saveLocations = state.saveLocations;
+        }
+        if(state.exportOptionManager) {
             this.exportOptionManager.deserialize(state.exportOptionManager);
+        }
     }
 }
 
