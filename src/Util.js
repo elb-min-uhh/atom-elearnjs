@@ -30,11 +30,10 @@ class Util {
             filters.unshift({ name: fileTypes.substr(1), extensions: [fileTypes.substr(1).toLowerCase()] });
         }
 
-        let filePath = await new Promise((res) => {
-            dialog.showSaveDialog({
+        //#6 fix empty Promise with async implementation in newer atom versions.
+        let filePath = dialog.showSaveDialogSync({
                 defaultPath: defaultPath,
                 filters: filters,
-            }, res);
         });
 
         return filePath;
